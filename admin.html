@@ -3,47 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy - Transaction Monitor</title>
+    <title>Rayy - Admin Transaction Monitor</title>
     <style>
         :root {
             --primary: #38bdf8;
             --bg: #0b1120;
             --card: #1e293b;
+            --dark: #0f172a;
             --text: #f8fafc;
         }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 500px; margin: auto; }
-        .title { color: var(--primary); text-align: center; font-weight: 900; text-transform: uppercase; margin-bottom: 25px; }
-        
-        .card {
-            background: var(--card); border-radius: 25px; padding: 25px; 
-            border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            overflow: hidden; /* Dikunci dulu buat splash screen */
         }
-        .label { font-size: 0.75rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: block; }
+
+        /* --- ANIMASI SPLASH SCREEN --- */
+        #splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; transition: 0.8s ease-in-out;
+        }
+
+        .logo-box {
+            width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
+            display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
+            font-weight: 900; color: var(--bg); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(56, 189, 248, 0.6); }
+        }
+
+        /* --- CONTAINER UTAMA --- */
+        .container { 
+            max-width: 500px; margin: auto; padding: 20px; padding-top: 50px;
+            opacity: 0; transform: translateY(20px); transition: 1s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .container.visible { opacity: 1; transform: translateY(0); }
+
+        /* --- LOGIN CARD --- */
+        .login-card { 
+            background: var(--card); padding: 40px; border-radius: 35px; text-align: center; 
+            border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .login-card h2 { color: var(--primary); margin-bottom: 25px; font-weight: 900; letter-spacing: -1px; }
+
+        input { 
+            width: 100%; padding: 20px; background: var(--dark); border: 2px solid transparent; 
+            color: white; border-radius: 20px; margin-bottom: 15px; box-sizing: border-box; 
+            outline: none; text-align: center; transition: 0.3s; font-size: 1rem;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .btn-unlock { 
+            width: 100%; padding: 20px; border: none; border-radius: 20px; 
+            background: var(--primary); color: var(--bg); font-weight: 900; 
+            cursor: pointer; text-transform: uppercase; transition: 0.3s;
+        }
+        .btn-unlock:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3); }
+
+        /* --- MONITOR AREA --- */
+        #monitorArea { display: none; animation: fadeIn 0.8s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: var(--card); border-radius: 30px; padding: 25px; border: 1px solid rgba(255,255,255,0.05); }
+        .label { font-size: 0.75rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: block; letter-spacing: 1.5px; }
         
-        .list-container { max-height: 500px; overflow-y: auto; }
+        .list-container { max-height: 600px; overflow-y: auto; padding-right: 5px; }
+        
+        /* Custom Scrollbar */
+        .list-container::-webkit-scrollbar { width: 5px; }
+        .list-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
         .list-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px; background: #0f172a; border-radius: 15px;
-            margin-bottom: 12px; border-left: 4px solid var(--primary);
-            animation: slideIn 0.5s ease;
+            padding: 18px; background: #0f172a; border-radius: 20px;
+            margin-bottom: 12px; border-left: 5px solid var(--primary);
+            animation: itemSlide 0.5s ease forwards;
         }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-        
-        .item-info b { display: block; font-size: 1rem; color: var(--text); }
-        .item-info small { color: #94a3b8; font-size: 0.75rem; }
-        .status-badge { background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 5px 12px; border-radius: 50px; font-size: 0.65rem; font-weight: 800; }
+        @keyframes itemSlide { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+
+        .item-info b { display: block; font-size: 1.1rem; color: #fff; }
+        .item-info small { color: #94a3b8; font-size: 0.8rem; }
+        .status-badge { background: rgba(34, 197, 94, 0.15); color: #22c55e; padding: 6px 14px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(34, 197, 94, 0.3); }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2 class="title">Live <span style="color:white;">Monitor</span></h2>
+    <div id="splash">
+        <div class="logo-box">R</div>
+        <p style="margin-top: 25px; font-weight: 800; letter-spacing: 4px; font-size: 0.8rem; color: var(--primary);">ADMIN MONITOR</p>
+    </div>
 
-        <div class="card">
-            <span class="label">Recent Transactions (Real-time)</span>
-            <div id="historyList" class="list-container">
-                <p style="text-align:center; opacity:0.5;">Menghubungkan ke server...</p>
+    <div class="container" id="main-content">
+        <div id="loginPage">
+            <div class="login-card">
+                <h2>ADMIN ACCESS</h2>
+                <input type="password" id="adminKey" placeholder="Enter Access Key">
+                <button class="btn-unlock" onclick="checkAdminKey()">Unlock Monitor</button>
+            </div>
+        </div>
+
+        <div id="monitorArea">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 0 10px;">
+                <h2 style="color: var(--primary); font-weight: 900; letter-spacing: -1px;">LIVE <span style="color:#fff;">TRANSAKSI</span></h2>
+                <button onclick="location.reload()" style="background:rgba(239, 68, 68, 0.1); border:none; color:#ef4444; padding:8px 15px; border-radius:12px; cursor:pointer; font-weight:700; font-size:0.75rem;">LOGOUT</button>
+            </div>
+
+            <div class="card">
+                <span class="label">Riwayat Real-time</span>
+                <div id="historyList" class="list-container">
+                    <p style="text-align:center; opacity:0.5; padding: 20px;">Menghubungkan Database...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -56,29 +134,53 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Pantau Transaksi dari Firebase secara Real-time
-        onValue(ref(db, 'transactions'), (snapshot) => {
-            const list = document.getElementById('historyList');
-            list.innerHTML = "";
-            const data = snapshot.val();
-            
-            if(data) {
-                // Urutkan dari yang terbaru (paling atas)
-                Object.keys(data).reverse().forEach(id => {
-                    const item = data[id];
-                    list.innerHTML += `
-                        <div class="list-item">
-                            <div class="item-info">
-                                <b>${item.nama}</b>
-                                <small>Rp ${Number(item.jumlah).toLocaleString()} • ${item.waktu}</small>
-                            </div>
-                            <div class="status-badge">SUCCESS</div>
-                        </div>`;
-                });
+        const ADMIN_SECRET = "access=rayy-ninja"; 
+
+        window.checkAdminKey = function() {
+            const input = document.getElementById('adminKey').value;
+            if(input === ADMIN_SECRET) {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('monitorArea').style.display = 'block';
+                startMonitor();
             } else {
-                list.innerHTML = "<p style='text-align:center; opacity:0.5;'>Belum ada transaksi hari ini.</p>";
+                alert("ACCESS DENIED: Kode Salah!");
             }
-        });
+        }
+
+        function startMonitor() {
+            onValue(ref(db, 'transactions'), (snapshot) => {
+                const list = document.getElementById('historyList');
+                list.innerHTML = "";
+                const data = snapshot.val();
+                
+                if(data) {
+                    Object.keys(data).reverse().forEach(id => {
+                        const item = data[id];
+                        list.innerHTML += `
+                            <div class="list-item">
+                                <div class="item-info">
+                                    <b>${item.nama}</b>
+                                    <small>Rp ${Number(item.jumlah).toLocaleString()} • ${item.waktu}</small>
+                                </div>
+                                <div class="status-badge">PAID</div>
+                            </div>`;
+                    });
+                } else {
+                    list.innerHTML = "<p style='text-align:center; opacity:0.3; padding:20px;'>Belum ada transaksi.</p>";
+                }
+            });
+        }
+
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('splash').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('splash').style.display = 'none';
+                    document.getElementById('main-content').classList.add('visible');
+                    document.body.style.overflow = 'auto';
+                }, 800);
+            }, 2500);
+        };
     </script>
 </body>
 </html>
