@@ -17,7 +17,8 @@
         .btn-green { background: #22c55e; color: white; }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px 0; border-bottom: 1px solid #334155; font-size: 0.9rem; }
-        #authOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0b1120; z-index:9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+        .status-banned { color: #ef4444; font-weight: bold; }
+        #authOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0b1120; z-index:9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -30,14 +31,15 @@
 </div>
 
 <div class="container">
-    <div class="card" style="border-color: #38bdf8;">
-        <h2>🕒 Log Aktivitas</h2>
-        <div id="logActivity" style="max-height: 100px; overflow-y: auto; font-size: 0.8rem; color: #94a3b8;"></div>
+    <div style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+        <h1 style="font-size: 1.8rem; font-weight: 800;">Rayy Dev Panel</h1>
     </div>
 
     <div class="card" style="border-color: #ef4444;">
         <h2 style="color: #ef4444;">🚫 Daftar Akun Terblokir</h2>
-        <table id="bannedTable"><tbody id="bannedListBody"></tbody></table>
+        <table id="bannedTable">
+            <tbody id="bannedListBody"></tbody>
+        </table>
     </div>
 
     <div class="card">
@@ -49,37 +51,26 @@
         <h2>🔒 Kelola Akses</h2>
         <input type="text" id="targetUser" placeholder="Username Target">
         <button class="btn btn-red" onclick="prosesBan()">BLOKIR (BAN)</button>
-        <button class="btn btn-green" style="margin-top:10px;" onclick="prosesUnban()">UNBAN</button>
+        <button class="btn btn-green" style="margin-top:10px;" onclick="prosesUnban()">UNBAN (BUKA BLOKIR)</button>
     </div>
 
     <div class="card">
-        <h2>➕ Tambah Admin</h2>
-        <input type="text" id="newUser" placeholder="User">
-        <input type="password" id="newPass" placeholder="Pass">
-        <input type="text" id="newName" placeholder="Nama">
-        <button class="btn btn-blue" onclick="simpanAdmin()">SIMPAN</button>
+        <h2>➕ Tambah Admin Baru</h2>
+        <input type="text" id="newUser" placeholder="Username">
+        <input type="password" id="newPass" placeholder="Password">
+        <input type="text" id="newName" placeholder="Nama Lengkap">
+        <button class="btn btn-blue" onclick="simpanAdmin()">SIMPAN ADMIN</button>
     </div>
 </div>
 
 <script>
-    function addLog(msg) {
-        let logs = JSON.parse(localStorage.getItem('devLogs')) || [];
-        logs.unshift({ time: new Date().toLocaleString(), action: msg });
-        localStorage.setItem('devLogs', JSON.stringify(logs.slice(0, 10)));
-        displayLogs();
-    }
-
-    function displayLogs() {
-        const logBox = document.getElementById('logActivity');
-        let logs = JSON.parse(localStorage.getItem('devLogs')) || [];
-        logBox.innerHTML = logs.map(l => `<div>[${l.time}] ${l.action}</div>`).join('');
-    }
-
     function checkDevAuth() {
+        if (typeof CONFIG === 'undefined') {
+            alert("Error: config.js tidak terbaca!"); return;
+        }
         const u = document.getElementById('devUser').value;
         const p = document.getElementById('devPass').value;
         if (u === CONFIG.devUsername && p === CONFIG.devPassword) {
-            addLog("Login Berhasil");
             document.getElementById('authOverlay').style.display = 'none';
             refreshData();
         } else {
@@ -89,45 +80,63 @@
     }
 
     function refreshData() {
-        displayLogs();
+        // Admin List
         const tableAdmin = document.getElementById('userTable');
-        tableAdmin.innerHTML = `<tr><td>${CONFIG.ownerUsername} (Owner)</td><td>Rayy</td></tr>`;
+        tableAdmin.innerHTML = `<tr><td>${CONFIG.ownerUsername} (Owner)</td><td style="text-align:right;">Utama</td></tr>`;
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
-        admins.forEach(a => { tableAdmin.innerHTML += `<tr><td>${a.user}</td><td>${a.name}</td></tr>`; });
+        admins.forEach(a => { 
+            tableAdmin.innerHTML += `<tr><td>${a.user}</td><td style="text-align:right;">${a.name}</td></tr>`; 
+        });
 
+        // Banned List: Hanya teks saja
         const tableBan = document.getElementById('bannedListBody');
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
-        tableBan.innerHTML = banned.length ? banned.map(u => `<tr><td>⚠️ ${u}</td><td style="text-align:right;"><button onclick="prosesUnbanLangsung('${u}')">UNBAN</button></td></tr>`).join('') : '<tr><td style="text-align:center;">Kosong</td></tr>';
+        if(banned.length === 0) {
+            tableBan.innerHTML = '<tr><td style="color:#94a3b8; text-align:center; padding:10px 0;">Tidak ada data blokir</td></tr>';
+        } else {
+            tableBan.innerHTML = '';
+            banned.forEach(user => {
+                tableBan.innerHTML += `<tr><td class="status-banned">⚠️ ${user}</td></tr>`;
+            });
+        }
     }
 
     function prosesBan() {
         const user = document.getElementById('targetUser').value;
+        if(!user) return;
         if(user === CONFIG.devUsername || user === CONFIG.ownerUsername) {
-            alert(CONFIG.pesanBlokirDev);
-            return;
+            alert(CONFIG.pesanBlokirDev); return;
         }
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
         if(!banned.includes(user)) banned.push(user);
         localStorage.setItem('bannedUsers', JSON.stringify(banned));
-        addLog(`Ban: ${user}`);
         refreshData();
+        document.getElementById('targetUser').value = "";
     }
 
-    function prosesUnbanLangsung(u) {
+    function prosesUnban() {
+        const user = document.getElementById('targetUser').value;
+        if(!user) return;
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
-        localStorage.setItem('bannedUsers', JSON.stringify(banned.filter(x => x !== u)));
-        addLog(`Unban: ${u}`);
+        localStorage.setItem('bannedUsers', JSON.stringify(banned.filter(x => x !== user)));
+        alert("Berhasil Unban: " + user);
         refreshData();
+        document.getElementById('targetUser').value = "";
     }
-
-    function prosesUnban() { prosesUnbanLangsung(document.getElementById('targetUser').value); }
 
     function simpanAdmin() {
+        const u = document.getElementById('newUser').value;
+        const p = document.getElementById('newPass').value;
+        const n = document.getElementById('newName').value;
+        if(!u || !p) return;
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
-        admins.push({ user: document.getElementById('newUser').value, pass: document.getElementById('newPass').value, name: document.getElementById('newName').value });
+        admins.push({ user: u, pass: p, name: n });
         localStorage.setItem('admins', JSON.stringify(admins));
-        alert("Simpan Berhasil");
+        alert("Admin Disimpan!");
         refreshData();
+        document.getElementById('newUser').value = "";
+        document.getElementById('newPass').value = "";
+        document.getElementById('newName').value = "";
     }
 </script>
 </body>
