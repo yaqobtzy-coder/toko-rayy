@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Toko Rayy</title>
     <script>
-        // SENSOR OTOMATIS: Pesan Jam 9 Pagi
+        // SENSOR OTOMATIS: Jika di dev.html dimatikan
         if (localStorage.getItem('tokoLocked') === 'offline') {
             document.write(`
                 <body style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center; margin:0; padding:20px;">
-                    <div><h2 style="color:#ef4444; font-size:1.5rem; text-transform:uppercase; border: 1px solid #ef4444; padding: 20px; border-radius: 15px;">WEB AKAN BISA DI AKSES JAM 9 PAGI</h2></div>
+                    <div><h2 style="color:#ef4444; font-size:1.5rem; text-transform:uppercase; border: 2px solid #ef4444; padding: 20px; border-radius: 15px;">WEB AKAN BISA DI AKSES JAM 9 PAGI</h2></div>
                 </body>
             `);
             window.stop();
@@ -20,13 +20,11 @@
         .container { max-width: 450px; margin: auto; }
         .card { background: #1e293b; border-radius: 15px; padding: 15px; margin-bottom: 12px; border: 1px solid #334155; position: relative; }
         .login-box { text-align: center; margin-top: 50px; }
-        input { width: 100%; padding: 15px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 10px; box-sizing: border-box; }
+        input { width: 100%; padding: 15px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 10px; box-sizing: border-box; outline: none; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
         .btn-blue { background: #38bdf8; color: white; }
         .status-badge { float: right; font-size: 0.7rem; padding: 4px 8px; border-radius: 5px; }
         .status-pending { background: #f59e0b; color: #000; }
-        .status-sukses { background: #22c55e; color: #fff; }
-        /* Tampilan Layar Ban sesuai permintaan */
         .ban-container { text-align: center; margin-top: 50px; padding: 25px; border: 2px solid #ef4444; border-radius: 20px; background: #1e1b1b; }
         .btn-wa { background: #22c55e; color: white; text-decoration: none; display: inline-block; padding: 15px 25px; border-radius: 12px; font-weight: bold; margin-top: 15px; }
     </style>
@@ -36,6 +34,7 @@
 <div class="container" id="app">
     <div id="loginPage" class="login-box">
         <h2 style="color: #38bdf8;">Admin Login</h2>
+        <p id="infoLogin" style="color: #94a3b8; font-size: 0.8rem;">Kesempatan Salah: 3x</p>
         <input type="text" id="userIn" placeholder="Username">
         <input type="password" id="passIn" placeholder="Password">
         <button class="btn btn-blue" onclick="handleLogin()">MASUK</button>
@@ -44,12 +43,12 @@
     <div id="historyPage" style="display: none;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h2 style="color: #38bdf8;">Riwayat Transaksi</h2>
-            <button onclick="location.reload()" style="background:none; border:1px solid #334155; color:#94a3b8; border-radius:5px; cursor:pointer;">🔄</button>
+            <button onclick="muatTransaksi()" style="background:none; border:1px solid #334155; color:#94a3b8; border-radius:5px; cursor:pointer; padding:5px;">🔄</button>
         </div>
         <div id="listTransaksi">
             <p style="text-align:center; color:#94a3b8;">Belum ada transaksi masuk...</p>
         </div>
-        <button class="btn btn-blue" style="margin-top:20px; background:#334155;" onclick="location.reload()">LOGOUT</button>
+        <button class="btn" style="margin-top:20px; background:#334155; color:white;" onclick="location.reload()">LOGOUT</button>
     </div>
 </div>
 
@@ -60,22 +59,33 @@
     function handleLogin() {
         const u = document.getElementById('userIn').value;
         const p = document.getElementById('passIn').value;
-        let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
+        
+        // 1. Cek List Ban
+        let banned = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
+        if (banned.includes(u)) {
+            tampilkanLayarBlokir(u, 'manual');
+            return;
+        }
 
-        if (banned.includes(u)) { tampilkanLayarBlokir(u, 'manual'); return; }
+        // 2. Cek Admin Utama & Admin Tambahan
+        let admins = JSON.parse(localStorage.getItem('admins') || '[]');
+        const userValid = (u === "admin_rayy" && p === "rayy123") || admins.find(a => a.user === u && a.pass === p);
 
-        if ((u === "admin_rayy" && p === "rayy123")) {
+        if (userValid) {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('historyPage').style.display = 'block';
             muatTransaksi();
-            setInterval(muatTransaksi, 5000); // REFRESH OTOMATIS SETIAP 5 DETIK
+            setInterval(muatTransaksi, 5000); // Cek data baru tiap 5 detik
         } else {
             salahHitung++;
             if (salahHitung >= 3) {
-                banned.push(u);
+                if(!banned.includes(u)) banned.push(u);
                 localStorage.setItem('bannedUsers', JSON.stringify(banned));
                 tampilkanLayarBlokir(u, 'otomatis');
-            } else { alert("Login Gagal!"); }
+            } else {
+                document.getElementById('infoLogin').innerText = `Sisa Kesempatan: ${3 - salahHitung}x`;
+                alert("Username atau Password Salah!");
+            }
         }
     }
 
@@ -86,11 +96,10 @@
         if (history.length === 0) return;
 
         listContainer.innerHTML = "";
-        history.reverse().forEach(trx => {
-            const statusClass = trx.status === 'Pending' ? 'status-pending' : 'status-sukses';
+        history.slice().reverse().forEach(trx => {
             listContainer.innerHTML += `
                 <div class="card">
-                    <span class="status-badge ${statusClass}">${trx.status}</span>
+                    <span class="status-badge status-pending">${trx.status}</span>
                     <div style="color:#38bdf8; font-weight:bold; font-size:0.8rem;">${trx.orderId}</div>
                     <div style="font-size:1.2rem; font-weight:bold; margin:5px 0;">Rp ${parseInt(trx.amount).toLocaleString('id-ID')}</div>
                     <div style="color:#94a3b8; font-size:0.7rem;">${trx.date}</div>
