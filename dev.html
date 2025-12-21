@@ -8,44 +8,43 @@
         :root { --primary: #38bdf8; --bg: #0b1120; --card: #1e293b; --red: #ef4444; --green: #22c55e; }
         body { background-color: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow: hidden; }
 
-        /* --- ANIMASI SPLASH SCREEN CSS --- */
+        /* --- SPLASH SCREEN --- */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 99999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transition: opacity 0.8s, visibility 0.8s;
+            align-items: center; justify-content: center; transition: 0.8s;
         }
         .splash-logo {
             width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
             display: flex; align-items: center; justify-content: center; font-size: 3rem;
             font-weight: 900; color: var(--bg); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
-            animation: bounceIn 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: bounceIn 1.2s ease;
         }
-        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-        .splash-text { margin-top: 20px; font-weight: 800; letter-spacing: 2px; color: var(--primary); text-transform: uppercase; text-align: center; }
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .splash-text { margin-top: 20px; font-weight: 800; letter-spacing: 2px; color: var(--primary); text-transform: uppercase; }
 
-        /* --- NOTIFIKASI MELUNCUR (ATAS-BAWAH) --- */
+        /* --- TOAST NOTIF --- */
         #customToast {
             position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: var(--primary); color: var(--bg); padding: 15px 30px;
+            background: var(--primary); color: var(--bg); padding: 12px 25px;
             border-radius: 50px; font-weight: 800; z-index: 100001;
-            transition: all 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6);
-            white-space: nowrap;
+            transition: 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6); white-space: nowrap;
         }
         #customToast.show { top: 30px; }
 
-        /* --- LAYOUT UTAMA --- */
-        .container { max-width: 450px; margin: auto; padding: 20px; height: 100vh; opacity: 0; transition: opacity 1s; box-sizing: border-box; overflow-y: auto; }
+        /* --- CONTENT --- */
+        .container { max-width: 450px; margin: auto; padding: 20px; height: 100vh; opacity: 0; transition: 1s; box-sizing: border-box; overflow-y: auto; }
         .container.visible { opacity: 1; }
-        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; position: relative; }
+        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; }
         
-        input { width: 100%; padding: 16px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 15px; box-sizing: border-box; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--primary); }
-        
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-top: 10px; }
+        input { width: 100%; padding: 14px; margin: 8px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; outline: none; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-top: 5px; }
         .btn-blue { background: var(--primary); color: var(--bg); }
         .btn-red { background: var(--red); color: white; }
-        
-        .label { font-size: 0.8rem; color: #94a3b8; margin-left: 5px; }
+        .btn-sm { width: auto; padding: 5px 12px; font-size: 0.7rem; margin-top: 5px; }
+
+        .label-text { font-size: 0.75rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #334155; }
     </style>
 </head>
 <body>
@@ -55,116 +54,153 @@
         <div class="splash-text">RAYY SERVER INFO</div>
     </div>
 
-    <div id="customToast">Notifikasi</div>
+    <div id="customToast">Pesan</div>
 
     <div class="container" id="main-content">
         <div id="loginPage" style="text-align:center; margin-top:50px;">
-            <h1 style="color:var(--primary);">Developer Access</h1>
+            <h1 style="color:var(--primary);">Dev Access</h1>
             <div class="card">
                 <input type="text" id="devUser" placeholder="Username Dev">
-                <input type="password" id="devPass" placeholder="Secret Key">
+                <input type="password" id="devPass" placeholder="Password Dev">
                 <button class="btn btn-blue" onclick="handleDevLogin()">Unlock Panel</button>
             </div>
         </div>
 
         <div id="devPanel" style="display:none;">
-            <h2 style="color:var(--primary); margin-bottom:20px;">Control Center</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="color:var(--primary); margin:0;">Control Panel</h2>
+                <button class="btn btn-sm" style="background:#334155; color:white;" onclick="location.reload()">Logout</button>
+            </div>
             
             <div class="card">
-                <span class="label">Status Toko</span>
-                <button id="statusBtn" class="btn" onclick="toggleToko()">LOADING...</button>
+                <span class="label-text">Switch Status Toko</span>
+                <button id="statusBtn" class="btn" onclick="toggleToko()">Memuat...</button>
             </div>
 
             <div class="card">
-                <span class="label">Tambah Admin Baru</span>
-                <input type="text" id="newAdminUser" placeholder="User Admin Baru">
-                <input type="text" id="newAdminPass" placeholder="Pass Admin Baru">
+                <span class="label-text">Tambah Admin</span>
+                <input type="text" id="newAdminU" placeholder="User Baru">
+                <input type="text" id="newAdminP" placeholder="Pass Baru">
                 <button class="btn btn-blue" onclick="addAdmin()">Simpan Admin</button>
+                
+                <div style="margin-top:20px;">
+                    <span class="label-text">List Admin Tambahan</span>
+                    <div id="adminList"></div>
+                </div>
             </div>
 
             <div class="card">
-                <span class="label">Database Tools</span>
-                <button class="btn btn-red" onclick="resetHistory()">Reset Semua Transaksi</button>
+                <span class="label-text">User Terblokir (Ban)</span>
+                <div id="banList"></div>
             </div>
 
-            <button class="btn" style="background:#334155; color:white; margin-top:20px;" onclick="location.reload()">Logout</button>
+            <div class="card" style="border-color: var(--red);">
+                <span class="label-text" style="color: var(--red);">Danger Zone</span>
+                <button class="btn btn-red" onclick="resetTrx()">Reset Semua Transaksi</button>
+                <button class="btn" style="background:none; color:#94a3b8; font-size:0.7rem;" onclick="clearAllData()">Wipe All LocalStorage</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Info dari data tersimpan: access=rayy-ninja
-        const SECRET_KEY = "rayy-ninja"; 
+        const DEV_USER = "rayy_dev";
+        const DEV_PW = "085794";
 
         window.onload = () => {
             setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                splash.style.opacity = '0';
-                splash.style.visibility = 'hidden';
-                document.getElementById('main-content').classList.add('visible');
-                document.body.style.overflow = "auto";
+                document.getElementById('splash-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('splash-screen').style.display = 'none';
+                    document.getElementById('main-content').classList.add('visible');
+                    document.body.style.overflow = "auto";
+                }, 800);
             }, 2500);
             updateStatusUI();
         };
 
-        function tampilkanNotif(pesan) {
-            const toast = document.getElementById('customToast');
-            toast.innerText = pesan;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        function tampilkanNotif(m) {
+            const t = document.getElementById('customToast');
+            t.innerText = m; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
         }
 
         function handleDevLogin() {
-            const u = document.getElementById('devUser').value;
-            const p = document.getElementById('devPass').value;
-
-            if (u === "rayy_dev" && p === SECRET_KEY) {
-                tampilkanNotif("⚡ Developer Mode Active");
+            if (document.getElementById('devUser').value === DEV_USER && document.getElementById('devPass').value === DEV_PW) {
+                tampilkanNotif("🔓 Developer Mode Active");
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('devPanel').style.display = 'block';
-            } else {
-                tampilkanNotif("❌ Akses Ditolak!");
-            }
+                renderLists();
+            } else { tampilkanNotif("❌ Akses Ditolak!"); }
         }
 
         function toggleToko() {
-            const current = localStorage.getItem('tokoLocked');
-            if (current === 'offline') {
-                localStorage.removeItem('tokoLocked');
-                tampilkanNotif("✅ Toko Sekarang ONLINE");
-            } else {
-                localStorage.setItem('tokoLocked', 'offline');
-                tampilkanNotif("⚠️ Toko Diatur OFFLINE");
-            }
+            const isOff = localStorage.getItem('tokoLocked') === 'offline';
+            if (isOff) localStorage.removeItem('tokoLocked');
+            else localStorage.setItem('tokoLocked', 'offline');
             updateStatusUI();
+            tampilkanNotif(isOff ? "✅ Toko ONLINE" : "⚠️ Toko OFFLINE");
         }
 
         function updateStatusUI() {
             const btn = document.getElementById('statusBtn');
             if(!btn) return;
-            const isOffline = localStorage.getItem('tokoLocked') === 'offline';
-            btn.innerText = isOffline ? "TOKO: OFFLINE (JAM 9)" : "TOKO: ONLINE";
-            btn.style.background = isOffline ? "var(--red)" : "var(--green)";
+            const isOff = localStorage.getItem('tokoLocked') === 'offline';
+            btn.innerText = isOff ? "TOKO: OFFLINE" : "TOKO: ONLINE";
+            btn.style.background = isOff ? "var(--red)" : "var(--green)";
             btn.style.color = "white";
         }
 
         function addAdmin() {
-            const user = document.getElementById('newAdminUser').value;
-            const pass = document.getElementById('newAdminPass').value;
-            if(!user || !pass) return tampilkanNotif("Isi semua data!");
-
-            let admins = JSON.parse(localStorage.getItem('admins') || '[]');
-            admins.push({user, pass});
-            localStorage.setItem('admins', JSON.stringify(admins));
-            
-            tampilkanNotif("👤 Admin Berhasil Ditambah");
-            document.getElementById('newAdminUser').value = "";
-            document.getElementById('newAdminPass').value = "";
+            const u = document.getElementById('newAdminU').value, p = document.getElementById('newAdminP').value;
+            if(!u || !p) return tampilkanNotif("Isi data!");
+            let a = JSON.parse(localStorage.getItem('admins') || '[]');
+            a.push({user: u, pass: p});
+            localStorage.setItem('admins', JSON.stringify(a));
+            tampilkanNotif("👤 Admin Ditambah");
+            document.getElementById('newAdminU').value = ""; document.getElementById('newAdminP').value = "";
+            renderLists();
         }
 
-        function resetHistory() {
-            if (confirm("Hapus SEMUA riwayat transaksi? Tindakan ini permanen!")) {
+        function renderLists() {
+            // Render List Admin
+            const al = document.getElementById('adminList');
+            let admins = JSON.parse(localStorage.getItem('admins') || '[]');
+            al.innerHTML = admins.length ? "" : "<small>Belum ada admin tambahan.</small>";
+            admins.forEach((item, i) => {
+                al.innerHTML += `<div class="list-item"><span>${item.user}</span><button class="btn btn-red btn-sm" onclick="hapusAdmin(${i})">HAPUS</button></div>`;
+            });
+
+            // Render List Ban
+            const bl = document.getElementById('banList');
+            let banned = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
+            bl.innerHTML = banned.length ? "" : "<small>Tidak ada user diblokir.</small>";
+            banned.forEach((user, i) => {
+                bl.innerHTML += `<div class="list-item"><span>${user}</span><button class="btn btn-blue btn-sm" onclick="unban(${i})">UNBAN</button></div>`;
+            });
+        }
+
+        function hapusAdmin(i) {
+            let a = JSON.parse(localStorage.getItem('admins') || '[]');
+            a.splice(i, 1); localStorage.setItem('admins', JSON.stringify(a));
+            renderLists(); tampilkanNotif("🗑️ Admin Dihapus");
+        }
+
+        function unban(i) {
+            let b = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
+            b.splice(i, 1); localStorage.setItem('bannedUsers', JSON.stringify(b));
+            renderLists(); tampilkanNotif("🔓 User Unbanned");
+        }
+
+        function resetTrx() {
+            if(confirm("Hapus semua history transaksi?")) {
                 localStorage.removeItem('trx_history');
-                tampilkanNotif("🗑️ Database Dibersihkan");
+                tampilkanNotif("🗑️ History Dibersihkan");
+            }
+        }
+
+        function clearAllData() {
+            if(confirm("PERINGATAN! Ini akan menghapus SEMUA data termasuk admin & setting. Lanjutkan?")) {
+                localStorage.clear(); location.reload();
             }
         }
     </script>
