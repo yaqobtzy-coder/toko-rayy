@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy - Admin Monitor System v2.0</title>
+    <title>Rayy - Admin Monitor</title>
     <style>
         :root {
             --primary: #38bdf8;
@@ -15,109 +15,51 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; overflow: hidden; }
 
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', sans-serif; 
-            overflow: hidden; 
-        }
-
-        /* SPLASH SCREEN */
         #splash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transition: 0.8s ease-in-out;
+            align-items: center; justify-content: center; transition: 0.8s;
         }
-        .logo-box {
-            width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
-            display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
-            font-weight: 900; color: var(--bg); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
-            animation: pulse 2s infinite ease-in-out;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4); }
-            50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(56, 189, 248, 0.6); }
-        }
+        .logo-box { width: 90px; height: 90px; background: var(--primary); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 900; color: #000; }
 
-        .container { 
-            max-width: 500px; margin: auto; padding: 20px; padding-top: 50px;
-            opacity: 0; transform: translateY(20px); transition: 1s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-        .container.visible { opacity: 1; transform: translateY(0); }
+        .container { max-width: 500px; margin: auto; padding: 20px; padding-top: 60px; opacity: 0; transition: 1s; }
+        .visible { opacity: 1; }
 
-        /* LOGIN CARD */
-        .login-card { 
-            background: var(--card); padding: 40px; border-radius: 35px; text-align: center; 
-            border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-        input { 
-            width: 100%; padding: 18px; background: var(--dark); border: 2px solid transparent; 
-            color: white; border-radius: 18px; margin-bottom: 12px; outline: none; text-align: center;
-            transition: 0.3s; font-size: 1rem;
-        }
+        .card { background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.05); }
+        input { width: 100%; padding: 18px; background: var(--dark); border: 2px solid transparent; color: white; border-radius: 15px; margin-bottom: 10px; text-align: center; }
         input:focus { border-color: var(--primary); }
-        .btn-unlock { 
-            width: 100%; padding: 18px; border: none; border-radius: 18px; 
-            background: var(--primary); color: var(--bg); font-weight: 900; 
-            cursor: pointer; text-transform: uppercase;
-        }
-
-        /* MONITOR AREA */
-        #monitorArea { display: none; }
-        .card { background: var(--card); border-radius: 30px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .label { font-size: 0.75rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: block; letter-spacing: 1.5px; }
         
-        .list-container { max-height: 550px; overflow-y: auto; }
-        .list-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 18px; background: #0f172a; border-radius: 20px;
-            margin-bottom: 12px; border-left: 5px solid var(--primary);
-            animation: itemSlide 0.5s ease forwards;
-        }
-        @keyframes itemSlide { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        .btn-login { width: 100%; padding: 18px; border: none; border-radius: 15px; background: var(--primary); color: #000; font-weight: 900; cursor: pointer; }
 
-        .item-info b { display: block; font-size: 1.1rem; color: #fff; }
-        .item-info small { color: #94a3b8; font-size: 0.8rem; }
-        .status-badge { background: rgba(34, 197, 94, 0.15); color: #22c55e; padding: 6px 14px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(34, 197, 94, 0.3); }
-
-        /* LOCK SCREEN STYLE */
-        .lock-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); display: flex; align-items: center; justify-content: center;
-            z-index: 10000; text-align: center; padding: 20px;
-        }
-        .lock-box { border: 2px solid var(--primary); padding: 40px; border-radius: 35px; background: rgba(56, 189, 248, 0.05); max-width: 400px; }
+        .item { background: var(--dark); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+        
+        /* OVERLAY PESAN */
+        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:10001; display:flex; align-items:center; justify-content:center; padding:30px; text-align:center; }
+        .box { border: 2px solid var(--primary); padding: 40px; border-radius: 30px; background: rgba(56,189,248,0.05); }
     </style>
 </head>
 <body>
 
     <div id="splash">
         <div class="logo-box">R</div>
-        <p style="margin-top: 25px; font-weight: 800; letter-spacing: 4px; font-size: 0.8rem; color: var(--primary);">ADMIN MONITOR</p>
     </div>
 
     <div class="container" id="main-content">
         <div id="loginPage">
-            <div class="login-card">
-                <h2 style="color: var(--primary); margin-bottom: 25px;">ADMIN ACCESS</h2>
+            <div class="card">
+                <h2 style="text-align:center; margin-bottom:20px; color:var(--primary);">ADMIN LOGIN</h2>
                 <input type="text" id="adminUser" placeholder="Username">
-                <input type="password" id="adminPass" placeholder="Password / Key">
-                <button class="btn-unlock" onclick="authAdmin()">Login System</button>
+                <input type="password" id="adminPass" placeholder="Password">
+                <button class="btn-login" onclick="authAdmin()">LOGIN MONITOR</button>
             </div>
         </div>
 
-        <div id="monitorArea">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                <h2 style="color: var(--primary); font-weight: 900;">LIVE <span style="color:#fff;">HISTORY</span></h2>
-                <button onclick="location.reload()" style="background:rgba(239, 68, 68, 0.1); border:none; color:#ef4444; padding:8px 15px; border-radius:12px; cursor:pointer; font-weight:700; font-size:0.75rem;">LOGOUT</button>
-            </div>
-            <div class="card">
-                <span class="label">Transaksi Real-time</span>
-                <div id="historyList" class="list-container">
-                    <p style="text-align:center; opacity:0.4; padding: 20px;">Menghubungkan...</p>
-                </div>
-            </div>
+        <div id="monitorArea" style="display:none;">
+            <h2 style="margin-bottom:20px;">Riwayat Transaksi</h2>
+            <div id="historyList"></div>
+            <button onclick="location.reload()" style="margin-top:20px; width:100%; padding:10px; background:transparent; border:1px solid #ef4444; color:#ef4444; border-radius:10px;">LOGOUT</button>
         </div>
     </div>
 
@@ -130,20 +72,42 @@
         const db = getDatabase(app);
 
         const OWNER_KEY = "085794";
+        let currentAdminUser = "";
 
-        // --- SISTEM AUTO-LOCK SINKRON DENGAN DEV.HTML ---
+        // 1. CEK SERVER MONITOR TUTUP
         onValue(ref(db, 'settings/toko_locked'), (snap) => {
             if (snap.val() === true) {
                 document.body.innerHTML = `
-                <div class="lock-overlay">
-                    <div class="lock-box">
-                        <h1 style="color:var(--primary); font-size:2rem; font-weight:900;">SYSTEM LOCKED</h1>
-                        <p style="margin: 20px 0; opacity:0.8; line-height:1.6;">Akses Admin Monitor ditutup sementara oleh Developer Utama.</p>
-                        <div style="font-size:0.7rem; letter-spacing:3px; opacity:0.4; font-weight:800;">RAYY SECURITY SYSTEM</div>
+                <div class="overlay">
+                    <div class="box">
+                        <h1 style="color:var(--primary);">SERVER TUTUP</h1>
+                        <p>Server monitoring transaksi di tutup Harap kembali besok pagi pukul 09:00 WIB</p>
                     </div>
                 </div>`;
             }
         });
+
+        // 2. CEK BLOKIR ADMIN REAL-TIME
+        function startAdminCheck(username) {
+            if(username === "Owner Rayy") return;
+            onValue(ref(db, 'sys_extra_admins'), (snap) => {
+                const admins = snap.val();
+                let exists = false;
+                for(let id in admins) {
+                    if(admins[id].user === username) { exists = true; break; }
+                }
+                if(!exists) {
+                    document.body.innerHTML = `
+                    <div class="overlay">
+                        <div class="box" style="border-color:#ef4444;">
+                            <h1 style="color:#ef4444;">AKUN DIBLOKIR</h1>
+                            <p>Akun Admin anda Telah di blokir oleh developer/owner silahkan hubungi owner Rayy</p>
+                            <p style="margin-top:20px; font-size:0.9rem; opacity:0.7;">WhatsApp: 08XXXXXXXXXX</p>
+                        </div>
+                    </div>`;
+                }
+            });
+        }
 
         window.authAdmin = function() {
             const u = document.getElementById('adminUser').value.trim();
@@ -163,8 +127,13 @@
                         break;
                     }
                 }
-                if(found) { showMonitor(u); } 
-                else { alert("Akses Ditolak!"); }
+                if(found) { 
+                    currentAdminUser = u;
+                    showMonitor(u);
+                    startAdminCheck(u);
+                } else { 
+                    alert("Akses Ditolak!"); 
+                }
             }, { onlyOnce: true });
         }
 
@@ -180,17 +149,8 @@
                 if(data) {
                     Object.keys(data).reverse().forEach(id => {
                         const item = data[id];
-                        list.innerHTML += `
-                            <div class="list-item">
-                                <div class="item-info">
-                                    <b>${item.nama}</b>
-                                    <small>Rp ${Number(item.jumlah).toLocaleString()} • ${item.waktu}</small>
-                                </div>
-                                <div class="status-badge">PAID</div>
-                            </div>`;
+                        list.innerHTML += `<div class="item"><b>${item.nama}</b><br><small>Rp ${item.jumlah} - ${item.waktu}</small></div>`;
                     });
-                } else {
-                    list.innerHTML = "<p style='text-align:center; opacity:0.3; padding:20px;'>Belum ada transaksi.</p>";
                 }
             });
         }
@@ -202,7 +162,7 @@
                     document.getElementById('splash').style.display = 'none';
                     document.getElementById('main-content').classList.add('visible');
                 }, 800);
-            }, 2500);
+            }, 2000);
         };
     </script>
 </body>
