@@ -11,7 +11,7 @@
         .icon-header { font-size: 3rem; display: block; }
         .title-text { font-size: 2.2rem; font-weight: 800; color: white; display: block; }
         .card { background: #1e293b; border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid #334155; }
-        h2 { color: #38bdf8; font-size: 1.1rem; margin-bottom: 15px; }
+        h2 { color: #38bdf8; font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
         input { width: 100%; padding: 15px; margin: 8px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
         .btn-green { background: #22c55e; color: white; }
@@ -19,7 +19,7 @@
         .btn-red { background: #ef4444; color: white; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px 5px; border-bottom: 1px solid #334155; font-size: 0.9rem; }
-        /* Gaya Overlay Login */
+        .status-banned { color: #ef4444; font-weight: bold; font-size: 0.8rem; }
         #authOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0b1120; z-index:9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
     </style>
 </head>
@@ -27,8 +27,8 @@
 
 <div id="authOverlay">
     <h2 style="color:white;">🔐 DEVELOPER LOGIN ONLY</h2>
-    <input type="text" id="devUser" placeholder="Username Dev Utama" style="max-width:300px;">
-    <input type="password" id="devPass" placeholder="Password Dev" style="max-width:300px;">
+    <input type="text" id="devUser" placeholder="Username Dev Utama">
+    <input type="password" id="devPass" placeholder="Password Dev">
     <button onclick="checkDevAuth()" style="padding: 15px 40px; border-radius: 12px; border: none; background: #38bdf8; color: white; font-weight: bold; cursor: pointer; margin-top: 10px;">MASUK PANEL</button>
 </div>
 
@@ -39,16 +39,25 @@
         <span class="title-text">Panel</span>
     </div>
 
+    <div class="card" style="border-color: #ef4444;">
+        <h2 style="color: #ef4444;">🚫 Daftar Akun Terblokir</h2>
+        <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 10px;">(Akun yang salah pass 3x atau di-ban manual)</p>
+        <table id="bannedTable">
+            <tbody id="bannedListBody">
+                </tbody>
+        </table>
+    </div>
+
     <div class="card">
-        <h2>👥 List Akun Terdaftar</h2>
+        <h2>👥 List Admin Aktif</h2>
         <table><tbody id="userTable"></tbody></table>
     </div>
 
     <div class="card">
-        <h2>🔒 Ban Admin / Ganti Pass</h2>
+        <h2>🔒 Kelola Blokir (Ban/Unban)</h2>
         <input type="text" id="targetUser" placeholder="Username Target">
-        <button class="btn btn-green" onclick="prosesBan()">BAN & BLOKIR AKSES</button>
-        <button class="btn btn-red" style="background: #0ea5e9;" onclick="prosesUnban()">BUKA BLOKIR (UNBAN)</button>
+        <button class="btn btn-red" onclick="prosesBan()">BLOKIR AKSES (BAN)</button>
+        <button class="btn btn-green" style="margin-top:10px;" onclick="prosesUnban()">BUKA BLOKIR (UNBAN)</button>
     </div>
 
     <div class="card">
@@ -56,39 +65,53 @@
         <input type="text" id="newUser" placeholder="Username">
         <input type="password" id="newPass" placeholder="Password">
         <input type="text" id="newName" placeholder="Nama Lengkap">
-        <button class="btn btn-blue" onclick="simpanAdmin()">SIMPAN ADMIN BARU</button>
+        <button class="btn btn-blue" onclick="simpanAdmin()">SIMPAN ADMIN</button>
     </div>
 </div>
 
 <script>
-    // KREDENSI DEV UTAMA
-    const DEV_USERNAME = "rayy_dev"; // Username khusus dev
-    const DEV_PASSWORD = "085794";   // Password khusus dev
+    const DEV_USERNAME = "rayy_dev"; 
+    const DEV_PASSWORD = "085794";   
 
     function checkDevAuth() {
         const user = document.getElementById('devUser').value;
         const pass = document.getElementById('devPass').value;
-
         if (user === DEV_USERNAME && pass === DEV_PASSWORD) {
             document.getElementById('authOverlay').style.display = 'none';
-            loadAdmins();
+            refreshData();
         } else {
-            alert("AKSES DITOLAK! Hanya Developer Utama yang bisa masuk.");
+            alert("AKSES DITOLAK!");
             window.location.href = "index.html";
         }
     }
 
-    function simpanAdmin() {
-        const user = document.getElementById('newUser').value;
-        const pass = document.getElementById('newPass').value;
-        const name = document.getElementById('newName').value;
-        if(!user || !pass || !name) return alert("Isi semua data!");
+    function refreshData() {
+        loadAdmins();
+        loadBannedUsers();
+    }
 
-        let listAdmin = JSON.parse(localStorage.getItem('admins')) || [];
-        listAdmin.push({ user, pass, name });
-        localStorage.setItem('admins', JSON.stringify(listAdmin));
-        alert("Admin Berhasil Ditambah!");
-        location.reload();
+    function loadBannedUsers() {
+        const body = document.getElementById('bannedListBody');
+        let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
+        if(banned.length === 0) {
+            body.innerHTML = '<tr><td style="color:#94a3b8; text-align:center;">Tidak ada akun terblokir</td></tr>';
+            return;
+        }
+        body.innerHTML = '';
+        banned.forEach(user => {
+            body.innerHTML += `<tr><td class="status-banned">⚠️ ${user}</td><td style="text-align:right;"><button onclick="prosesUnbanLangsung('${user}')" style="background:none; border:1px solid #22c55e; color:#22c55e; border-radius:5px; padding:3px 8px; cursor:pointer; font-size:10px;">UNBAN</button></td></tr>`;
+        });
+    }
+
+    function prosesUnbanLangsung(user) {
+        let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
+        const index = banned.indexOf(user);
+        if (index > -1) {
+            banned.splice(index, 1);
+            localStorage.setItem('bannedUsers', JSON.stringify(banned));
+            alert(user + " Berhasil dipulihkan!");
+            refreshData();
+        }
     }
 
     function prosesBan() {
@@ -97,19 +120,27 @@
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
         if(!banned.includes(user)) banned.push(user);
         localStorage.setItem('bannedUsers', JSON.stringify(banned));
-        alert(user + " Berhasil di BAN!");
+        alert(user + " TELAH DIBLOKIR!");
+        document.getElementById('targetUser').value = "";
+        refreshData();
     }
 
     function prosesUnban() {
         const user = document.getElementById('targetUser').value;
-        if(!user) return alert("Isi username!");
-        let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
-        const index = banned.indexOf(user);
-        if (index > -1) {
-            banned.splice(index, 1);
-            localStorage.setItem('bannedUsers', JSON.stringify(banned));
-            alert(user + " Berhasil di UNBAN!");
-        }
+        prosesUnbanLangsung(user);
+        document.getElementById('targetUser').value = "";
+    }
+
+    function simpanAdmin() {
+        const user = document.getElementById('newUser').value;
+        const pass = document.getElementById('newPass').value;
+        const name = document.getElementById('newName').value;
+        if(!user || !pass || !name) return alert("Isi semua data!");
+        let listAdmin = JSON.parse(localStorage.getItem('admins')) || [];
+        listAdmin.push({ user, pass, name });
+        localStorage.setItem('admins', JSON.stringify(listAdmin));
+        alert("Admin Berhasil Ditambah!");
+        location.reload();
     }
 
     function loadAdmins() {
