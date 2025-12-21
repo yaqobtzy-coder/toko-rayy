@@ -3,59 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - Toko Rayy</title>
+    <title>Admin Panel - Toko Rayy</title>
+    <script src="config.js"></script>
     <style>
-        body { background-color: #0b1120; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; text-align: center; }
-        .login-card { background: #1e293b; padding: 30px; border-radius: 20px; border: 1px solid #334155; width: 100%; max-width: 400px; }
-        input { width: 100%; padding: 15px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
-        .btn-blue { background: #38bdf8; color: white; }
-        .btn-red { background: #ef4444; color: white; margin-top: 20px; text-decoration: none; display: inline-block; }
+        body { background-color: #0b1120; color: white; font-family: sans-serif; padding: 20px; }
+        .card { background: #1e293b; border-radius: 15px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #f59e0b; position: relative; }
+        .btn-green { background: #22c55e; color: white; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .status-tag { position: absolute; top: 20px; right: 20px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-<div class="login-card" id="mainContent">
-    <h2>Masuk Admin</h2>
-    <input type="text" id="userAdmin" placeholder="Username Admin">
-    <input type="password" id="passAdmin" placeholder="Password">
-    <button class="btn btn-blue" onclick="tryLogin()">MASUK SEKARANG</button>
+<div id="loginPage">
+    <h2>Login Admin</h2>
+    <input type="text" id="u" placeholder="User" style="width:100%; padding:10px; margin-bottom:10px;">
+    <input type="password" id="p" placeholder="Pass" style="width:100%; padding:10px; margin-bottom:10px;">
+    <button onclick="login()" style="width:100%; padding:10px;">MASUK</button>
+</div>
+
+<div id="historyPage" style="display:none;">
+    <h2 id="tokoTitle"></h2>
+    <div id="trans2" class="card">
+        <span class="status-tag" id="tag2">⌛ Pending</span>
+        <b>RAYY1766275313193</b><br>Rp 5.000
+        <div id="btn2"><button class="btn-green" onclick="konfirmasi('2')">KONFIRMASI PEMBAYARAN</button></div>
+    </div>
 </div>
 
 <script>
-    const waNumber = "628131172093";
+    let salah = 0;
+    function login() {
+        const user = document.getElementById('u').value;
+        const pass = document.getElementById('p').value;
+        let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
 
-    function tryLogin() {
-        const user = document.getElementById('userAdmin').value;
-        const pass = document.getElementById('passAdmin').value;
-        
-        // 1. Cek apakah user ada di daftar BAN (dari Panel Dev)
-        const bannedList = JSON.parse(localStorage.getItem('bannedUsers')) || [];
-        
-        if (bannedList.includes(user)) {
-            // Tampilan jika kena BAN sesuai permintaanmu
-            const pesanWa = `HALO DEVELOPER TERHORMAT SAYA ADMIN ${user} INGIN MENGAJUKAN BANDING TERHADAP AKUN ADMIN SAYA, TERIMAKASIH`;
-            const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(pesanWa)}`;
-            
-            document.body.innerHTML = `
-                <div class="login-card" style="border-color: #ef4444;">
-                    <h2 style="color: #ef4444;">AKUN ADMIN ANDA TELAH DI BAN PERMANEN OLEH DEV/RAYY</h2>
-                    <p style="color: #94a3b8;">HUBUNGI CONTACT DEVELOPER: ${waNumber}</p>
-                    <a href="${waLink}" class="btn btn-red">HUBUNGI DEVELOPER (BANDING)</a>
-                </div>
-            `;
-            return;
-        }
+        if(banned.includes(user)) { alert("AKUN DIBLOKIR!"); return; }
 
-        // 2. Jika tidak di-ban, cek password (contoh sederhana)
-        if (user === "admin_rayy" && pass === "rayy123") {
-            alert("Selamat Datang Owner!");
-            window.location.href = "dashboard.html"; // Arahkan ke dashboard kamu
+        if(user === CONFIG.ownerUsername && pass === CONFIG.ownerPassword) {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('historyPage').style.display = 'block';
+            document.getElementById('tokoTitle').innerText = CONFIG.namaToko;
         } else {
-            alert("Username atau Password Salah!");
+            salah++;
+            if(salah >= 3) {
+                banned.push(user);
+                localStorage.setItem('bannedUsers', JSON.stringify(banned));
+                alert("Salah 3x! Akun diblokir.");
+            } else { alert("Salah! Sisa: " + (3-salah)); }
         }
     }
-</script>
 
+    function konfirmasi(id) {
+        new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3').play();
+        document.getElementById('trans'+id).style.borderLeft = "4px solid #22c55e";
+        document.getElementById('tag'+id).innerText = "✅ Sukses";
+        document.getElementById('btn'+id).innerHTML = "";
+        alert("Sukses!");
+    }
+</script>
 </body>
 </html>
