@@ -9,11 +9,13 @@
         .container { max-width: 450px; margin: auto; }
         .card { background: #1e293b; border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid #334155; }
         h2 { color: #38bdf8; font-size: 1.1rem; margin-bottom: 15px; }
-        input { width: 100%; padding: 15px; margin: 8px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; }
+        input { width: 100%; padding: 15px; margin: 8px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #38bdf8; }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
         .btn-blue { background: #38bdf8; color: white; }
         .btn-red { background: #ef4444; color: white; }
         .btn-green { background: #22c55e; color: white; }
+        .btn-sm { padding: 8px 12px; font-size: 0.7rem; border-radius: 8px; width: auto; }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px 0; border-bottom: 1px solid #334155; font-size: 0.9rem; }
         #authOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0b1120; z-index:9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
@@ -42,14 +44,14 @@
         </div>
     </div>
 
-    <div class="card" style="border-color: #ef4444;">
-        <h2 style="color: #ef4444;">🚫 Akun Terblokir</h2>
-        <table id="bannedTable"><tbody id="bannedListBody"></tbody></table>
-    </div>
-
     <div class="card">
         <h2>👥 List Admin Aktif</h2>
         <table id="userTable"></table>
+    </div>
+
+    <div class="card" style="border-color: #ef4444;">
+        <h2 style="color: #ef4444;">🚫 Akun Terblokir</h2>
+        <table id="bannedTable"><tbody id="bannedListBody"></tbody></table>
     </div>
 
     <div class="card">
@@ -91,14 +93,34 @@
 
     function refreshData() {
         const tableAdmin = document.getElementById('userTable');
-        tableAdmin.innerHTML = `<tr><td>${CONFIG.ownerUsername} (Owner)</td><td style="text-align:right;">Utama</td></tr>`;
+        tableAdmin.innerHTML = `<tr><td><b>${CONFIG.ownerUsername} (Owner)</b></td><td style="text-align:right; color:#94a3b8;">Sistem</td></tr>`;
+        
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
-        admins.forEach(a => { tableAdmin.innerHTML += `<tr><td>${a.user}</td><td style="text-align:right;">${a.name}</td></tr>`; });
+        admins.forEach((a, index) => { 
+            tableAdmin.innerHTML += `
+                <tr>
+                    <td>${a.user} <br><small style="color:#94a3b8">${a.name}</small></td>
+                    <td style="text-align:right;">
+                        <button class="btn btn-red btn-sm" onclick="hapusAdmin(${index})">HAPUS</button>
+                    </td>
+                </tr>`; 
+        });
 
         const tableBan = document.getElementById('bannedListBody');
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
         tableBan.innerHTML = banned.length === 0 ? '<tr><td>Tidak ada data</td></tr>' : '';
-        banned.forEach(user => { tableBan.innerHTML += `<tr><td style="color:#ef4444;">⚠️ ${user}</td></tr>`; });
+        banned.forEach(user => { 
+            tableBan.innerHTML += `<tr><td style="color:#ef4444;">⚠️ ${user}</td></tr>`; 
+        });
+    }
+
+    function hapusAdmin(index) {
+        if(confirm("Apakah kamu yakin ingin menghapus akun admin ini secara permanen?")) {
+            let admins = JSON.parse(localStorage.getItem('admins')) || [];
+            admins.splice(index, 1);
+            localStorage.setItem('admins', JSON.stringify(admins));
+            refreshData();
+        }
     }
 
     function prosesBan() {
@@ -108,6 +130,7 @@
         if(!banned.includes(user)) banned.push(user);
         localStorage.setItem('bannedUsers', JSON.stringify(banned));
         refreshData();
+        document.getElementById('targetUser').value = "";
     }
 
     function prosesUnban() {
@@ -115,13 +138,23 @@
         let filtered = banned.filter(x => x !== document.getElementById('targetUser').value);
         localStorage.setItem('bannedUsers', JSON.stringify(filtered));
         refreshData();
+        document.getElementById('targetUser').value = "";
     }
 
     function simpanAdmin() {
+        const u = document.getElementById('newUser').value;
+        const p = document.getElementById('newPass').value;
+        const n = document.getElementById('newName').value;
+        if(!u || !p) return alert("Isi data dengan lengkap!");
+        
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
-        admins.push({ user: document.getElementById('newUser').value, pass: document.getElementById('newPass').value, name: document.getElementById('newName').value });
+        admins.push({ user: u, pass: p, name: n });
         localStorage.setItem('admins', JSON.stringify(admins));
+        alert("Admin Berhasil Ditambah!");
         refreshData();
+        document.getElementById('newUser').value = "";
+        document.getElementById('newPass').value = "";
+        document.getElementById('newName').value = "";
     }
 </script>
 </body>
