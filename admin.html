@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy - Admin Transaction Monitor</title>
+    <title>Rayy - Admin Monitor System</title>
     <style>
         :root {
             --primary: #38bdf8;
@@ -19,29 +19,26 @@
             background: var(--bg); 
             color: var(--text); 
             font-family: 'Segoe UI', sans-serif; 
-            overflow: hidden; /* Dikunci dulu buat splash screen */
+            overflow: hidden; 
         }
 
-        /* --- ANIMASI SPLASH SCREEN --- */
+        /* --- SPLASH SCREEN --- */
         #splash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
             align-items: center; justify-content: center; transition: 0.8s ease-in-out;
         }
-
         .logo-box {
             width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
             display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
             font-weight: 900; color: var(--bg); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
             animation: pulse 2s infinite ease-in-out;
         }
-
         @keyframes pulse {
             0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4); }
             50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(56, 189, 248, 0.6); }
         }
 
-        /* --- CONTAINER UTAMA --- */
         .container { 
             max-width: 500px; margin: auto; padding: 20px; padding-top: 50px;
             opacity: 0; transform: translateY(20px); transition: 1s cubic-bezier(0.19, 1, 0.22, 1);
@@ -51,19 +48,17 @@
         /* --- LOGIN CARD --- */
         .login-card { 
             background: var(--card); padding: 40px; border-radius: 35px; text-align: center; 
-            border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
-        .login-card h2 { color: var(--primary); margin-bottom: 25px; font-weight: 900; letter-spacing: -1px; }
-
+        .login-card h2 { color: var(--primary); margin-bottom: 25px; font-weight: 900; }
         input { 
-            width: 100%; padding: 20px; background: var(--dark); border: 2px solid transparent; 
-            color: white; border-radius: 20px; margin-bottom: 15px; box-sizing: border-box; 
-            outline: none; text-align: center; transition: 0.3s; font-size: 1rem;
+            width: 100%; padding: 18px; background: var(--dark); border: 2px solid transparent; 
+            color: white; border-radius: 18px; margin-bottom: 12px; outline: none; text-align: center;
+            transition: 0.3s; font-size: 1rem;
         }
         input:focus { border-color: var(--primary); }
-
         .btn-unlock { 
-            width: 100%; padding: 20px; border: none; border-radius: 20px; 
+            width: 100%; padding: 18px; border: none; border-radius: 18px; 
             background: var(--primary); color: var(--bg); font-weight: 900; 
             cursor: pointer; text-transform: uppercase; transition: 0.3s;
         }
@@ -73,12 +68,10 @@
         #monitorArea { display: none; animation: fadeIn 0.8s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .card { background: var(--card); border-radius: 30px; padding: 25px; border: 1px solid rgba(255,255,255,0.05); }
+        .card { background: var(--card); border-radius: 30px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.05); }
         .label { font-size: 0.75rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: block; letter-spacing: 1.5px; }
         
-        .list-container { max-height: 600px; overflow-y: auto; padding-right: 5px; }
-        
-        /* Custom Scrollbar */
+        .list-container { max-height: 550px; overflow-y: auto; padding-right: 5px; }
         .list-container::-webkit-scrollbar { width: 5px; }
         .list-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 
@@ -106,21 +99,22 @@
         <div id="loginPage">
             <div class="login-card">
                 <h2>ADMIN ACCESS</h2>
-                <input type="password" id="adminKey" placeholder="Enter Access Key">
-                <button class="btn-unlock" onclick="checkAdminKey()">Unlock Monitor</button>
+                <input type="text" id="adminUser" placeholder="Username">
+                <input type="password" id="adminPass" placeholder="Password / Key">
+                <button class="btn-unlock" onclick="authAdmin()">Login Panel</button>
             </div>
         </div>
 
         <div id="monitorArea">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 0 10px;">
-                <h2 style="color: var(--primary); font-weight: 900; letter-spacing: -1px;">LIVE <span style="color:#fff;">TRANSAKSI</span></h2>
+                <h2 style="color: var(--primary); font-weight: 900; letter-spacing: -1px;">LIVE <span style="color:#fff;">HISTORY</span></h2>
                 <button onclick="location.reload()" style="background:rgba(239, 68, 68, 0.1); border:none; color:#ef4444; padding:8px 15px; border-radius:12px; cursor:pointer; font-weight:700; font-size:0.75rem;">LOGOUT</button>
             </div>
 
             <div class="card">
-                <span class="label">Riwayat Real-time</span>
+                <span class="label">Transaksi Real-time</span>
                 <div id="historyList" class="list-container">
-                    <p style="text-align:center; opacity:0.5; padding: 20px;">Menghubungkan Database...</p>
+                    <p style="text-align:center; opacity:0.4; padding: 20px;">Menunggu data dari Cloud...</p>
                 </div>
             </div>
         </div>
@@ -128,31 +122,56 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        const ADMIN_SECRET = "access=rayy-ninja"; 
+        // Akses Utama
+        const OWNER_KEY = "085794";
 
-        window.checkAdminKey = function() {
-            const input = document.getElementById('adminKey').value;
-            if(input === ADMIN_SECRET) {
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('monitorArea').style.display = 'block';
-                startMonitor();
-            } else {
-                alert("ACCESS DENIED: Kode Salah!");
+        window.authAdmin = function() {
+            const u = document.getElementById('adminUser').value.trim();
+            const p = document.getElementById('adminPass').value.trim();
+
+            // Cek Login Owner
+            if(p === OWNER_KEY) {
+                showMonitor("Owner Rayy");
+                return;
             }
+
+            // Cek Login Extra Admin dari Firebase
+            onValue(ref(db, 'sys_extra_admins'), (snap) => {
+                const admins = snap.val();
+                let found = false;
+                for(let id in admins) {
+                    if(admins[id].user === u && admins[id].pass === p) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if(found) {
+                    showMonitor(u);
+                } else {
+                    alert("Akses Ditolak: Username atau Password salah!");
+                }
+            }, { onlyOnce: true });
         }
 
-        function startMonitor() {
+        function showMonitor(adminName) {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('monitorArea').style.display = 'block';
+            
+            // Catat log login ke dev.html
+            push(ref(db, 'sys_login_logs'), { user: adminName, time: new Date().toLocaleString() });
+
+            // Ambil data transaksi real-time
             onValue(ref(db, 'transactions'), (snapshot) => {
                 const list = document.getElementById('historyList');
                 list.innerHTML = "";
                 const data = snapshot.val();
-                
                 if(data) {
                     Object.keys(data).reverse().forEach(id => {
                         const item = data[id];
@@ -166,7 +185,7 @@
                             </div>`;
                     });
                 } else {
-                    list.innerHTML = "<p style='text-align:center; opacity:0.3; padding:20px;'>Belum ada transaksi.</p>";
+                    list.innerHTML = "<p style='text-align:center; opacity:0.3; padding:20px;'>Belum ada riwayat.</p>";
                 }
             });
         }
