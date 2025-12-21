@@ -3,251 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy - Admin Monitor Secure v2.1</title>
-    
+    <title>Rayy Admin - Secure Monitor</title>
     <style>
         :root {
             --primary: #38bdf8;
-            --primary-glow: rgba(56, 189, 248, 0.4);
             --bg: #0b1120;
             --card: #1e293b;
-            --dark: #0f172a;
-            --text: #f8fafc;
             --red: #ef4444;
-            --green: #22c55e;
-            --orange: #f59e0b;
-            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --text: #f8fafc;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            background-image: radial-gradient(circle at top right, #1e293b 0%, #0b1120 100%);
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
         }
 
-        /* --- SPLASH SCREEN --- */
-        #splash {
+        /* Tampilan Blokir Mewah (Sesuai Foto 1) */
+        .ban-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transition: opacity 0.8s ease;
+            background: var(--bg); z-index: 10000; display: flex; 
+            align-items: center; justify-content: center; padding: 25px;
         }
-        .logo-box {
-            width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
-            display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
-            font-weight: 900; color: #0b1120; box-shadow: 0 0 40px var(--primary-glow);
-            animation: pulse 2s infinite ease-in-out;
+        .ban-box {
+            border: 2px solid var(--red); padding: 50px 30px; border-radius: 40px;
+            background: rgba(239, 68, 68, 0.05); width: 100%; max-width: 420px;
+            text-align: center;
         }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-
-        /* --- CONTAINER --- */
-        .container { max-width: 550px; margin: auto; padding: 25px; opacity: 0; transform: translateY(20px); transition: 1s ease; }
-        .container.visible { opacity: 1; transform: translateY(0); }
-
-        /* --- LOGIN CARD --- */
-        .login-card {
-            background: var(--card); padding: 50px 35px; border-radius: 40px;
-            text-align: center; border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); margin-top: 80px;
-        }
-        .login-card h2 { color: var(--primary); font-weight: 900; margin-bottom: 30px; }
-
-        input {
-            width: 100%; padding: 20px; background: var(--dark); border: 2px solid transparent;
-            color: white; border-radius: 20px; font-size: 1rem; text-align: center;
-            transition: var(--transition); margin-bottom: 15px;
-        }
-        input:focus { border-color: var(--primary); }
-
-        .btn-unlock {
-            width: 100%; padding: 20px; border: none; border-radius: 20px;
-            background: var(--primary); color: #0b1120; font-weight: 900;
-            cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+        .ban-box h1 { color: var(--red); font-size: 2.2rem; font-weight: 900; margin-bottom: 20px; }
+        .ban-box p { margin-bottom: 30px; line-height: 1.6; opacity: 0.9; }
+        
+        .btn-wa {
+            display: inline-block; padding: 18px 35px; background: var(--primary);
+            color: #0b1120; text-decoration: none; border-radius: 20px; 
+            font-weight: 900; text-transform: uppercase;
         }
 
-        /* --- MONITOR AREA --- */
-        #monitorArea { display: none; }
-        .header-monitor { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .item-card {
-            background: var(--card); padding: 25px; border-radius: 30px; margin-bottom: 15px;
-            border-left: 6px solid var(--primary); position: relative; animation: fadeIn 0.5s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .status-pill {
-            position: absolute; top: 25px; right: 25px; padding: 6px 12px;
-            border-radius: 10px; font-size: 0.65rem; font-weight: 900; text-transform: uppercase;
-        }
-        .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--orange); border: 1px solid var(--orange); }
-        .status-success { background: rgba(34, 197, 94, 0.1); color: var(--green); border: 1px solid var(--green); }
-
-        .btn-confirm {
-            width: 100%; margin-top: 20px; padding: 14px; border: none; border-radius: 15px;
-            background: var(--green); color: white; font-weight: 800; cursor: pointer;
-        }
-        .btn-confirm:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
-
-        /* --- OVERLAY BANNED --- */
-        .full-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 10001; display: flex; align-items: center;
-            justify-content: center; padding: 30px; text-align: center;
-        }
-        .box-msg { border: 2px solid var(--red); padding: 50px 30px; border-radius: 40px; background: rgba(239, 68, 68, 0.05); width: 100%; max-width: 420px; }
-        .btn-wa { display: inline-block; margin-top: 30px; padding: 18px 35px; background: var(--primary); color: #0b1120; text-decoration: none; border-radius: 20px; font-weight: 900; }
+        /* UI Login & Dashboard */
+        .container { width: 100%; max-width: 480px; padding: 20px; }
+        .card { background: var(--card); padding: 40px 30px; border-radius: 35px; text-align: center; }
+        input { width: 100%; padding: 18px; margin-bottom: 15px; border-radius: 15px; border: none; background: #0f172a; color: white; text-align: center; }
+        .btn-login { width: 100%; padding: 18px; background: var(--primary); border: none; border-radius: 15px; font-weight: 900; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="splash">
-        <div class="logo-box">R</div>
-    </div>
-
-    <div class="container" id="main-content">
-        <div id="loginPage">
-            <div class="login-card">
-                <h2>ADMIN LOGIN</h2>
-                <input type="text" id="adminUser" placeholder="Username">
-                <input type="password" id="adminPass" placeholder="Password">
-                <button class="btn-unlock" onclick="authAdmin()">Login Monitor</button>
-            </div>
+    <div class="container" id="main-ui">
+        <div id="loginArea" class="card">
+            <h2 style="margin-bottom:25px; color:var(--primary);">ADMIN LOGIN</h2>
+            <input type="text" id="userAdmin" placeholder="Username">
+            <input type="password" id="passAdmin" placeholder="Password">
+            <button class="btn-login" onclick="prosesLogin()">LOGIN MONITOR</button>
         </div>
-
-        <div id="monitorArea">
-            <div class="header-monitor">
-                <h2>LIVE <span style="color:var(--primary);">MONITOR</span></h2>
-                <button onclick="location.reload()" style="background:none; border:none; color:var(--red); font-weight:800; cursor:pointer;">LOGOUT</button>
-            </div>
-            <div id="historyList"></div>
+        <div id="monitorArea" style="display:none;">
+            <h2 style="margin-bottom:20px;">DASHBOARD TRANSAKSI</h2>
+            <div id="listTransaksi"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        const OWNER_KEY = "085794";
         const OWNER_WA = "628131172093";
 
-        // 1. CEK SERVER TUTUP
-        onValue(ref(db, 'settings/toko_locked'), (snap) => {
-            if (snap.val() === true) {
-                document.body.innerHTML = `<div class="full-overlay"><div class="box-msg" style="border-color: var(--primary);"><h1>SERVER TUTUP</h1><p>Kembali besok pukul 09:00 WIB</p></div></div>`;
-            }
-        });
+        // Fungsi Tampilkan Pesan Blokir Mewah
+        function tampilkanLayarBan(username) {
+            const pesanKeOwner = `halo owner terhormat akun saya (${username}) terkana ban tanpa alasan harap di tinjau🙏`;
+            const linkWA = `https://wa.me/${OWNER_WA}?text=${encodeURIComponent(pesanKeOwner)}`;
+            
+            document.body.innerHTML = `
+                <div class="ban-overlay">
+                    <div class="ban-box">
+                        <h1>AKUN DIBLOKIR</h1>
+                        <p>Akun Admin anda Telah di blokir oleh developer/owner silahkan hubungi owner Rayy</p>
+                        <a href="${linkWA}" class="btn-wa">CONTACT OWNER</a>
+                    </div>
+                </div>`;
+        }
 
-        // 2. FUNGSI AUTO-KICK (REAL-TIME PROTECTION)
-        function startRealTimeProtection(username) {
+        // Cek Ban Real-time
+        function proteksiAdmin(username) {
             if(username === "Owner Rayy") return;
+            onValue(ref(db, 'banned_users/' + username), (snap) => {
+                if(snap.exists()) tampilkanLayarBan(username);
+            });
+        }
 
-            // CEK DUA TEMPAT SEKALIGUS: BANNED_USERS & SYS_EXTRA_ADMINS
-            onValue(ref(db, 'banned_users/' + username), (banSnap) => {
-                onValue(ref(db, 'sys_extra_admins'), (adminSnap) => {
-                    const admins = adminSnap.val();
-                    let isExistInAdmin = false;
-                    if(admins) {
-                        for(let id in admins) { if(admins[id].user === username) isExistInAdmin = true; }
-                    }
+        window.prosesLogin = function() {
+            const u = document.getElementById('userAdmin').value;
+            const p = document.getElementById('passAdmin').value;
 
-                    // JIKA TERDETEKSI DI DAFTAR BAN (INDEX) ATAU DIHAPUS DARI DAFTAR ADMIN
-                    if(banSnap.exists() || !isExistInAdmin) {
-                        kickAdmin(username);
-                    }
+            if(p === "085794") { // Akses Owner
+                bukaDashboard("Owner Rayy");
+                return;
+            }
+
+            // Cek Ban & Akun Admin
+            onValue(ref(db, 'banned_users/' + u), (banSnap) => {
+                if(banSnap.exists()) {
+                    tampilkanLayarBan(u);
+                } else {
+                    onValue(ref(db, 'sys_extra_admins'), (adminSnap) => {
+                        let valid = false;
+                        adminSnap.forEach(d => { if(d.val().user === u && d.val().pass === p) valid = true; });
+                        
+                        if(valid) {
+                            bukaDashboard(u);
+                            proteksiAdmin(u);
+                        } else {
+                            alert("Akses Ditolak!");
+                        }
+                    }, { onlyOnce: true });
+                }
+            }, { onlyOnce: true });
+        }
+
+        function bukaDashboard(name) {
+            document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('monitorArea').style.display = 'block';
+            
+            onValue(ref(db, 'transactions'), (snap) => {
+                const list = document.getElementById('listTransaksi');
+                list.innerHTML = "";
+                snap.forEach(child => {
+                    const tr = child.val();
+                    const isSelesai = tr.status === "Success";
+                    list.innerHTML += `
+                        <div style="background:var(--card); padding:20px; border-radius:20px; margin-bottom:10px; border-left:5px solid ${isSelesai ? '#22c55e' : '#38bdf8'}; text-align:left;">
+                            <div style="float:right; font-size:0.7rem; font-weight:900; color:${isSelesai ? '#22c55e' : '#f59e0b'};">${tr.status || 'Pending'}</div>
+                            <b>${tr.nama}</b><br><small>Rp ${tr.jumlah}</small>
+                            <button onclick="konfirmasi('${child.key}')" style="width:100%; margin-top:10px; padding:10px; border-radius:10px; border:none; background:#22c55e; color:white; font-weight:800;" ${isSelesai ? 'disabled' : ''}>
+                                ${isSelesai ? 'TERKONFIRMASI' : 'KONFIRMASI'}
+                            </button>
+                        </div>`;
                 });
             });
         }
 
-        function kickAdmin(username) {
-            const waLink = `https://wa.me/${OWNER_WA}?text=halo%20owner%20terhormat%20akun%20saya%20(${username})%20terkena%20ban%20tanpa%20alasan%20harap%20di%20tinjau🙏`;
-            document.body.innerHTML = `
-            <div class="full-overlay">
-                <div class="box-msg">
-                    <h1 style="color:var(--red);">AKUN DIBLOKIR</h1>
-                    <p>Akun Admin anda Telah di blokir oleh developer/owner silahkan hubungi owner Rayy</p>
-                    <a href="${waLink}" class="btn-wa">CONTACT OWNER</a>
-                </div>
-            </div>`;
-        }
-
-        // 3. PROSES LOGIN (FIX LOLOS BAN)
-        window.authAdmin = function() {
-            const u = document.getElementById('adminUser').value.trim();
-            const p = document.getElementById('adminPass').value.trim();
-
-            if(!u || !p) return alert("Isi data!");
-            if(p === OWNER_KEY) { showMonitor("Owner Rayy"); return; }
-
-            // PERTAMA: CEK APAKAH USERNAME INI DI BAN (LIST INDEX)
-            onValue(ref(db, 'banned_users/' + u), (banCheck) => {
-                if(banCheck.exists()) {
-                    alert("Gagal Login: Akun ini telah diblokir secara permanen oleh Owner!");
-                    return;
-                }
-
-                // KEDUA: JIKA TIDAK DI BAN, BARU CEK PASSWORD ADMINNYA
-                onValue(ref(db, 'sys_extra_admins'), (snap) => {
-                    const data = snap.val();
-                    let valid = false;
-                    for(let id in data) { if(data[id].user === u && data[id].pass === p) valid = true; }
-
-                    if(valid) {
-                        showMonitor(u);
-                        startRealTimeProtection(u);
-                    } else {
-                        alert("Akses Ditolak: Password salah atau akun bukan admin!");
-                    }
-                }, { onlyOnce: true });
-
-            }, { onlyOnce: true });
-        }
-
-        function showMonitor(adminName) {
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('monitorArea').style.display = 'block';
-            push(ref(db, 'sys_login_logs'), { user: adminName, time: new Date().toLocaleString() });
-
-            onValue(ref(db, 'transactions'), (snapshot) => {
-                const list = document.getElementById('historyList');
-                list.innerHTML = "";
-                const data = snapshot.val();
-                if(data) {
-                    Object.keys(data).reverse().forEach(id => {
-                        const item = data[id];
-                        const isSuccess = item.status === "Success";
-                        list.innerHTML += `
-                            <div class="item-card">
-                                <div class="status-pill ${isSuccess ? 'status-success' : 'status-pending'}">${item.status || 'Pending'}</div>
-                                <div style="padding-right: 85px;">
-                                    <b>${item.nama}</b>
-                                    <p style="color:var(--primary); font-weight:800; margin-top:5px;">Rp ${Number(item.jumlah).toLocaleString()}</p>
-                                    <p style="font-size:0.75rem; opacity:0.4; margin-top:5px;">${item.waktu}</p>
-                                </div>
-                                <button class="btn-confirm" ${isSuccess ? 'disabled' : ''} onclick="confirmPay('${id}')">
-                                    ${isSuccess ? '✓ TERKONFIRMASI' : 'KONFIRMASI PEMBAYARAN'}
-                                </button>
-                            </div>`;
-                    });
-                }
-            });
-        }
-
-        window.confirmPay = function(id) {
-            update(ref(db, 'transactions/' + id), { status: "Success" });
-        }
-
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('splash').style.display = 'none';
-                document.getElementById('main-content').classList.add('visible');
-            }, 2000);
-        };
+        window.konfirmasi = (id) => { update(ref(db, 'transactions/' + id), { status: "Success" }); }
     </script>
 </body>
 </html>
