@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Transaksi</title>
     <script>
-        // SENSOR OTOMATIS: Jam 9 Pagi
+        // CEK STATUS TOKO (JAM 9 PAGI)
         if (localStorage.getItem('tokoLocked') === 'offline') {
             document.write(`
                 <body style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center; margin:0; padding:20px;">
@@ -19,34 +19,33 @@
         :root { --primary: #38bdf8; --bg: #0b1120; --card: #1e293b; --red: #ef4444; --green: #22c55e; }
         body { background-color: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow: hidden; }
 
-        /* --- ANIMASI SPLASH SCREEN CSS --- */
+        /* ANIMASI SPLASH SCREEN */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 99999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transition: opacity 0.8s, visibility 0.8s;
+            align-items: center; justify-content: center; transition: 0.8s;
         }
         .splash-logo {
             width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
             display: flex; align-items: center; justify-content: center; font-size: 3rem;
             font-weight: 900; color: var(--bg); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
-            animation: bounceIn 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: bounceIn 1s ease;
         }
-        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .splash-text { margin-top: 20px; font-weight: 800; letter-spacing: 2px; color: var(--primary); text-transform: uppercase; }
 
-        /* --- NOTIFIKASI MELUNCUR (ATAS-BAWAH) --- */
+        /* NOTIFIKASI MELUNCUR */
         #customToast {
             position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
             background: var(--primary); color: var(--bg); padding: 15px 30px;
-            border-radius: 50px; font-weight: 800; z-index: 100001;
-            transition: all 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+            border-radius: 50px; font-weight: 800; z-index: 100001; transition: 0.6s;
         }
         #customToast.show { top: 30px; }
 
-        /* --- LAYOUT UTAMA --- */
-        .container { max-width: 450px; margin: auto; padding: 20px; height: 100vh; opacity: 0; transition: opacity 1s; box-sizing: border-box; }
+        .container { max-width: 450px; margin: auto; padding: 20px; height: 100vh; opacity: 0; transition: 1s; box-sizing: border-box; overflow-y: auto; }
         .container.visible { opacity: 1; }
         .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; position: relative; }
+        
         input { width: 100%; padding: 16px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 15px; box-sizing: border-box; outline: none; }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
         .btn-blue { background: var(--primary); color: var(--bg); }
@@ -84,7 +83,7 @@
                 <button onclick="muatTransaksi()" style="background:#334155; border:none; color:white; padding:10px; border-radius:10px;">🔄</button>
             </div>
             <div id="listTransaksi"></div>
-            <button class="btn" style="background:#334155; color:white; margin-top:30px;" onclick="location.reload()">Logout</button>
+            <button class="btn" style="background:#334155; color:white; margin-top:30px;" onclick="location.reload()">Keluar Aplikasi</button>
         </div>
     </div>
 
@@ -95,41 +94,51 @@
 
         window.onload = () => {
             setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                splash.style.opacity = '0';
-                splash.style.visibility = 'hidden';
-                document.getElementById('main-content').classList.add('visible');
-                document.body.style.overflow = "auto";
-            }, 2500);
+                document.getElementById('splash-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('splash-screen').style.display = 'none';
+                    document.getElementById('main-content').classList.add('visible');
+                }, 800);
+            }, 2000);
         };
 
-        function tampilkanNotif(pesan) {
-            const toast = document.getElementById('customToast');
-            toast.innerText = pesan;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        function notify(pesan) {
+            const t = document.getElementById('customToast');
+            t.innerText = pesan; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
         }
 
         function handleLogin() {
             const u = document.getElementById('userIn').value;
             const p = document.getElementById('passIn').value;
-            let banned = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
             
-            if (banned.includes(u)) { tampilkanLayarBlokir(u, 'manual'); return; }
+            // Cek Banned List (Dari Dev Panel)
+            let banned = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
+            if (banned.includes(u)) { tampilkanBlokir(u); return; }
 
+            // Cek Admin List
             let admins = JSON.parse(localStorage.getItem('admins') || '[]');
-            if ((u === "admin_rayy" && p === "rayy123") || admins.find(a => a.user === u && a.pass === p)) {
-                tampilkanNotif("🔓 Akses Diterima!");
+            let isMatch = (u === "admin_rayy" && p === "rayy123") || admins.find(a => a.user === u && a.pass === p);
+
+            if (isMatch) {
+                notify("🔓 Selamat Datang!");
+                
+                // CATAT LOGIN (DIPANTAU DEV)
+                let logs = JSON.parse(localStorage.getItem('login_logs') || '[]');
+                logs.push({ user: u, time: new Date().toLocaleString('id-ID') });
+                localStorage.setItem('login_logs', JSON.stringify(logs.slice(-20)));
+
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('historyPage').style.display = 'block';
                 muatTransaksi();
-                setInterval(checkNewTransaction, 5000);
+                setInterval(checkNew, 5000);
             } else {
                 salahHitung++;
                 if(salahHitung >= 3) {
-                    banned.push(u); localStorage.setItem('bannedUsers', JSON.stringify(banned));
-                    tampilkanLayarBlokir(u, 'otomatis');
-                } else { tampilkanNotif("🔒 Akses Ditolak!"); }
+                    banned.push(u);
+                    localStorage.setItem('bannedUsers', JSON.stringify(banned));
+                    tampilkanBlokir(u);
+                } else { notify("❌ Password Salah!"); }
             }
         }
 
@@ -147,6 +156,7 @@
                         <span class="status-badge status-${trx.status}">${trx.status}</span>
                         <div style="color:var(--primary); font-weight:bold; font-size:0.85rem;">ID: ${trx.orderId}</div>
                         <div style="font-size:1.3rem; font-weight:bold; margin:8px 0;">Rp ${parseInt(trx.amount).toLocaleString('id-ID')}</div>
+                        <div style="font-size:0.75rem; color:#94a3b8;">User: ${trx.user || 'Guest'}</div>
                         ${trx.status === 'Pending' ? `<button class="btn btn-blue btn-sm" onclick="confirmTrx(${realIdx})">CONFIRM</button>` : ''}
                         <button class="btn btn-sm" style="background:var(--red); color:white;" onclick="hapusTrx(${realIdx})">HAPUS</button>
                     </div>`;
@@ -157,34 +167,34 @@
             let history = JSON.parse(localStorage.getItem('trx_history') || '[]');
             history[idx].status = "Sukses";
             localStorage.setItem('trx_history', JSON.stringify(history));
-            tampilkanNotif("✅ Transaksi Sukses!");
+            notify("✅ Transaksi Sukses!");
             muatTransaksi();
         }
 
         function hapusTrx(idx) {
-            if(confirm("Hapus riwayat ini?")) {
+            if(confirm("Hapus transaksi ini?")) {
                 let history = JSON.parse(localStorage.getItem('trx_history') || '[]');
                 history.splice(idx, 1);
                 localStorage.setItem('trx_history', JSON.stringify(history));
                 muatTransaksi();
-                tampilkanNotif("🗑️ Berhasil Dihapus");
+                notify("🗑️ Dihapus!");
             }
         }
 
-        function checkNewTransaction() {
+        function checkNew() {
             const history = JSON.parse(localStorage.getItem('trx_history') || '[]');
             if (history.length > lastTrxCount) { 
-                tampilkanNotif("🔔 Transaksi Baru!"); 
+                notify("🔔 Ada Transaksi Baru!"); 
                 muatTransaksi(); 
             }
         }
 
-        function tampilkanLayarBlokir(username, tipe) {
-            let waText = `Halo owner saya ${username} kena ban...`;
+        function tampilkanBlokir(u) {
             document.getElementById('main-content').innerHTML = `
                 <div class="ban-container">
-                    <h1 style="color:var(--red);">AKUN DI BAN!</h1>
-                    <a href="https://wa.me/${waNumber}?text=${encodeURIComponent(waText)}" class="btn btn-blue" style="text-decoration:none; background:var(--green); color:white;">HUBUNGI OWNER</a>
+                    <h1 style="color:var(--red);">AKUN DIBLOKIR</h1>
+                    <p>Akun <b>${u}</b> tidak memiliki izin akses.</p>
+                    <a href="https://wa.me/${waNumber}?text=Halo+owner+akun+${u}+terkena+banned" class="btn btn-blue" style="text-decoration:none; display:inline-block; background:var(--green); color:white;">HUBUNGI OWNER</a>
                 </div>`;
         }
     </script>
