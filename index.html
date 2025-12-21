@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Store - Payment</title>
+    <title>Rayy Store - Topup & Digital</title>
     <script>
-        // SENSOR OTOMATIS: Mengecek status dari panel Dev
-        if (localStorage.getItem('tokoLocked') === 'offline') {
+        // 1. CEK STATUS TOKO (OFFLINE/ONLINE)
+        if (localStorage.getItem('toko_locked') === 'true') {
             document.write(`
-                <body style="background:#0f172a; color:white; display:flex; align-items:center; justify-content:center; min-height:100vh; font-family:sans-serif; text-align:center; margin:0; padding:20px; box-sizing:border-box;">
-                    <div style="background:#1e293b; padding:40px 20px; border-radius:20px; max-width:400px; width:100%; border: 2px solid #38bdf8; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                        <h1 style="font-size:4rem; margin:0;">⚠️</h1>
-                        <h2 style="color:#38bdf8; font-size:1.3rem; line-height:1.6; margin-top:20px; text-transform:uppercase;">
-                            ALL PEMBAYARAN DI ATAS JAM 9 MALAM AKAN DI PROSES BESOK JAM 9 PAGI
-                        </h2>
+                <body style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center; padding:20px;">
+                    <div style="border:2px solid #ef4444; padding:30px; border-radius:20px; background:rgba(239,68,68,0.1);">
+                        <h1 style="color:#ef4444;">TOKO SEDANG TUTUP</h1>
+                        <p>Kami sedang offline. Silakan kembali lagi nanti jam 09:00 Pagi.</p>
                     </div>
                 </body>
             `);
@@ -21,32 +19,106 @@
         }
     </script>
     <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: #1e293b; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px; border: none; background: #334155; color: white; font-size: 18px; text-align: center; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; border-radius: 10px; border: none; background: #38bdf8; color: #0f172a; font-weight: bold; font-size: 16px; cursor: pointer; }
+        :root { --primary: #38bdf8; --bg: #0b1120; --card: #1e293b; --text: #f1f5f9; --green: #22c55e; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: auto; }
+        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; }
+        
+        h1 { font-size: 1.5rem; text-align: center; color: var(--primary); margin-bottom: 5px; }
+        p.sub { text-align: center; font-size: 0.8rem; opacity: 0.6; margin-bottom: 30px; }
+
+        label { display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 8px; color: var(--primary); }
+        input, select { 
+            width: 100%; padding: 15px; margin-bottom: 20px; background: #0f172a; 
+            border: 1px solid #334155; color: white; border-radius: 12px; box-sizing: border-box; outline: none;
+        }
+
+        .btn-order { 
+            width: 100%; padding: 18px; background: var(--primary); color: var(--bg); 
+            border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase;
+        }
+        .btn-order:active { transform: scale(0.98); }
+
+        #orderStatus { 
+            display: none; margin-top: 20px; padding: 20px; border-radius: 15px; 
+            background: rgba(34, 197, 94, 0.1); border: 1px solid var(--green); text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2 style="color: #38bdf8;">Rayy Store</h2>
-        <p>Masukkan Nominal Pembayaran</p>
-        <input type="number" id="amount" placeholder="Contoh: 10000">
-        <button onclick="bayar()">BAYAR SEKARANG</button>
+
+    <div class="container">
+        <h1>RAYY STORE</h1>
+        <p class="sub">Proses Cepat & Aman Terpercaya</p>
+
+        <div class="card" id="formOrder">
+            <label>NAMA / USERNAME</label>
+            <input type="text" id="custName" placeholder="Masukkan nama Anda...">
+
+            <label>PILIH LAYANAN</label>
+            <select id="layanan">
+                <option value="10000">Topup 10k - Rp 10.000</option>
+                <option value="20000">Topup 20k - Rp 20.000</option>
+                <option value="50000">Topup 50k - Rp 50.000</option>
+                <option value="100000">Topup 100k - Rp 100.000</option>
+            </select>
+
+            <label>NOMOR TUJUAN (ID/WA)</label>
+            <input type="number" id="targetId" placeholder="Contoh: 08123xxx atau ID Game">
+
+            <button class="btn-order" onclick="buatPesanan()">PESAN SEKARANG</button>
+        </div>
+
+        <div id="orderStatus">
+            <h3 style="color:var(--green); margin:0;">PESANAN TERKIRIM!</h3>
+            <p style="font-size:0.8rem;">Silakan tunggu konfirmasi admin di WhatsApp.</p>
+            <button class="btn-order" style="background:#25d366; color:white; margin-top:10px;" onclick="keWA()">CHAT ADMIN (WA)</button>
+        </div>
     </div>
+
     <script>
-        function bayar() {
-            const amount = document.getElementById('amount').value;
-            if (!amount || amount < 1000) return alert("Minimal Rp 1.000");
-            const orderId = "RAYY" + Date.now();
-            const history = JSON.parse(localStorage.getItem('trx_history') || '[]');
-            history.push({ 
-                orderId, amount, 
-                date: new Date().toLocaleString('id-ID'), 
-                status: 'Pending' 
-            });
+        function buatPesanan() {
+            const nama = document.getElementById('custName').value.trim();
+            const harga = document.getElementById('layanan').value;
+            const target = document.getElementById('targetId').value.trim();
+
+            if(!nama || !target) {
+                alert("Mohon isi semua data!");
+                return;
+            }
+
+            // 2. CEK APAKAH USER DIBAN (SINKRON DENGAN DEV)
+            let banned = JSON.parse(localStorage.getItem('sys_banned_list') || '[]');
+            if (banned.includes(nama)) {
+                alert("AKUN ANDA DIBLOKIR! Tidak dapat melakukan pemesanan.");
+                return;
+            }
+
+            // 3. BUAT DATA TRANSAKSI (SINKRON DENGAN ADMIN)
+            const orderId = "RAYY-" + Math.floor(Date.now() / 1000);
+            const newTrx = {
+                orderId: orderId,
+                user: nama,
+                amount: harga,
+                target: target,
+                status: "Pending",
+                date: new Date().toLocaleString('id-ID')
+            };
+
+            // Simpan ke database trx_history
+            let history = JSON.parse(localStorage.getItem('trx_history') || '[]');
+            history.push(newTrx);
             localStorage.setItem('trx_history', JSON.stringify(history));
-            window.location.href = `https://app.pakasir.com/pay/rayy-store/${amount}?order_id=${orderId}`;
+
+            // Sembunyikan form, tampilkan status
+            document.getElementById('formOrder').style.display = 'none';
+            document.getElementById('orderStatus').style.display = 'block';
+        }
+
+        function keWA() {
+            const nama = document.getElementById('custName').value;
+            const msg = `Halo Admin Rayy, saya ${nama} sudah membuat pesanan di web. Mohon dikonfirmasi ya!`;
+            window.location.href = "https://wa.me/628131172093?text=" + encodeURIComponent(msg);
         }
     </script>
 </body>
