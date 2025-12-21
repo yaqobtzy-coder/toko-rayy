@@ -3,410 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard Pro - Rayy Server</title>
-    
+    <title>Admin Dashboard - Transaction Core</title>
     <script>
-        if (localStorage.getItem('tokoLocked') === 'offline') {
+        // SINKRONISASI STATUS SERVER DARI DEV
+        if (localStorage.getItem('toko_locked') === 'true') {
             document.write(`
-                <body style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:'Segoe UI',sans-serif; text-align:center; margin:0; padding:20px;">
-                    <div style="border: 2px solid #ef4444; padding: 40px; border-radius: 30px; background: rgba(239, 68, 68, 0.1);">
-                        <h1 style="color:#ef4444; font-size: 3rem;">OFFLINE</h1>
-                        <p style="font-size: 1.2rem; opacity: 0.8;">Server sedang dalam pemeliharaan atau jam operasional tutup.</p>
-                        <p style="font-weight: bold; color: #38bdf8;">KEMBALI PADA JAM 09:00 PAGI</p>
+                <body style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center;">
+                    <div style="border: 2px solid #ef4444; padding: 30px; border-radius: 20px;">
+                        <h1 style="color:#ef4444; margin:0;">SERVER OFFLINE</h1>
+                        <p style="opacity:0.7;">Kembali lagi besok jam 09:00 Pagi.</p>
                     </div>
                 </body>
             `);
             window.stop();
         }
     </script>
-
     <style>
-        /* --- CORE DESIGN SYSTEM --- */
-        :root {
-            --primary: #38bdf8;
-            --bg: #0b1120;
-            --card: #1e293b;
-            --dark-card: #0f172a;
-            --red: #ef4444;
-            --green: #22c55e;
-            --orange: #f59e0b;
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* --- ANIMASI SPLASH SCREEN --- */
-        #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 99999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transition: 1s ease-in-out;
-        }
-        .splash-logo {
-            width: 120px; height: 120px; background: var(--primary); border-radius: 30px;
-            display: flex; align-items: center; justify-content: center; font-size: 4rem;
-            font-weight: 900; color: var(--bg); box-shadow: 0 0 50px rgba(56, 189, 248, 0.5);
-            animation: pulse 2s infinite ease-in-out;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }
-            50% { transform: scale(1.1); box-shadow: 0 0 60px rgba(56, 189, 248, 0.6); }
-            100% { transform: scale(1); box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }
-        }
-
-        /* --- UI NOTIFICATION (TOAST) --- */
-        #customToast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: var(--primary); color: var(--bg); padding: 18px 35px;
-            border-radius: 50px; font-weight: 900; z-index: 100001;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        #customToast.show { top: 40px; }
-
-        /* --- LAYOUTS --- */
-        .main-wrapper {
-            max-width: 550px;
-            margin: auto;
-            padding: 25px;
-            min-height: 100vh;
-            box-sizing: border-box;
-            display: none; /* Muncul setelah splash */
-        }
-
-        .card {
-            background: var(--card);
-            border-radius: 28px;
-            padding: 25px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.05);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            transition: 0.3s;
-        }
-
-        /* --- STATS DASHBOARD --- */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        .stat-box {
-            background: var(--dark-card);
-            padding: 15px;
-            border-radius: 20px;
-            text-align: center;
-            border: 1px solid rgba(56, 189, 248, 0.1);
-        }
-        .stat-val { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
-        .stat-lbl { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; margin-top: 5px; }
-
-        /* --- FORM ELEMENTS --- */
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 8px; color: var(--primary); padding-left: 5px; }
-        input {
-            width: 100%;
-            padding: 18px;
-            background: var(--dark-card);
-            border: 1px solid #334155;
-            color: white;
-            border-radius: 18px;
-            box-sizing: border-box;
-            outline: none;
-            transition: 0.3s;
-            font-size: 1rem;
-        }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
-
-        .btn {
-            width: 100%;
-            padding: 18px;
-            border: none;
-            border-radius: 18px;
-            font-weight: 900;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .btn-blue { background: linear-gradient(135deg, #38bdf8, #0ea5e9); color: var(--bg); }
-        .btn-blue:active { transform: scale(0.96); }
+        :root { --primary: #38bdf8; --bg: #0b1120; --card: #1e293b; --red: #ef4444; --green: #22c55e; --text: #f1f5f9; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         
-        /* --- LIST TRANSAKSI --- */
-        .trx-item {
-            background: var(--dark-card);
-            padding: 20px;
-            border-radius: 22px;
-            margin-bottom: 15px;
-            border-left: 5px solid var(--orange);
-            position: relative;
+        #splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; transition: 0.6s;
         }
+        .splash-logo { width: 80px; height: 80px; background: var(--primary); border-radius: 20px; font-size: 2.5rem; font-weight: 900; color: var(--bg); display: flex; align-items: center; justify-content: center; }
+
+        .toast {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: var(--primary); color: var(--bg); padding: 15px 30px;
+            border-radius: 50px; font-weight: 800; z-index: 10000; transition: 0.5s;
+        }
+        .toast.show { top: 30px; }
+
+        .container { max-width: 500px; margin: auto; padding: 20px; }
+        .card { background: var(--card); border-radius: 25px; padding: 25px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .header h2 { margin: 0; color: var(--primary); font-size: 1.2rem; }
+
+        input { width: 100%; padding: 16px; margin: 10px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 15px; box-sizing: border-box; outline: none; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .btn-blue { background: var(--primary); color: var(--bg); }
+        .btn-sm { width: auto; padding: 6px 12px; font-size: 0.65rem; margin-top: 10px; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .stat-box { background: #0f172a; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid rgba(56,189,248,0.1); }
+        .stat-num { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
+        .stat-label { font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; }
+
+        .trx-item { background: #0f172a; padding: 18px; border-radius: 18px; margin-bottom: 12px; border-left: 4px solid orange; position: relative; }
         .trx-item.sukses { border-left-color: var(--green); }
-        .badge {
-            position: absolute; top: 15px; right: 15px;
-            padding: 5px 12px; border-radius: 8px; font-size: 0.65rem; font-weight: 900;
-        }
-        .badge-pending { background: rgba(245, 158, 11, 0.2); color: var(--orange); }
-        .badge-sukses { background: rgba(34, 197, 94, 0.2); color: var(--green); }
-
-        .trx-amount { font-size: 1.4rem; font-weight: 800; margin: 10px 0; }
-        .trx-info { font-size: 0.75rem; color: var(--text-dim); line-height: 1.5; }
-
-        .action-btns { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-mini { padding: 10px; font-size: 0.7rem; border-radius: 10px; flex: 1; }
-
-        /* --- BAN SCREEN --- */
-        .banned-ui { text-align: center; padding: 50px 20px; }
-        .banned-ui h1 { color: var(--red); font-size: 2.5rem; }
-
-        /* CUSTOM SCROLLBAR */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--card); border-radius: 10px; }
+        .status-tag { position: absolute; top: 15px; right: 15px; font-size: 0.6rem; padding: 3px 8px; border-radius: 5px; font-weight: bold; }
+        .tag-pending { background: rgba(255, 165, 0, 0.2); color: orange; }
+        .tag-sukses { background: rgba(34, 197, 94, 0.2); color: var(--green); }
     </style>
 </head>
 <body>
 
-    <div id="splash-screen">
-        <div class="splash-logo">R</div>
-        <p class="splash-text" id="splash-txt">Initializing System...</p>
-    </div>
+    <div id="splash"><div class="splash-logo">R</div></div>
+    <div id="toast" class="toast">Notif</div>
 
-    <div id="customToast">Pesan Sistem</div>
-
-    <div class="main-wrapper" id="app">
-        
-        <section id="view-login">
-            <div style="text-align: center; margin-bottom: 40px; margin-top: 50px;">
-                <h1 style="font-weight: 900; letter-spacing: -1px; margin: 0;">ADMIN <span style="color: var(--primary);">CORE</span></h1>
-                <p style="color: var(--text-dim); margin-top: 5px;">Silakan otentikasi identitas Anda</p>
+    <div class="container">
+        <div id="loginView" style="margin-top: 50px;">
+            <div style="text-align:center; margin-bottom:30px;">
+                <h1 style="margin:0; font-weight:900;">ADMIN <span style="color:var(--primary)">ACCESS</span></h1>
+                <p style="opacity:0.6; font-size:0.8rem;">Rayy Server Management</p>
             </div>
-            
             <div class="card">
-                <div class="input-group">
-                    <label>IDENTITAS PENGGUNA</label>
-                    <input type="text" id="inp-user" placeholder="Masukkan Username">
-                </div>
-                <div class="input-group" style="margin-top: 20px;">
-                    <label>KUNCI AKSES (PASSWORD)</label>
-                    <input type="password" id="inp-pass" placeholder="••••••••">
-                </div>
-                <button class="btn btn-blue" style="margin-top: 30px;" onclick="doLogin()">
-                    MASUK KE DASHBOARD
-                </button>
+                <input type="text" id="user" placeholder="Username">
+                <input type="password" id="pass" placeholder="Password">
+                <button class="btn btn-blue" onclick="handleLogin()">AUTHENTICATE</button>
             </div>
-            <p style="text-align: center; font-size: 0.7rem; color: var(--text-dim);">V.4.0.0 Pro - Secure Connection Enabled</p>
-        </section>
+        </div>
 
-        <section id="view-dash" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                <div>
-                    <h2 style="margin: 0; font-size: 1.5rem;">Dashboard</h2>
-                    <p style="margin: 0; font-size: 0.7rem; color: var(--text-dim);" id="display-admin-name">Memuat...</p>
-                </div>
-                <button onclick="logout()" style="background: var(--card); border: 1px solid #334155; color: white; padding: 10px 15px; border-radius: 12px; font-weight: bold; font-size: 0.7rem;">LOGOUT</button>
+        <div id="dashView" style="display: none;">
+            <div class="header">
+                <h2 id="adminName">Welcome Admin</h2>
+                <button onclick="location.reload()" style="background:none; border:1px solid #334155; color:white; padding:5px 12px; border-radius:10px; font-size:0.7rem;">LOGOUT</button>
             </div>
 
             <div class="stats-grid">
                 <div class="stat-box">
-                    <div class="stat-val" id="stat-total-trx">0</div>
-                    <div class="stat-lbl">Total Trx</div>
+                    <div class="stat-num" id="totalTrx">0</div>
+                    <div class="stat-label">Total Transaksi</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-val" id="stat-income" style="color: var(--green);">Rp 0</div>
-                    <div class="stat-lbl">Pendapatan</div>
+                    <div class="stat-num" id="income" style="color:var(--green)">Rp 0</div>
+                    <div class="stat-label">Total Income</div>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h4 style="margin: 0; text-transform: uppercase; font-size: 0.8rem; color: var(--primary);">Riwayat Transaksi Terkini</h4>
-                <span id="new-notif-dot" style="width: 10px; height: 10px; background: var(--red); border-radius: 50%; display: none;"></span>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary);">TRANSACTION LOGS</span>
+                <span onclick="loadTrx()" style="cursor:pointer; font-size:0.75rem;">🔄 Refresh</span>
             </div>
 
-            <div id="container-trx">
-                </div>
-
-            <div style="height: 50px;"></div> </section>
-
+            <div id="trxContainer"></div>
+        </div>
     </div>
 
-    <audio id="snd-notif" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
-
     <script>
-        // --- KONFIGURASI DATA ---
         const OWNER_ID = "rayy_dev";
         const OWNER_KEY = "085794";
-        let sessionUser = "";
-        let trxCacheCount = 0;
-        let failAttempt = 0;
+        let failCount = 0;
 
-        // --- CORE LOGIC ---
         window.onload = () => {
-            // Animasi Splash
-            setTimeout(() => {
-                document.getElementById('splash-txt').innerText = "Securing Connection...";
-                setTimeout(() => {
-                    document.getElementById('splash-screen').style.opacity = '0';
-                    setTimeout(() => {
-                        document.getElementById('splash-screen').style.display = 'none';
-                        document.getElementById('app').style.display = 'block';
-                    }, 1000);
-                }, 1500);
-            }, 1000);
+            setTimeout(() => { document.getElementById('splash').style.display = 'none'; }, 1500);
         };
 
-        function pushNotif(msg) {
-            const t = document.getElementById('customToast');
-            t.innerText = msg; t.classList.add('show');
+        function showToast(m) {
+            const t = document.getElementById('toast');
+            t.innerText = m; t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        function doLogin() {
-            const u = document.getElementById('inp-user').value;
-            const p = document.getElementById('inp-pass').value;
+        function handleLogin() {
+            const u = document.getElementById('user').value.trim();
+            const p = document.getElementById('pass').value.trim();
 
-            // Pengecekan Banned
-            let bannedList = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
-            if (bannedList.includes(u)) {
-                showBannedUI(u);
+            // SINKRONISASI DATA DARI DEV (sys_banned_list & sys_extra_admins)
+            let banned = JSON.parse(localStorage.getItem('sys_banned_list') || '[]');
+            let extras = JSON.parse(localStorage.getItem('sys_extra_admins') || '[]');
+
+            // Cek Banned
+            if (banned.includes(u)) {
+                alert("AKUN ANDA DIBLOKIR!");
                 return;
             }
 
-            // Pengecekan Admin (Default & Dev & Tambahan)
-            let extraAdmins = JSON.parse(localStorage.getItem('admins') || '[]');
-            let isFound = (u === "admin_rayy" && p === "rayy123") || 
-                          (u === OWNER_ID && p === OWNER_KEY) ||
-                          extraAdmins.find(x => x.user === u && x.pass === p);
+            // Validasi Kredensial
+            let match = (u === "admin_rayy" && p === "rayy123") || 
+                        (u === OWNER_ID && p === OWNER_KEY) ||
+                        extras.find(a => a.user === u && a.pass === p);
 
-            if (isFound) {
-                sessionUser = u;
-                pushNotif("Akses Terverifikasi!");
+            if (match) {
+                showToast("🔓 Access Granted");
                 
-                // Simpan Riwayat Login untuk Dev Panel
-                let logData = JSON.parse(localStorage.getItem('login_logs') || '[]');
-                logData.push({ user: u, time: new Date().toLocaleString('id-ID') });
-                localStorage.setItem('login_logs', JSON.stringify(logData.slice(-30)));
+                // Simpan Log ke Database Dev
+                let logs = JSON.parse(localStorage.getItem('sys_login_logs') || '[]');
+                logs.push({ user: u, time: new Date().toLocaleString('id-ID') });
+                localStorage.setItem('sys_login_logs', JSON.stringify(logs.slice(-30)));
 
-                // Switch View
-                document.getElementById('view-login').style.display = 'none';
-                document.getElementById('view-dash').style.display = 'block';
-                document.getElementById('display-admin-name').innerText = "Logged in as: " + u;
-                
-                renderDashboard();
-                // Real-time Update per 5 detik
-                setInterval(autoSync, 5000);
+                document.getElementById('loginView').style.display = 'none';
+                document.getElementById('dashView').style.display = 'block';
+                document.getElementById('adminName').innerText = "Hi, " + u;
+                loadTrx();
             } else {
                 if(u !== OWNER_ID) {
-                    failAttempt++;
-                    if(failAttempt >= 3) {
-                        bannedList.push(u);
-                        localStorage.setItem('bannedUsers', JSON.stringify(bannedList));
-                        showBannedUI(u);
-                    } else { pushNotif("Kredensial Salah! (" + failAttempt + "/3)"); }
-                } else { pushNotif("Password Owner Salah!"); }
+                    failCount++;
+                    if(failCount >= 3) {
+                        banned.push(u);
+                        localStorage.setItem('sys_banned_list', JSON.stringify(banned));
+                        alert("Terlalu banyak kesalahan. AKUN DIBLOKIR!");
+                    } else { showToast("❌ Login Failed! (" + failCount + "/3)"); }
+                } else { showToast("❌ Owner Password Wrong!"); }
             }
         }
 
-        function renderDashboard() {
-            const container = document.getElementById('container-trx');
+        function loadTrx() {
+            const container = document.getElementById('trxContainer');
             const data = JSON.parse(localStorage.getItem('trx_history') || '[]');
-            trxCacheCount = data.length;
-
-            // Hitung Statistik
-            let income = 0;
-            let totalSukses = 0;
-            data.forEach(t => {
-                if(t.status === 'Sukses') {
-                    income += parseInt(t.amount || 0);
-                    totalSukses++;
-                }
-            });
-
-            document.getElementById('stat-total-trx').innerText = data.length;
-            document.getElementById('stat-income').innerText = "Rp " + income.toLocaleString('id-ID');
+            
+            let totalIncome = 0;
+            data.forEach(t => { if(t.status === 'Sukses') totalIncome += parseInt(t.amount); });
+            document.getElementById('totalTrx').innerText = data.length;
+            document.getElementById('income').innerText = "Rp " + totalIncome.toLocaleString('id-ID');
 
             if (data.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:50px; color:var(--text-dim);">Tidak Ada Data Transaksi</div>`;
+                container.innerHTML = "<p style='text-align:center; opacity:0.5; margin-top:30px;'>No Transactions.</p>";
                 return;
             }
 
             container.innerHTML = "";
-            data.slice().reverse().forEach((item, idx) => {
-                const oriIdx = data.length - 1 - idx;
-                const isS = item.status === 'Sukses';
-                
+            data.slice().reverse().forEach((trx, index) => {
+                const realIdx = data.length - 1 - index;
+                const isS = trx.status === 'Sukses';
                 container.innerHTML += `
                     <div class="trx-item ${isS ? 'sukses' : ''}">
-                        <span class="badge ${isS ? 'badge-sukses' : 'badge-pending'}">${item.status.toUpperCase()}</span>
-                        <div class="trx-info">Order ID: ${item.orderId}</div>
-                        <div class="trx-amount">Rp ${parseInt(item.amount).toLocaleString('id-ID')}</div>
-                        <div class="trx-info">
-                            <b>Waktu:</b> ${item.date || '-'}<br>
-                            <b>Pengguna:</b> ${item.user || 'Guest User'}<br>
-                            <b>Metode:</b> ${item.method || 'QRIS'}
+                        <span class="status-tag ${isS ? 'tag-sukses' : 'tag-pending'}">${trx.status.toUpperCase()}</span>
+                        <div style="font-weight:bold; font-size:1.1rem; color:var(--primary);">Rp ${parseInt(trx.amount).toLocaleString('id-ID')}</div>
+                        <div style="font-size:0.7rem; color:#94a3b8; margin-top:5px;">ID: ${trx.orderId} | User: ${trx.user || 'Guest'}</div>
+                        <div style="margin-top:10px; display:flex; gap:10px;">
+                            ${!isS ? `<button class="btn btn-blue btn-sm" onclick="confirmTrx(${realIdx})">CONFIRM</button>` : ''}
+                            <button class="btn btn-red btn-sm" style="background:#334155;" onclick="delTrx(${realIdx})">DELETE</button>
                         </div>
-                        <div class="action-btns">
-                            ${!isS ? `<button class="btn btn-blue btn-mini" onclick="approveTrx(${oriIdx})">KONFIRMASI</button>` : ''}
-                            <button class="btn btn-red btn-mini" onclick="deleteTrx(${oriIdx})">HAPUS</button>
-                        </div>
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
-        function approveTrx(index) {
+        function confirmTrx(idx) {
             let data = JSON.parse(localStorage.getItem('trx_history') || '[]');
-            data[index].status = "Sukses";
+            data[idx].status = "Sukses";
             localStorage.setItem('trx_history', JSON.stringify(data));
-            pushNotif("Transaksi Berhasil Dikonfirmasi!");
-            renderDashboard();
+            showToast("✅ Confirmed!");
+            loadTrx();
         }
 
-        function deleteTrx(index) {
-            if (confirm("Hapus catatan transaksi ini selamanya?")) {
+        function delTrx(idx) {
+            if(confirm("Hapus transaksi ini?")) {
                 let data = JSON.parse(localStorage.getItem('trx_history') || '[]');
-                data.splice(index, 1);
+                data.splice(idx, 1);
                 localStorage.setItem('trx_history', JSON.stringify(data));
-                pushNotif("Data Dihapus!");
-                renderDashboard();
+                loadTrx();
             }
-        }
-
-        function autoSync() {
-            const data = JSON.parse(localStorage.getItem('trx_history') || '[]');
-            if (data.length > trxCacheCount) {
-                document.getElementById('snd-notif').play();
-                pushNotif("🔔 Transaksi Baru Diterima!");
-                renderDashboard();
-            }
-        }
-
-        function logout() {
-            if(confirm("Yakin ingin keluar?")) location.reload();
-        }
-
-        function showBannedUI(user) {
-            document.getElementById('app').innerHTML = `
-                <div class="banned-ui">
-                    <h1>ACCESS DENIED</h1>
-                    <div class="card" style="border-color: var(--red);">
-                        <p>Akun <b>${user}</b> telah diblokir secara permanen oleh sistem keamanan.</p>
-                        <p style="font-size: 0.8rem; color: var(--text-dim);">Silakan hubungi Developer (Rayy) untuk proses pemulihan akun.</p>
-                    </div>
-                    <button class="btn btn-blue" onclick="location.href='https://wa.me/628131172093'">HUBUNGI DEVELOPER</button>
-                </div>
-            `;
         }
     </script>
 </body>
