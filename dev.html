@@ -89,8 +89,14 @@
             </div>
 
             <div class="card">
-                <span class="label">User Diblokir (Ban System)</span>
-                <div id="banList"></div>
+                <span class="label">Manajemen Ban Manual</span>
+                <input type="text" id="banUserManual" placeholder="Ketik Username untuk Ban">
+                <button class="btn btn-red" onclick="banManual()">BAN USER SEKARANG</button>
+                
+                <div style="margin-top:20px;">
+                    <span class="label">Daftar User Terblokir</span>
+                    <div id="banList"></div>
+                </div>
             </div>
 
             <div class="card">
@@ -166,10 +172,26 @@
             // Render Banned
             const bl = document.getElementById('banList');
             let banned = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
-            bl.innerHTML = banned.length ? "" : "<small>Kosong.</small>";
+            bl.innerHTML = banned.length ? "" : "<small>Tidak ada user yang diban.</small>";
             banned.forEach((u, i) => {
-                bl.innerHTML += `<div class="list-item"><span>${u}</span><button class="btn btn-blue btn-sm" onclick="unban(${i})">Unban</button></div>`;
+                bl.innerHTML += `<div class="list-item"><span>${u}</span><button class="btn btn-blue btn-sm" onclick="unban(${i})">Buka Ban (Unban)</button></div>`;
             });
+        }
+
+        // FUNGSI BAN MANUAL
+        function banManual() {
+            const user = document.getElementById('banUserManual').value;
+            if(!user) return notify("Masukkan username!");
+            let banned = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
+            if(!banned.includes(user)) {
+                banned.push(user);
+                localStorage.setItem('bannedUsers', JSON.stringify(banned));
+                notify("🚫 " + user + " Berhasil Diban!");
+                document.getElementById('banUserManual').value = "";
+                renderAll();
+            } else {
+                notify("User sudah diban!");
+            }
         }
 
         function addAdmin() {
@@ -191,8 +213,9 @@
 
         function unban(i) {
             let b = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
+            let user = b[i];
             b.splice(i, 1); localStorage.setItem('bannedUsers', JSON.stringify(b));
-            renderAll(); notify("🔓 User Dipulihkan");
+            renderAll(); notify("🔓 " + user + " Dipulihkan");
         }
 
         function resetTrx() {
