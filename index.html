@@ -3,67 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Payment - Official Transaction System</title>
+    <title>Rayy Payment - Official System</title>
     
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        // Firebase Configuration Rayy [2025-12-21]
-        const firebaseConfig = { 
-            databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" 
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // SYSTEM: SERVER MONITOR (REAL-TIME)
-        onValue(ref(db, 'settings/toko_locked'), (snapshot) => {
-            if (snapshot.val() === true) {
-                document.body.innerHTML = `
-                <div class="offline-overlay">
-                    <div class="offline-box">
-                        <div class="alert-icon">⚠️</div>
-                        <h1>SERVER OFFLINE</h1>
-                        <p>Maaf Rayy, sistem pembayaran sedang ditutup sementara oleh Admin. Silakan kembali beberapa saat lagi.</p>
-                        <div class="offline-footer">RAYY PAYMENT SYSTEM v2.0</div>
-                    </div>
-                </div>`;
-            }
-        });
-
-        // SYSTEM: TRANSACTION LOGIC
-        window.prosesPembayaran = function() {
-            const user = document.getElementById('username').value.trim();
-            const nominal = document.getElementById('amount').value;
-            
-            if(!user || !nominal) {
-                showToast("Harap isi semua kolom!");
-                return;
-            }
-
-            // Real-time Banned Check
-            onValue(ref(db, 'banned_users/' + user), (snapshot) => {
-                if (snapshot.exists()) {
-                    showToast("❌ AKUN ANDA DIBLOKIR!");
-                } else {
-                    // Save to Firebase History
-                    push(ref(db, 'transactions'), {
-                        nama: user,
-                        jumlah: nominal,
-                        waktu: new Date().toLocaleString(),
-                        status: "Success"
-                    }).then(() => {
-                        // Redirect to Pakasir
-                        const orderId = "RY-" + Date.now();
-                        window.location.href = `https://app.pakasir.com/pay/rayy-store/${nominal}?order_id=${orderId}`;
-                    });
-                }
-            }, { onlyOnce: true });
-        }
-    </script>
-
     <style>
-        /* --- RAYY DESIGN SYSTEM (200+ LINES OF CSS) --- */
         :root {
             --primary: #38bdf8;
             --primary-glow: rgba(56, 189, 248, 0.4);
@@ -75,18 +17,12 @@
             --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -95,333 +31,139 @@
             background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0b1120 100%);
         }
 
-        /* SPLASH SCREEN STYLING */
+        /* SPLASH SCREEN */
         #splash {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.8s ease-in-out;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; transition: 0.8s ease-in-out;
         }
-
-        .logo-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
         .logo-box {
-            width: 120px;
-            height: 120px;
-            background: var(--primary);
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            font-weight: 900;
-            color: var(--bg);
-            box-shadow: 0 0 50px var(--primary-glow);
+            width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
+            display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
+            font-weight: 900; color: var(--bg); box-shadow: 0 0 40px var(--primary-glow);
             animation: pulse 2s infinite ease-in-out;
-            z-index: 2;
         }
-
-        .logo-ring {
-            position: absolute;
-            width: 140px;
-            height: 140px;
-            border: 2px solid var(--primary);
-            border-radius: 35px;
-            animation: rotate 4s linear infinite;
-            opacity: 0.3;
-        }
-
         @keyframes pulse {
             0%, 100% { transform: scale(1); box-shadow: 0 0 40px var(--primary-glow); }
-            50% { transform: scale(1.05); box-shadow: 0 0 70px var(--primary-glow); }
+            50% { transform: scale(1.05); box-shadow: 0 0 60px var(--primary-glow); }
         }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .splash-text {
-            margin-top: 30px;
-            font-weight: 800;
-            letter-spacing: 5px;
-            font-size: 0.9rem;
-            color: var(--primary);
-            text-transform: uppercase;
-            animation: blink 1.5s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* MAIN UI CONTAINER */
+        /* MAIN UI */
         .container {
-            width: 100%;
-            max-width: 460px;
-            padding: 30px;
-            opacity: 0;
-            transform: translateY(30px);
+            width: 100%; max-width: 460px; padding: 30px;
+            opacity: 0; transform: translateY(30px);
             transition: 1.2s cubic-bezier(0.19, 1, 0.22, 1);
-            z-index: 10;
         }
+        .container.visible { opacity: 1; transform: translateY(0); }
 
-        .container.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .main-header {
-            text-align: center;
-            margin-bottom: 35px;
-        }
-
-        .main-header h1 {
-            font-size: 2.2rem;
-            font-weight: 900;
-            letter-spacing: -1px;
-        }
-
-        .main-header h1 span {
-            color: var(--primary);
-            text-shadow: 0 0 20px var(--primary-glow);
-        }
-
-        /* CARD STYLING */
         .card {
-            background: var(--card);
-            border-radius: 40px;
-            padding: 45px 35px;
+            background: var(--card); border-radius: 40px; padding: 45px 35px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
         }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 5px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-        }
-
-        .input-group {
-            margin-bottom: 30px;
-            position: relative;
-        }
-
+        .input-group { margin-bottom: 25px; }
         .input-group label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            padding-left: 5px;
+            display: block; font-size: 0.75rem; font-weight: 800;
+            color: var(--primary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 2px;
         }
 
         input {
-            width: 100%;
-            padding: 22px;
-            background: var(--dark);
-            border: 2px solid transparent;
-            color: white;
-            border-radius: 22px;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: var(--transition);
+            width: 100%; padding: 20px; background: var(--dark); border: 2px solid transparent;
+            color: white; border-radius: 20px; font-size: 1rem; transition: var(--transition);
         }
-
-        input:focus {
-            border-color: var(--primary);
-            background: #0b1120;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
-        }
+        input:focus { border-color: var(--primary); background: #0b1120; }
 
         .btn-pay {
-            width: 100%;
-            padding: 24px;
-            border: none;
-            border-radius: 24px;
-            background: var(--primary);
-            color: var(--bg);
-            font-weight: 900;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: var(--transition);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 10px;
-            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);
+            width: 100%; padding: 22px; border: none; border-radius: 22px;
+            background: var(--primary); color: var(--bg); font-weight: 900;
+            cursor: pointer; transition: var(--transition); text-transform: uppercase;
         }
+        .btn-pay:hover { transform: translateY(-5px); box-shadow: 0 10px 25px var(--primary-glow); }
 
-        .btn-pay:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px var(--primary-glow);
-            filter: brightness(1.1);
+        /* OVERLAY TUTUP / BANNED */
+        .full-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); display: flex; align-items: center; justify-content: center;
+            z-index: 10000; padding: 25px; text-align: center;
         }
-
-        .btn-pay:active {
-            transform: scale(0.98);
+        .msg-box {
+            border: 2px solid var(--red); padding: 40px 30px; border-radius: 35px;
+            background: rgba(239, 68, 68, 0.05); max-width: 400px;
         }
-
-        /* OFFLINE SCREEN */
-        .offline-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            padding: 20px;
-        }
-
-        .offline-box {
-            background: rgba(239, 68, 68, 0.05);
-            border: 2px solid var(--red);
-            padding: 50px 30px;
-            border-radius: 40px;
-            text-align: center;
-            max-width: 400px;
-            animation: slideUp 0.6s ease-out;
-        }
-
-        .alert-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: var(--red);
-        }
-
-        .offline-box h1 {
-            color: var(--red);
-            font-size: 2rem;
-            font-weight: 900;
-            margin-bottom: 15px;
-        }
-
-        .offline-box p {
-            opacity: 0.8;
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-
-        .offline-footer {
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 2px;
-            opacity: 0.4;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* TOAST NOTIFICATION */
-        #toast {
-            position: fixed;
-            bottom: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary);
-            color: var(--bg);
-            padding: 18px 40px;
-            border-radius: 50px;
-            font-weight: 800;
-            z-index: 99999;
-            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-        }
-
-        #toast.show { bottom: 40px; }
-
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            font-size: 0.8rem;
-            opacity: 0.4;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
+        .msg-box h1 { color: var(--red); margin-bottom: 15px; font-weight: 900; }
+        .msg-box p { line-height: 1.6; opacity: 0.9; font-size: 1.1rem; }
     </style>
 </head>
 <body>
 
     <div id="splash">
-        <div class="logo-wrapper">
-            <div class="logo-ring"></div>
-            <div class="logo-box">R</div>
-        </div>
-        <p class="splash-text">RayyStore Payment</p>
+        <div class="logo-box">R</div>
+        <p style="margin-top:20px; color:var(--primary); letter-spacing:3px; font-weight:800;">RAYY PAYMENT</p>
     </div>
-
-    <div id="toast">Notifikasi</div>
 
     <div class="container" id="main-content">
-        <div class="main-header">
-            <h1>RAYY <span>PAYMENT</span></h1>
-            <p style="font-size: 0.8rem; opacity: 0.5; margin-top: 5px; font-weight: 600;">SECURE GATEWAY v2.0</p>
-        </div>
-        
+        <h1 style="text-align:center; margin-bottom:30px; font-weight:900;">RAYY <span style="color:var(--primary);">STORE</span></h1>
         <div class="card">
             <div class="input-group">
-                <label>USERNAME / ID PEMBELI</label>
-                <input type="text" id="username" placeholder="Masukkan Nama Lengkap">
+                <label>ID PEMBELI / NAMA</label>
+                <input type="text" id="username" placeholder="Masukkan ID">
             </div>
-
             <div class="input-group">
-                <label>NOMINAL TRANSAKSI (RP)</label>
-                <input type="number" id="amount" placeholder="Minimal Rp 1.000">
+                <label>NOMINAL (RP)</label>
+                <input type="number" id="amount" placeholder="Contoh: 10000">
             </div>
-
-            <button class="btn-pay" onclick="prosesPembayaran()">Bayar Sekarang</button>
-        </div>
-
-        <div class="footer">
-            &copy; 2025 RAYY DEVELOPMENT • ALL RIGHTS RESERVED
+            <button class="btn-pay" onclick="prosesPembayaran()">BAYAR SEKARANG</button>
         </div>
     </div>
 
-    <script>
-        // UI INTERACTION LOGIC
-        window.onload = () => {
-            // Hide splash and show content
-            setTimeout(() => {
-                const splash = document.getElementById('splash');
-                splash.style.opacity = '0';
-                
-                setTimeout(() => {
-                    splash.style.display = 'none';
-                    document.getElementById('main-content').classList.add('visible');
-                    // Unlock scroll after splash
-                    document.body.style.overflow = 'auto';
-                }, 800);
-            }, 3000); // 3 seconds splash for premium feel
-        };
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+        const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // CEK STATUS TOKO (SERVER TUTUP)
+        onValue(ref(db, 'settings/toko_locked'), (snap) => {
+            if (snap.val() === true) {
+                document.body.innerHTML = `
+                <div class="full-overlay">
+                    <div class="msg-box" style="border-color: #facc15; background: rgba(250, 204, 21, 0.05);">
+                        <h1 style="color:#facc15;">SERVER TUTUP</h1>
+                        <p style="color:#fff;">Server tutup pukul 21:00 WIB akan di buka lagi pukul 09:00 WIB, yang terlanjur bayar akan di proses besok hari.</p>
+                    </div>
+                </div>`;
+            }
+        });
+
+        window.prosesPembayaran = function() {
+            const user = document.getElementById('username').value.trim();
+            const nominal = document.getElementById('amount').value;
+            if(!user || !nominal) return alert("Isi data!");
+
+            onValue(ref(db, 'banned_users/' + user), (snap) => {
+                if (snap.exists()) {
+                    alert("Akun anda telah di blokir oleh Developer/Owner Rayy!");
+                } else {
+                    push(ref(db, 'transactions'), {
+                        nama: user, jumlah: nominal, waktu: new Date().toLocaleString()
+                    }).then(() => {
+                        window.location.href = `https://app.pakasir.com/pay/rayy-store/${nominal}?order_id=RY-${Date.now()}`;
+                    });
+                }
+            }, { onlyOnce: true });
         }
 
-        // Prevent back button after payment start
-        window.onbeforeunload = function() {
-            // Add custom logic if needed
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('splash').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('splash').style.display = 'none';
+                    document.getElementById('main-content').classList.add('visible');
+                }, 800);
+            }, 2500);
         };
     </script>
 </body>
