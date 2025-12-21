@@ -3,36 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Rayy - Official</title>
+    <title>Rayy Payment - Official System</title>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
+        // Konfigurasi Database Rayy
+        const firebaseConfig = { 
+            databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" 
+        };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // 1. CEK SERVER OFFLINE (REMOTE CONTROL)
-        onValue(ref(db, 'settings/toko_locked'), (snapshot) => {
+        // LOGIKA MATIKAN SERVER DARI JARAK JAUH
+        const statusRef = ref(db, 'settings/toko_locked');
+        onValue(statusRef, (snapshot) => {
             if (snapshot.val() === true) {
-                document.body.innerHTML = `<div style="background:#0b1120; color:white; height:100vh; display:flex; align-items:center; justify-content:center; text-align:center; font-family:sans-serif;"><div><h1 style="color:#ef4444;">SERVER OFFLINE</h1><p>Maaf, pembayaran sedang ditutup oleh Admin.</p></div></div>`;
+                document.body.innerHTML = `
+                <div style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center; margin:0; padding:20px;">
+                    <div style="border: 2px solid #ef4444; padding: 40px; border-radius: 30px; background: rgba(239, 68, 68, 0.1); max-width:450px;">
+                        <h1 style="color:#ef4444; font-size: 2.5rem; margin:0;">SERVER OFFLINE</h1>
+                        <p style="opacity: 0.9; margin-top:15px; line-height:1.6;">Web ini telah dimatikan sementara oleh Admin.</p>
+                        <div style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.05); border-radius:15px; font-size:0.85rem; border:1px dashed #ef4444;">
+                            <span style="color:#ef4444; font-weight:bold;">[PENTING]</span><br>
+                            TRANSAKSI ANDA AKAN DIPROSES SAAT SERVER KEMBALI ONLINE.
+                        </div>
+                    </div>
+                </div>`;
             }
         });
 
-        // 2. FUNGSI CEK BAN SAAT MAU BAYAR
-        window.processPayment = function() {
+        // FUNGSI CEK BAN SEBELUM BAYAR
+        window.cekAndBayar = function() {
             const user = document.getElementById('username').value.trim();
             const nominal = document.getElementById('amount').value;
             
-            if(!user || !nominal) return alert("Lengkapi data!");
+            if(!user || !nominal) return alert("Harap isi semua data!");
 
-            // Cek ke Firebase apakah user ini di-ban
             onValue(ref(db, 'banned_users/' + user), (snapshot) => {
                 if (snapshot.exists()) {
-                    alert("AKUN ANDA TELAH DI-BAN! Anda tidak bisa melakukan pembayaran.");
+                    alert("⚠️ AKUN ANDA DIBLOKIR! Silakan hubungi Rayy.");
                 } else {
-                    // Jika tidak di-ban, lanjut ke Pakasir
                     const orderId = "RY-" + Date.now();
                     window.location.href = `https://app.pakasir.com/pay/rayy-store/${nominal}?order_id=${orderId}`;
                 }
@@ -41,47 +53,176 @@
     </script>
 
     <style>
-        :root { --primary: #38bdf8; --bg: #0b1120; --card: #141b2d; --text: #f8fafc; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; }
-        
-        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s; }
-        .logo-box { width: 100px; height: 100px; background: var(--primary); border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; font-weight: 900; color: var(--bg); box-shadow: 0 0 50px rgba(56, 189, 248, 0.4); }
+        /* CSS ASLI KAMU (Full Version) */
+        :root {
+            --primary: #38bdf8;
+            --bg: #0b1120;
+            --card: #141b2d;
+            --text: #f8fafc;
+        }
 
-        #main-app { max-width: 500px; margin: auto; padding: 25px; padding-top: 60px; opacity: 0; transition: 1s; }
-        .visible { opacity: 1 !important; }
-        
-        .card { background: var(--card); border-radius: 35px; padding: 35px; border: 1px solid rgba(255,255,255,0.05); }
-        input { width: 100%; padding: 18px; background: #1e293b; border: none; color: white; border-radius: 15px; margin: 10px 0 20px; outline: none; box-sizing: border-box; }
-        .btn-pay { width: 100%; padding: 20px; border: none; border-radius: 20px; background: var(--primary); color: var(--bg); font-weight: 900; cursor: pointer; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; transition: 0.8s ease-in-out;
+        }
+
+        .logo-box {
+            width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
+            display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
+            font-weight: 900; color: var(--bg); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(56, 189, 248, 0.6); }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 25px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: 1s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 35px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: -1px;
+        }
+
+        .title span { color: var(--primary); }
+
+        .input-group { margin-bottom: 25px; }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 20px;
+            background: #1e293b;
+            border: 2px solid transparent;
+            color: white;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            background: #0f172a;
+        }
+
+        .btn-pay {
+            width: 100%;
+            padding: 22px;
+            border: none;
+            border-radius: 22px;
+            background: var(--primary);
+            color: var(--bg);
+            font-weight: 900;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .btn-pay:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.8rem;
+            opacity: 0.5;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
 
-    <div id="splash-screen">
+    <div id="splash">
         <div class="logo-box">R</div>
-        <p style="margin-top:20px; font-weight:800; letter-spacing:4px;">PAYMENT RAYY</p>
+        <p style="margin-top: 25px; font-weight: 800; letter-spacing: 4px; font-size: 0.9rem;">PAYMENT RAYY</p>
     </div>
 
-    <div id="main-app">
-        <h1 style="text-align:center; margin-bottom:30px;">RAYY <span style="color:var(--primary);">PAYMENT</span></h1>
+    <div class="container" id="main-content">
+        <div class="title">RAYY <span>PAYMENT</span></div>
+        
         <div class="card">
-            <label style="font-size:0.75rem; color:var(--primary); font-weight:800;">USERNAME</label>
-            <input type="text" id="username" placeholder="Masukkan Nama">
-            
-            <label style="font-size:0.75rem; color:var(--primary); font-weight:800;">NOMINAL (RP)</label>
-            <input type="number" id="amount" placeholder="Contoh: 22000">
+            <div class="input-group">
+                <label>Username / ID</label>
+                <input type="text" id="username" placeholder="Masukkan Nama Anda">
+            </div>
 
-            <button class="btn-pay" onclick="processPayment()">PROSES PEMBAYARAN</button>
+            <div class="input-group">
+                <label>Nominal Topup (Rp)</label>
+                <input type="number" id="amount" placeholder="Contoh: 15000">
+            </div>
+
+            <button class="btn-pay" onclick="cekAndBayar()">Proses Pembayaran</button>
+        </div>
+
+        <div class="footer">
+            SECURE PAYMENT SYSTEM BY RAYY DEV
         </div>
     </div>
 
     <script>
+        // Animasi Pembuka
         window.onload = () => {
             setTimeout(() => {
-                document.getElementById('splash-screen').style.opacity = '0';
+                document.getElementById('splash').style.opacity = '0';
                 setTimeout(() => {
-                    document.getElementById('splash-screen').style.display = 'none';
-                    document.getElementById('main-app').classList.add('visible');
+                    document.getElementById('splash').style.display = 'none';
+                    document.getElementById('main-content').classList.add('visible');
+                    document.body.style.overflow = 'auto';
                 }, 800);
             }, 2500);
         };
