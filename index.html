@@ -9,9 +9,15 @@
         if (localStorage.getItem('toko_locked') === 'true') {
             document.write(`
                 <body style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center; margin:0; padding:20px;">
-                    <div style="border: 2px solid #ef4444; padding: 40px; border-radius: 30px; background: rgba(239, 68, 68, 0.1); max-width:400px;">
+                    <div style="border: 2px solid #ef4444; padding: 40px; border-radius: 30px; background: rgba(239, 68, 68, 0.1); max-width:450px;">
                         <h1 style="color:#ef4444; font-size: 2.5rem; margin:0;">SERVER OFFLINE</h1>
-                        <p style="opacity: 0.8; margin-top:15px;">Sistem sedang dinonaktifkan sementara oleh Developer.</p>
+                        <p style="opacity: 0.9; margin-top:15px; line-height:1.6;">
+                            Web ini telah dimatikan, akan dinyalakan besok pagi pukul 09:00 WIB.
+                        </p>
+                        <div style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.05); border-radius:15px; font-size:0.85rem; border:1px dashed #ef4444;">
+                            <span style="color:#ef4444; font-weight:bold;">[PENTING]</span><br>
+                            BAGI YANG TELAH TF AKAN DI KONFIRMASI BESOK PAGI DAN JANGAN LUPA SS BUKTI TF KIRIM KE RAYY
+                        </div>
                     </div>
                 </body>
             `);
@@ -23,7 +29,7 @@
         :root {
             --primary: #38bdf8;
             --bg: #0b1120;
-            --card: #1e293b;
+            --card: #141b2d;
             --dark: #0f172a;
             --text: #f8fafc;
         }
@@ -34,86 +40,85 @@
             background-color: var(--bg);
             color: var(--text);
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            overflow: hidden; /* Dikunci saat animasi */
+            overflow: hidden;
         }
 
-        /* --- ANIMASI OPENING "PAYMENT RAYY" SMOOTH --- */
+        /* --- ANIMASI SPLASH SCREEN SESUAI FOTO --- */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 10000; display: flex;
-            align-items: center; justify-content: center;
-            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+            flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.8s ease;
         }
-        .text-container {
-            overflow: hidden;
-            display: flex;
-            align-items: center;
+
+        .logo-box {
+            width: 100px; height: 100px;
+            background: var(--primary);
+            border-radius: 25px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3.5rem; font-weight: 900; color: var(--bg);
+            box-shadow: 0 0 50px rgba(56, 189, 248, 0.4);
+            animation: pulse-scale 2s infinite ease-in-out;
         }
-        .anim-text {
-            font-size: 2.5rem; font-weight: 900; color: var(--primary);
-            text-transform: uppercase; letter-spacing: 8px;
-            transform: translateY(100px);
-            animation: slideUp 1.2s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+
+        .splash-text {
+            margin-top: 25px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            color: white;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeInText 1s forwards 0.5s;
         }
-        @keyframes slideUp {
-            to { transform: translateY(0); }
+
+        @keyframes pulse-scale {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(56, 189, 248, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(56, 189, 248, 0.6); }
         }
-        .shimmer {
-            background: linear-gradient(90deg, var(--primary), #ffffff, var(--primary));
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
-        }
-        @keyframes shine {
-            to { background-position: 200% center; }
-        }
+
+        @keyframes fadeInText { to { opacity: 1; } }
 
         /* --- MAIN UI --- */
         #main-app {
-            opacity: 0; transform: scale(0.95);
-            transition: 1.5s cubic-bezier(0.19, 1, 0.22, 1);
-            max-width: 550px; margin: auto; padding: 25px; padding-top: 80px;
+            opacity: 0; transform: translateY(20px);
+            transition: 1s cubic-bezier(0.19, 1, 0.22, 1);
+            max-width: 500px; margin: auto; padding: 25px; padding-top: 60px;
         }
-        #main-app.visible {
-            opacity: 1; transform: scale(1);
-        }
+        #main-app.visible { opacity: 1; transform: translateY(0); }
 
-        .header { text-align: center; margin-bottom: 40px; }
-        .header h1 { font-size: 2.2rem; font-weight: 900; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 2.2rem; font-weight: 900; text-transform: uppercase; }
         .header span { color: var(--primary); }
 
         .card {
             background: var(--card); border-radius: 35px; padding: 35px;
             border: 1px solid rgba(255,255,255,0.05);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
         .input-group { margin-bottom: 25px; }
-        .input-group label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .input-group label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
         
         input {
-            width: 100%; padding: 20px; background: var(--dark); border: 1px solid #334155;
-            color: white; border-radius: 20px; font-size: 1rem; outline: none; transition: 0.4s;
+            width: 100%; padding: 18px; background: #1e293b; border: 1px solid transparent;
+            color: white; border-radius: 15px; font-size: 1rem; outline: none; transition: 0.3s;
         }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 20px rgba(56, 189, 248, 0.25); transform: translateY(-2px); }
+        input:focus { border-color: var(--primary); background: #0f172a; }
 
         .btn-pay {
-            width: 100%; padding: 22px; border: none; border-radius: 22px;
-            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+            width: 100%; padding: 20px; border: none; border-radius: 20px;
+            background: var(--primary);
             color: var(--bg); font-weight: 900; font-size: 1.1rem;
-            cursor: pointer; text-transform: uppercase; transition: 0.4s;
-            box-shadow: 0 15px 30px rgba(56, 189, 248, 0.3);
-            margin-top: 10px;
+            cursor: pointer; text-transform: uppercase; transition: 0.3s;
+            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);
         }
-        .btn-pay:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(56, 189, 248, 0.5); }
-        .btn-pay:active { transform: scale(0.96); }
+        .btn-pay:hover { transform: scale(1.02); filter: brightness(1.1); }
 
-        /* --- TOAST --- */
         #toast {
             position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: var(--primary); color: var(--bg); padding: 18px 35px;
-            border-radius: 50px; font-weight: 900; z-index: 10001; transition: 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            background: var(--primary); color: var(--bg); padding: 15px 30px;
+            border-radius: 50px; font-weight: 900; z-index: 10001; transition: 0.5s;
         }
         #toast.show { top: 40px; }
     </style>
@@ -121,9 +126,8 @@
 <body>
 
     <div id="splash-screen">
-        <div class="text-container">
-            <div class="anim-text shimmer">PAYMENT RAYY</div>
-        </div>
+        <div class="logo-box">R</div>
+        <div class="splash-text">PAYMENT RAYY</div>
     </div>
 
     <div id="toast">Pesan Sistem</div>
@@ -131,7 +135,7 @@
     <div id="main-app">
         <div class="header">
             <h1>RAYY <span>PAYMENT</span></h1>
-            <p style="opacity:0.5; font-size:0.8rem; margin-top:5px; letter-spacing:1px;">SECURE CHECKOUT SYSTEM</p>
+            <p style="opacity:0.5; font-size:0.75rem; margin-top:5px;">Automatic API Pakasir & Slug System</p>
         </div>
 
         <div class="card">
@@ -146,35 +150,29 @@
             </div>
 
             <div class="input-group">
-                <label>Keterangan Transaksi</label>
-                <input type="text" id="note" placeholder="Contoh: Topup Game / Saldo">
+                <label>Keterangan / ID Tujuan</label>
+                <input type="text" id="note" placeholder="Contoh: 08123456789">
             </div>
 
-            <button class="btn-pay" onclick="executePayment()">BAYAR SEKARANG</button>
+            <button class="btn-pay" onclick="executePayment()">PROSES PEMBAYARAN</button>
         </div>
-        
-        <p style="text-align:center; font-size:0.6rem; opacity:0.3; margin-top:40px; text-transform:uppercase; letter-spacing:2px;">Powered by Pakasir Engine v2.0</p>
     </div>
 
     <script>
-        // --- KONFIGURASI API ---
         const SLUG = "rayy-store";
-        const API_KEY = "ZgjlIcOuqhkp4AJ02XzY9mannYCHZkDy";
-
-        // Logic Splash Screen
-        window.addEventListener('load', () => {
+        
+        window.onload = () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
                 const app = document.getElementById('main-app');
-                
                 splash.style.opacity = '0';
                 setTimeout(() => {
                     splash.style.display = 'none';
                     app.classList.add('visible');
                     document.body.style.overflow = 'auto';
-                }, 1000);
-            }, 3000);
-        });
+                }, 800);
+            }, 2500);
+        };
 
         function showToast(m) {
             const t = document.getElementById('toast');
@@ -185,40 +183,28 @@
         function executePayment() {
             const user = document.getElementById('username').value.trim();
             const nominal = document.getElementById('amount').value.trim();
-            const note = document.getElementById('note').value.trim();
 
-            if(!user || !nominal) return showToast("⚠️ Nama & Nominal Wajib Diisi!");
+            if(!user || !nominal) return showToast("⚠️ Isi Nama & Nominal!");
 
-            // --- SINKRONISASI BANNED ---
             let banned = JSON.parse(localStorage.getItem('sys_banned_list') || '[]');
             if (banned.includes(user)) {
-                alert("ACCESS DENIED!\nUsername " + user + " telah diblokir.");
+                alert("ACCESS DENIED!\nUsername Anda telah diblokir.");
                 return;
             }
 
-            // --- GENERATE DATA ---
-            const orderId = "RY-" + Math.random().toString(36).substring(2, 9).toUpperCase();
+            const orderId = "RY-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-            // --- SAVE TO ADMIN HISTORY ---
             let history = JSON.parse(localStorage.getItem('trx_history') || '[]');
             history.push({
-                orderId: orderId,
-                user: user,
-                amount: nominal,
-                status: "Pending",
-                date: new Date().toLocaleString('id-ID'),
-                method: "Pakasir"
+                orderId: orderId, user: user, amount: nominal,
+                status: "Pending", date: new Date().toLocaleString('id-ID'), method: "Pakasir"
             });
             localStorage.setItem('trx_history', JSON.stringify(history));
 
-            showToast("🚀 Menyiapkan QRIS...");
-
-            // --- REDIRECT KE PAKASIR API ---
+            showToast("🚀 Menghubungkan ke Pakasir...");
             setTimeout(() => {
-                // Link sesuai instruksi user: https://app.pakasir.com/pay/{slug}/{amount}?order_id={order_id}
-                const finalUrl = `https://app.pakasir.com/pay/${SLUG}/${nominal}?order_id=${orderId}`;
-                window.location.href = finalUrl;
-            }, 1800);
+                window.location.href = `https://app.pakasir.com/pay/${SLUG}/${nominal}?order_id=${orderId}`;
+            }, 1500);
         }
     </script>
 </body>
