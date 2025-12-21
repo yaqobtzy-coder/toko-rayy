@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server riwayat trx</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 95%; max-width: 800px; background: #1e293b; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        #dashboard, #banned-screen { display: none; }
+        h1 { font-size: 24px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #334155; color: white; text-align: center; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; text-align: left; }
+        th, td { padding: 12px; border-bottom: 1px solid #334155; }
+        .btn-danger { background: #ef4444; color: white; width: auto; padding: 5px 10px; font-size: 11px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="login-screen">
+            <h1 style="color: #38bdf8; text-align: center;">Server riwayat trx</h1>
+            <p style="text-align: center; color: #94a3b8; font-size: 14px;">Silakan masukkan kredensial admin</p>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="checkLogin()">MASUK KE SERVER</button>
+        </div>
+
+        <div id="banned-screen">
+            <h1 style="color: #ef4444; text-align: center;">SERVER LOCKED</h1>
+            <p style="text-align: center;">Akses ditutup sementara. Hubungi Developer.</p>
+        </div>
+
+        <div id="dashboard">
+            <h2 style="color:#38bdf8; margin-top: 0;">Server riwayat trx</h2>
+            <div style="background: #334155; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span>Total Data: <strong id="total-count">0</strong></span>
+                <button onclick="hapusRiwayat()" class="btn-danger">Reset Riwayat</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead><tr><th>Waktu</th><th>Order ID</th><th>Nominal</th></tr></thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+            <button onclick="location.reload()" style="background:#64748b; margin-top: 20px;">KELUAR SERVER</button>
+        </div>
+    </div>
+
+    <script>
+        const UNLOCK_KEY = "buka-akses-rayy";
+
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('key') === UNLOCK_KEY) {
+                localStorage.removeItem('is_banned');
+                localStorage.removeItem('salah_count');
+                alert("Sistem berhasil dipulihkan!");
+                window.location.href = "admin.html";
+            }
+            if (localStorage.getItem('is_banned') === 'true') {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('banned-screen').style.display = 'block';
+            }
+        };
+
+        function checkLogin() {
+            const userIn = document.getElementById('username').value;
+            const passIn = document.getElementById('password').value;
+            const USERS = JSON.parse(localStorage.getItem('dev_users')) || [{user:"admin_rayy", pass:"085794", name:"Rayy Utama"}];
+
+            const match = USERS.find(u => u.user === userIn && u.pass === passIn);
+
+            if (match) {
+                localStorage.removeItem('salah_count');
+                const logs = JSON.parse(localStorage.getItem('login_logs') || '[]');
+                logs.push({ user: userIn, name: match.name, time: new Date().toLocaleString('id-ID') });
+                localStorage.setItem('login_logs', JSON.stringify(logs));
+
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadData();
+            } else {
+                let salah = parseInt(localStorage.getItem('salah_count') || '0') + 1;
+                localStorage.setItem('salah_count', salah);
+                if (salah >= 3) {
+                    localStorage.setItem('is_banned', 'true');
+                    location.reload();
+                } else {
+                    alert("Login Gagal! Percobaan " + salah + "/3");
+                }
+            }
+        }
+
+        function loadData() {
+            const history = JSON.parse(localStorage.getItem('trx_history') || '[]');
+            document.getElementById('total-count').innerText = history.length;
+            document.getElementById('table-body').innerHTML = history.reverse().map(t => `
+                <tr><td>${t.date}</td><td>${t.orderId}</td><td>Rp ${parseInt(t.amount).toLocaleString()}</td></tr>
+            `).join('');
+        }
+
+        function hapusRiwayat() {
+            if(confirm("Hapus semua riwayat transaksi dari server?")) {
+                localStorage.removeItem('trx_history');
+                loadData();
+            }
+        }
+    </script>
+</body>
+</html>

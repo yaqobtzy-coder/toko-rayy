@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rayy Dev - Management</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; max-width: 600px; margin: auto; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        h3 { color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-top: 0; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: none; box-sizing: border-box; font-size: 14px; }
+        button { background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; }
+        .btn-unlock { background: #22c55e; color: white; border: 2px solid #16a34a; }
+        .unlock-area { background: #0f172a; padding: 15px; border-radius: 8px; margin-top: 10px; display: none; border: 1px dashed #38bdf8; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+        th, td { padding: 8px; border-bottom: 1px solid #334155; text-align: left; }
+        .delete-btn { background: #ef4444; color: white; width: auto; padding: 4px 8px; font-size: 10px; margin: 0; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h3>Rayy Dev - Security Control</h3>
+        <p style="font-size: 13px; color: #94a3b8;">Klik tombol di bawah untuk verifikasi pemulihan akses admin:</p>
+        <button onclick="toggleUnlockArea()" id="main-unlock-btn">🔓 PROSES BUKA BLOKIR</button>
+        
+        <div id="unlock-form" class="unlock-area">
+            <p style="font-size: 12px; margin-bottom: 10px; color: #38bdf8;">Masukkan Akun Admin untuk Verifikasi:</p>
+            <input type="text" id="verify_user" placeholder="Username Admin">
+            <input type="password" id="verify_pass" placeholder="Password Admin">
+            <button onclick="prosesBukaBlokir()" class="btn-unlock">KONFIRMASI BUKA AKSES</button>
+            <button onclick="toggleUnlockArea()" style="background:transparent; color:#94a3b8; font-size:11px; text-decoration:underline;">Batal</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>User Manager</h3>
+        <input type="text" id="u" placeholder="Username">
+        <input type="text" id="p" placeholder="Password">
+        <input type="text" id="n" placeholder="Nama Admin">
+        <button onclick="addUser()">TAMBAH ADMIN BARU</button>
+        <div id="u-list" style="margin-top:15px"></div>
+    </div>
+
+    <div class="card">
+        <h3>Log Riwayat Login</h3>
+        <div style="overflow-y: auto; max-height: 150px;">
+            <table>
+                <thead><tr><th>User</th><th>Nama</th><th>Waktu</th></tr></thead>
+                <tbody id="log-list"></tbody>
+            </table>
+        </div>
+        <button onclick="hapusLog()" style="background:#64748b; font-size: 10px; padding: 5px; margin-top: 10px;">Bersihkan Log</button>
+    </div>
+
+    <script>
+        function toggleUnlockArea() {
+            const area = document.getElementById('unlock-form');
+            const btn = document.getElementById('main-unlock-btn');
+            if (area.style.display === "none" || area.style.display === "") {
+                area.style.display = "block";
+                btn.style.display = "none";
+            } else {
+                area.style.display = "none";
+                btn.style.display = "block";
+            }
+        }
+
+        function prosesBukaBlokir() {
+            const uIn = document.getElementById('verify_user').value;
+            const pIn = document.getElementById('verify_pass').value;
+            const USERS = JSON.parse(localStorage.getItem('dev_users')) || [{user:"admin_rayy", pass:"085794", name:"Rayy Utama"}];
+
+            const match = USERS.find(u => u.user === uIn && u.pass === pIn);
+
+            if (match) {
+                localStorage.removeItem('is_banned');
+                localStorage.removeItem('salah_count');
+                alert("Akses untuk " + match.name + " telah dipulihkan. Silakan login kembali di halaman Admin.");
+                location.reload();
+            } else {
+                alert("Gagal! Username atau Password salah. Pemulihan ditolak.");
+            }
+        }
+
+        function addUser() {
+            const u = document.getElementById('u').value;
+            const p = document.getElementById('p').value;
+            const n = document.getElementById('n').value;
+            if(!u || !p || !n) return alert("Lengkapi data!");
+
+            let users = JSON.parse(localStorage.getItem('dev_users')) || [{user:"admin_rayy", pass:"085794", name:"Rayy Utama"}];
+            users.push({user: u, pass: p, name: n});
+            localStorage.setItem('dev_users', JSON.stringify(users));
+            location.reload();
+        }
+
+        const users = JSON.parse(localStorage.getItem('dev_users')) || [{user:"admin_rayy", pass:"085794", name:"Rayy Utama"}];
+        document.getElementById('u-list').innerHTML = users.map((u, i) => `
+            <div style="background:#334155; padding:8px; margin:4px 0; border-radius:5px; font-size:12px; display:flex; justify-content:space-between; align-items:center;">
+                <span><strong>${u.user}</strong> (${u.pass})</span>
+                ${i!==0 ? `<button class="delete-btn" onclick="del(${i})">Hapus</button>` : '<small>Owner</small>'}
+            </div>
+        `).join('');
+
+        function del(i) {
+            if(confirm("Hapus akun ini?")) {
+                let u = JSON.parse(localStorage.getItem('dev_users'));
+                u.splice(i, 1);
+                localStorage.setItem('dev_users', JSON.stringify(u));
+                location.reload();
+            }
+        }
+
+        const logs = JSON.parse(localStorage.getItem('login_logs') || '[]');
+        document.getElementById('log-list').innerHTML = logs.reverse().map(l => `
+            <tr><td>${l.user}</td><td>${l.name}</td><td>${l.time}</td></tr>
+        `).join('');
+
+        function hapusLog() {
+            if(confirm("Hapus semua riwayat login?")) {
+                localStorage.removeItem('login_logs');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

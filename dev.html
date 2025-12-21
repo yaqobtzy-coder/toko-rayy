@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rayy Super Dev Panel</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        
+        /* STYLE UNTUK COLLAPSIBLE */
+        .card { background: #1e293b; border-radius: 12px; margin-bottom: 15px; overflow: hidden; border: 1px solid #334155; }
+        .card-header { 
+            background: #1e293b; padding: 15px; cursor: pointer; 
+            display: flex; justify-content: space-between; align-items: center;
+            transition: 0.3s; font-weight: bold; color: #38bdf8;
+        }
+        .card-header:hover { background: #334155; }
+        .card-content { display: none; padding: 20px; border-top: 1px solid #334155; animation: fadeIn 0.3s; }
+        .active .card-content { display: block; }
+        .arrow { transition: 0.3s; }
+        .active .arrow { transform: rotate(180deg); }
+
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: none; box-sizing: border-box; }
+        input { background: #334155; color: white; }
+        button { font-weight: bold; cursor: pointer; }
+        .btn-unlock { background: #22c55e; color: white; }
+        .btn-add { background: #38bdf8; color: #0f172a; }
+        .btn-delete { background: #ef4444; color: white; width: auto; padding: 5px 10px; font-size: 11px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { padding: 10px; border-bottom: 1px solid #334155; text-align: left; }
+        .badge-owner { background: #f59e0b; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="text-align: center; color: #38bdf8;">🛠️ Rayy Super Dev Panel</h2>
+
+        <div class="card">
+            <div class="card-header" onclick="toggleCard(this)">
+                <span>👥 List Akun Terdaftar</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="card-content">
+                <table>
+                    <thead><tr><th>User</th><th>Nama</th><th>Aksi</th></tr></thead>
+                    <tbody id="user-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" onclick="toggleCard(this)">
+                <span>🔓 Buka Blokir / Ganti Pass</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="card-content">
+                <input type="text" id="v_user" placeholder="Username Admin">
+                <input type="password" id="v_old" placeholder="Password Lama">
+                <input type="password" id="v_new" placeholder="Password Baru">
+                <button onclick="unlock()" class="btn-unlock">UPDATE & BUKA AKSES</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" onclick="toggleCard(this)">
+                <span>➕ Tambah Admin Baru</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="card-content">
+                <input type="text" id="u" placeholder="Username">
+                <input type="password" id="p" placeholder="Password">
+                <input type="text" id="n" placeholder="Nama Lengkap">
+                <button onclick="addUser()" class="btn-add">SIMPAN ADMIN BARU</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" onclick="toggleCard(this)">
+                <span>📜 Riwayat Login Server</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="card-content">
+                <table>
+                    <thead><tr><th>Waktu</th><th>User</th><th>Status</th></tr></thead>
+                    <tbody id="login-history"></tbody>
+                </table>
+                <button onclick="localStorage.removeItem('login_logs'); loadDevData();" style="background:none; color:#ef4444; font-size:11px;">Hapus Riwayat</button>
+            </div>
+        </div>
+        
+        <button onclick="window.location.href='admin.html'" style="background: transparent; color: #94a3b8; border: 1px solid #475569;">Ke Dashboard Admin</button>
+    </div>
+
+    <script>
+        const OWNER = "admin_rayy";
+
+        // Fungsi Buka Tutup Card
+        function toggleCard(header) {
+            header.parentElement.classList.toggle('active');
+        }
+
+        function loadDevData() {
+            let users = JSON.parse(localStorage.getItem('dev_users')) || [{user: OWNER, pass:"085794", name:"Rayy Utama"}];
+            document.getElementById('user-list').innerHTML = users.map((u, i) => `
+                <tr>
+                    <td>${u.user} ${u.user === OWNER ? '<span class="badge-owner">OWNER</span>' : ''}</td>
+                    <td>${u.name}</td>
+                    <td>${u.user !== OWNER ? `<button class="btn-delete" onclick="deleteUser(${i})">Hapus</button>` : '--'}</td>
+                </tr>
+            `).join('');
+
+            const logs = JSON.parse(localStorage.getItem('login_logs') || '[]');
+            document.getElementById('login-history').innerHTML = logs.reverse().map(l => `
+                <tr><td>${l.time}</td><td>${l.user}</td><td style="color:${l.status === 'Berhasil' ? '#22c55e' : '#ef4444'}">${l.status}</td></tr>
+            `).slice(0, 10).join('');
+        }
+
+        function unlock() {
+            const uIn = document.getElementById('v_user').value;
+            const oldP = document.getElementById('v_old').value;
+            const newP = document.getElementById('v_new').value;
+            let users = JSON.parse(localStorage.getItem('dev_users')) || [{user: OWNER, pass:"085794", name:"Rayy Utama"}];
+            const idx = users.findIndex(x => x.user === uIn && x.pass === oldP);
+            if (idx !== -1) {
+                users[idx].pass = newP;
+                localStorage.setItem('dev_users', JSON.stringify(users));
+                localStorage.removeItem('is_banned');
+                localStorage.removeItem('salah_count');
+                alert("Berhasil diperbarui!"); loadDevData();
+            } else { alert("Data Salah!"); }
+        }
+
+        function addUser() {
+            const u = document.getElementById('u').value, p = document.getElementById('p').value, n = document.getElementById('n').value;
+            if(!u || !p || !n) return alert("Isi semua!");
+            let users = JSON.parse(localStorage.getItem('dev_users')) || [{user: OWNER, pass:"085794", name:"Rayy Utama"}];
+            users.push({user: u, pass: p, name: n});
+            localStorage.setItem('dev_users', JSON.stringify(users));
+            alert("Berhasil!"); loadDevData();
+        }
+
+        function deleteUser(i) {
+            let users = JSON.parse(localStorage.getItem('dev_users'));
+            if(confirm("Hapus akun?")) { users.splice(i, 1); localStorage.setItem('dev_users', JSON.stringify(users)); loadDevData(); }
+        }
+
+        window.onload = loadDevData;
+    </script>
+</body>
+</html>

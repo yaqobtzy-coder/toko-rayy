@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rayy Store - Payment</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: #1e293b; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        input { width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px; border: none; background: #334155; color: white; font-size: 18px; text-align: center; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; border-radius: 10px; border: none; background: #38bdf8; color: #0f172a; font-weight: bold; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 style="color: #38bdf8;">Rayy Store</h2>
+        <p>Masukkan Nominal Pembayaran</p>
+        <input type="number" id="amount" placeholder="Contoh: 10000">
+        <button onclick="bayar()">BAYAR SEKARANG</button>
+    </div>
+
+    <script>
+        function bayar() {
+            const amount = document.getElementById('amount').value;
+            if (!amount || amount < 1000) return alert("Minimal Rp 1.000");
+            
+            const orderId = "RAYY" + Date.now();
+            const history = JSON.parse(localStorage.getItem('trx_history') || '[]');
+            
+            history.push({ 
+                orderId, amount, 
+                date: new Date().toLocaleString('id-ID'), 
+                status: 'Pending' 
+            });
+            localStorage.setItem('trx_history', JSON.stringify(history));
+
+            window.location.href = `https://app.pakasir.com/pay/rayy-store/${amount}?order_id=${orderId}`;
+        }
+    </script>
+</body>
+</html>
