@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rayy Super Dev Panel</title>
-    <script src="config.js"></script>
     <style>
         body { background-color: #0b1120; color: #f8fafc; font-family: sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 450px; margin: auto; }
@@ -18,7 +17,6 @@
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px 0; border-bottom: 1px solid #334155; font-size: 0.9rem; }
         .status-banned { color: #ef4444; font-weight: bold; }
-        /* Overlay Login khusus Dev */
         #authOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0b1120; z-index:9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
     </style>
 </head>
@@ -32,11 +30,11 @@
 </div>
 
 <div class="container">
-    <div style="text-align: center; margin-bottom: 20px;">
-        <h1 style="font-size: 1.8rem;">Rayy Super Dev Panel</h1>
+    <div style="text-align: center; margin: 20px 0;">
+        <h1 style="font-size: 1.8rem; font-weight: 800;">Rayy Dev Panel</h1>
     </div>
 
-    <div class="card" style="border-color: #ef4444; padding-bottom: 10px;">
+    <div class="card" style="border-color: #ef4444;">
         <h2 style="color: #ef4444;">🚫 Daftar Akun Terblokir</h2>
         <table id="bannedTable">
             <tbody id="bannedListBody"></tbody>
@@ -52,7 +50,7 @@
         <h2>🔒 Kelola Akses</h2>
         <input type="text" id="targetUser" placeholder="Username Target">
         <button class="btn btn-red" onclick="prosesBan()">BLOKIR (BAN)</button>
-        <button class="btn btn-green" style="margin-top:10px;" onclick="prosesUnban()">BUKA BLOKIR (UNBAN)</button>
+        <button class="btn btn-green" style="margin-top:10px;" onclick="prosesUnban()">UNBAN (BUKA BLOKIR)</button>
     </div>
 
     <div class="card">
@@ -65,10 +63,21 @@
 </div>
 
 <script>
-    // 1. Fungsi Cek Login Dev (Hanya rayy_dev)
+    /* PENGATURAN DISINI (Gak perlu file config.js lagi supaya gak stuck)
+    */
+    const CONFIG = {
+        devUsername: "rayy_dev",
+        devPassword: "085794",
+        ownerUsername: "admin_rayy",
+        pesanBlokirDev: "Username ini adalah username Dev utama untuk semua layanan di semua web nya!",
+        pesanBukanDev: "Akun/username ini tidak seharusnya di web ini!"
+    };
+
     function checkDevAuth() {
         const u = document.getElementById('devUser').value;
         const p = document.getElementById('devPass').value;
+
+        // CEK LOGIN
         if (u === CONFIG.devUsername && p === CONFIG.devPassword) {
             document.getElementById('authOverlay').style.display = 'none';
             refreshData();
@@ -78,9 +87,8 @@
         }
     }
 
-    // 2. Fungsi Muat Data ke Tabel
     function refreshData() {
-        // Render Admin
+        // Render List Admin
         const tableAdmin = document.getElementById('userTable');
         tableAdmin.innerHTML = `<tr><td>${CONFIG.ownerUsername} (Owner)</td><td style="text-align:right;">Utama</td></tr>`;
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
@@ -88,7 +96,7 @@
             tableAdmin.innerHTML += `<tr><td>${a.user}</td><td style="text-align:right;">${a.name}</td></tr>`; 
         });
 
-        // Render Banned (Hanya Nama Saja)
+        // Render List Banned (HANYA TEKS, GAK ADA TOMBOL SAMPING)
         const tableBan = document.getElementById('bannedListBody');
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
         if(banned.length === 0) {
@@ -101,43 +109,45 @@
         }
     }
 
-    // 3. Fungsi Blokir dengan Proteksi Dev Utama
     function prosesBan() {
         const user = document.getElementById('targetUser').value;
         if(!user) return;
+        
+        // Proteksi Dev Utama & Owner
         if(user === CONFIG.devUsername || user === CONFIG.ownerUsername) {
             alert(CONFIG.pesanBlokirDev);
             return;
         }
+
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
         if(!banned.includes(user)) banned.push(user);
         localStorage.setItem('bannedUsers', JSON.stringify(banned));
-        alert("Berhasil Blokir: " + user);
         refreshData();
         document.getElementById('targetUser').value = "";
+        alert("Berhasil memblokir " + user);
     }
 
-    // 4. Fungsi Buka Blokir (Unban)
     function prosesUnban() {
         const user = document.getElementById('targetUser').value;
         if(!user) return;
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
-        localStorage.setItem('bannedUsers', JSON.stringify(banned.filter(x => x !== user)));
-        alert("Berhasil Unban: " + user);
+        let dataBaru = banned.filter(x => x !== user);
+        localStorage.setItem('bannedUsers', JSON.stringify(dataBaru));
+        alert("Berhasil membuka blokir: " + user);
         refreshData();
         document.getElementById('targetUser').value = "";
     }
 
-    // 5. Fungsi Tambah Admin Baru
     function simpanAdmin() {
         const u = document.getElementById('newUser').value;
         const p = document.getElementById('newPass').value;
         const n = document.getElementById('newName').value;
-        if(!u || !p) return alert("Isi data!");
+        if(!u || !p) return alert("Username dan Password wajib diisi!");
+        
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
         admins.push({ user: u, pass: p, name: n });
         localStorage.setItem('admins', JSON.stringify(admins));
-        alert("Admin Disimpan!");
+        alert("Admin " + u + " Berhasil Disimpan!");
         refreshData();
         document.getElementById('newUser').value = "";
         document.getElementById('newPass').value = "";
