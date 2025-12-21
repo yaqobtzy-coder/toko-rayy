@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy - Admin Monitor</title>
+    <title>Rayy - Admin Monitor System v2.0</title>
     <style>
         :root {
             --primary: #38bdf8;
@@ -12,74 +12,87 @@
             --dark: #0f172a;
             --text: #f8fafc;
             --red: #ef4444;
+            --green: #22c55e;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; overflow: hidden; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
 
+        /* SPLASH SCREEN */
         #splash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
             align-items: center; justify-content: center; transition: 0.8s;
         }
-        .logo-box { width: 90px; height: 90px; background: var(--primary); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 900; color: #000; }
+        .logo-box { width: 100px; height: 100px; background: var(--primary); border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; font-weight: 900; color: #000; box-shadow: 0 0 30px rgba(56, 189, 248, 0.3); }
 
-        .container { max-width: 500px; margin: auto; padding: 20px; padding-top: 60px; opacity: 0; transition: 1s; }
+        .container { max-width: 500px; margin: auto; padding: 20px; padding-top: 50px; opacity: 0; transition: 1s; }
         .visible { opacity: 1; }
 
-        .card { background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.05); }
-        input { width: 100%; padding: 18px; background: var(--dark); border: 2px solid transparent; color: white; border-radius: 15px; margin-bottom: 10px; text-align: center; }
+        /* LOGIN */
+        .card-login { background: var(--card); padding: 40px; border-radius: 35px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        input { width: 100%; padding: 18px; background: var(--dark); border: 2px solid transparent; color: white; border-radius: 18px; margin-bottom: 12px; text-align: center; outline: none; }
         input:focus { border-color: var(--primary); }
-        
-        .btn-login { width: 100%; padding: 18px; border: none; border-radius: 15px; background: var(--primary); color: #000; font-weight: 900; cursor: pointer; }
+        .btn-unlock { width: 100%; padding: 18px; border: none; border-radius: 18px; background: var(--primary); color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase; }
 
-        .item { background: var(--dark); padding: 15px; border-radius: 15px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
-        
-        /* OVERLAY PESAN */
-        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:10001; display:flex; align-items:center; justify-content:center; padding:30px; text-align:center; }
-        .box { border: 2px solid var(--primary); padding: 40px; border-radius: 30px; background: rgba(56,189,248,0.05); }
+        /* MONITOR LIST */
+        #monitorArea { display: none; }
+        .item-card { background: var(--card); border-radius: 25px; padding: 20px; margin-bottom: 15px; border-left: 5px solid var(--primary); }
+        .item-info b { display: block; font-size: 1.1rem; }
+        .item-info small { color: #94a3b8; }
+        .btn-konfirmasi { width: 100%; margin-top: 15px; padding: 12px; border: none; border-radius: 12px; background: var(--green); color: white; font-weight: 800; cursor: pointer; font-size: 0.8rem; }
+
+        /* FULL OVERLAY (OFFLINE/BANNED) */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 30px; text-align: center; }
+        .box-msg { border: 2px solid var(--red); padding: 45px 30px; border-radius: 40px; background: rgba(239, 68, 68, 0.05); width: 100%; max-width: 400px; }
+        .box-msg h1 { font-size: 2.2rem; color: var(--red); font-weight: 900; margin-bottom: 15px; text-transform: uppercase; }
+        .box-msg p { font-size: 1rem; line-height: 1.6; margin-bottom: 25px; }
+        .btn-contact { display: inline-block; padding: 15px 30px; background: var(--primary); color: #000; text-decoration: none; border-radius: 20px; font-weight: 900; }
     </style>
 </head>
 <body>
 
     <div id="splash">
         <div class="logo-box">R</div>
+        <p style="margin-top:20px; letter-spacing:3px; color:var(--primary); font-weight:800;">ADMIN SYSTEM</p>
     </div>
 
     <div class="container" id="main-content">
         <div id="loginPage">
-            <div class="card">
-                <h2 style="text-align:center; margin-bottom:20px; color:var(--primary);">ADMIN LOGIN</h2>
+            <div class="card-login">
+                <h2 style="color:var(--primary); margin-bottom:25px;">ADMIN MONITOR</h2>
                 <input type="text" id="adminUser" placeholder="Username">
                 <input type="password" id="adminPass" placeholder="Password">
-                <button class="btn-login" onclick="authAdmin()">LOGIN MONITOR</button>
+                <button class="btn-unlock" onclick="authAdmin()">Masuk Sistem</button>
             </div>
         </div>
 
-        <div id="monitorArea" style="display:none;">
-            <h2 style="margin-bottom:20px;">Riwayat Transaksi</h2>
+        <div id="monitorArea">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                <h2 style="font-weight:900;">LIVE <span style="color:var(--primary);">MONITOR</span></h2>
+                <button onclick="location.reload()" style="background:none; border:none; color:var(--red); font-weight:800; cursor:pointer;">LOGOUT</button>
+            </div>
             <div id="historyList"></div>
-            <button onclick="location.reload()" style="margin-top:20px; width:100%; padding:10px; background:transparent; border:1px solid #ef4444; color:#ef4444; border-radius:10px;">LOGOUT</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
         const OWNER_KEY = "085794";
-        let currentAdminUser = "";
+        const OWNER_WA = "628131172093";
 
-        // 1. CEK SERVER MONITOR TUTUP
+        // 1. CEK STATUS SERVER TUTUP
         onValue(ref(db, 'settings/toko_locked'), (snap) => {
             if (snap.val() === true) {
                 document.body.innerHTML = `
                 <div class="overlay">
-                    <div class="box">
+                    <div class="box-msg" style="border-color: var(--primary); background: rgba(56, 189, 248, 0.05);">
                         <h1 style="color:var(--primary);">SERVER TUTUP</h1>
                         <p>Server monitoring transaksi di tutup Harap kembali besok pagi pukul 09:00 WIB</p>
                     </div>
@@ -87,22 +100,25 @@
             }
         });
 
-        // 2. CEK BLOKIR ADMIN REAL-TIME
-        function startAdminCheck(username) {
+        // 2. FUNGSI AUTO-KICK JIKA ADMIN DI-BAN (REAL-TIME)
+        function monitorAdminStatus(username) {
             if(username === "Owner Rayy") return;
+            // Dengarkan perubahan pada folder admins secara real-time
             onValue(ref(db, 'sys_extra_admins'), (snap) => {
-                const admins = snap.val();
-                let exists = false;
-                for(let id in admins) {
-                    if(admins[id].user === username) { exists = true; break; }
+                const data = snap.val();
+                let isExist = false;
+                for(let id in data) {
+                    if(data[id].user === username) { isExist = true; break; }
                 }
-                if(!exists) {
+                
+                if(!isExist) {
+                    const waLink = `https://wa.me/${OWNER_WA}?text=halo%20owner%20terhormat%20akun%20saya%20(${username})%20terkena%20ban%20tanpa%20alasan%20harap%20di%20tinjau🙏`;
                     document.body.innerHTML = `
                     <div class="overlay">
-                        <div class="box" style="border-color:#ef4444;">
-                            <h1 style="color:#ef4444;">AKUN DIBLOKIR</h1>
+                        <div class="box-msg">
+                            <h1>SERVER OFFLINE</h1>
                             <p>Akun Admin anda Telah di blokir oleh developer/owner silahkan hubungi owner Rayy</p>
-                            <p style="margin-top:20px; font-size:0.9rem; opacity:0.7;">WhatsApp: 08XXXXXXXXXX</p>
+                            <a href="${waLink}" class="btn-contact">CONTACT OWNER</a>
                         </div>
                     </div>`;
                 }
@@ -123,16 +139,14 @@
                 let found = false;
                 for(let id in admins) {
                     if(admins[id].user === u && admins[id].pass === p) {
-                        found = true;
-                        break;
+                        found = true; break;
                     }
                 }
                 if(found) { 
-                    currentAdminUser = u;
                     showMonitor(u);
-                    startAdminCheck(u);
+                    monitorAdminStatus(u); // Jalankan pemantauan real-time
                 } else { 
-                    alert("Akses Ditolak!"); 
+                    alert("Gagal Login: Akun salah!"); 
                 }
             }, { onlyOnce: true });
         }
@@ -149,10 +163,27 @@
                 if(data) {
                     Object.keys(data).reverse().forEach(id => {
                         const item = data[id];
-                        list.innerHTML += `<div class="item"><b>${item.nama}</b><br><small>Rp ${item.jumlah} - ${item.waktu}</small></div>`;
+                        list.innerHTML += `
+                            <div class="item-card">
+                                <div class="item-info">
+                                    <b>${item.nama}</b>
+                                    <small>Rp ${Number(item.jumlah).toLocaleString()} • ${item.waktu}</small>
+                                </div>
+                                <button class="btn-konfirmasi" onclick="confirmPayment('${id}')">KONFIRMASI PEMBAYARAN</button>
+                            </div>`;
                     });
+                } else {
+                    list.innerHTML = "<p style='text-align:center; opacity:0.3; padding:20px;'>Belum ada transaksi.</p>";
                 }
             });
+        }
+
+        window.confirmPayment = function(id) {
+            if(confirm("Konfirmasi pembayaran ini telah diterima? (Data akan dihapus dari riwayat)")) {
+                remove(ref(db, 'transactions/' + id)).then(() => {
+                    alert("Pembayaran Terkonfirmasi!");
+                });
+            }
         }
 
         window.onload = () => {
@@ -161,8 +192,9 @@
                 setTimeout(() => {
                     document.getElementById('splash').style.display = 'none';
                     document.getElementById('main-content').classList.add('visible');
+                    document.body.style.overflow = 'auto';
                 }, 800);
-            }, 2000);
+            }, 2500);
         };
     </script>
 </body>
