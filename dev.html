@@ -4,22 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rayy Super Dev Panel</title>
+    <script src="config.js"></script>
     <style>
         body { background-color: #0b1120; color: #f8fafc; font-family: sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 450px; margin: auto; }
-        .header-panel { text-align: center; margin: 30px 0; }
-        .title-text { font-size: 2.2rem; font-weight: 800; color: white; display: block; }
         .card { background: #1e293b; border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid #334155; }
         h2 { color: #38bdf8; font-size: 1.1rem; margin-bottom: 15px; }
         input { width: 100%; padding: 15px; margin: 8px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
-        .btn-green { background: #22c55e; color: white; }
         .btn-blue { background: #38bdf8; color: white; }
         .btn-red { background: #ef4444; color: white; }
+        .btn-green { background: #22c55e; color: white; }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px 0; border-bottom: 1px solid #334155; font-size: 0.9rem; }
         .status-banned { color: #ef4444; font-weight: bold; }
-        .log-time { color: #94a3b8; font-size: 0.7rem; display: block; }
+        /* Overlay Login khusus Dev */
         #authOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0b1120; z-index:9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
     </style>
 </head>
@@ -33,16 +32,8 @@
 </div>
 
 <div class="container">
-    <div class="header-panel">
-        <span class="title-text">Rayy Super Dev</span>
-        <span class="title-text">Panel</span>
-    </div>
-
-    <div class="card" style="border-color: #38bdf8;">
-        <h2 style="color: #38bdf8;">🕒 Log Aktivitas Dev</h2>
-        <div id="logActivity" style="max-height: 150px; overflow-y: auto; font-size: 0.8rem; color: #cbd5e1;">
-            </div>
-        <button onclick="clearLogs()" style="background:none; border:none; color:#ef4444; font-size:0.7rem; cursor:pointer; margin-top:10px;">Hapus Log</button>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h1 style="font-size: 1.8rem;">Rayy Super Dev Panel</h1>
     </div>
 
     <div class="card" style="border-color: #ef4444; padding-bottom: 10px;">
@@ -65,122 +56,92 @@
     </div>
 
     <div class="card">
-        <h2>➕ Tambah Admin</h2>
+        <h2>➕ Tambah Admin Baru</h2>
         <input type="text" id="newUser" placeholder="Username">
         <input type="password" id="newPass" placeholder="Password">
         <input type="text" id="newName" placeholder="Nama Lengkap">
-        <button class="btn btn-blue" onclick="simpanAdmin()">SIMPAN</button>
+        <button class="btn btn-blue" onclick="simpanAdmin()">SIMPAN ADMIN</button>
     </div>
 </div>
 
 <script>
-    const DEV_USERNAME = "rayy_dev"; 
-    const DEV_PASSWORD = "085794";   
-
-    function addLog(msg) {
-        let logs = JSON.parse(localStorage.getItem('devLogs')) || [];
-        const now = new Date().toLocaleString('id-ID');
-        logs.unshift({ time: now, action: msg });
-        if(logs.length > 20) logs.pop(); // Simpan max 20 log
-        localStorage.setItem('devLogs', JSON.stringify(logs));
-        displayLogs();
-    }
-
-    function displayLogs() {
-        const logBox = document.getElementById('logActivity');
-        let logs = JSON.parse(localStorage.getItem('devLogs')) || [];
-        if(logs.length === 0) {
-            logBox.innerHTML = "Belum ada aktivitas.";
-            return;
-        }
-        logBox.innerHTML = logs.map(l => `<div><span class="log-time">${l.time}</span> ${l.action}</div><hr style="border:0; border-top:1px solid #334155; margin:5px 0;">`).join('');
-    }
-
-    function clearLogs() {
-        localStorage.removeItem('devLogs');
-        displayLogs();
-    }
-
+    // 1. Fungsi Cek Login Dev (Hanya rayy_dev)
     function checkDevAuth() {
         const u = document.getElementById('devUser').value;
         const p = document.getElementById('devPass').value;
-
-        if (u === DEV_USERNAME && p === DEV_PASSWORD) {
-            addLog(`✅ Berhasil login ke Panel Dev`);
+        if (u === CONFIG.devUsername && p === CONFIG.devPassword) {
             document.getElementById('authOverlay').style.display = 'none';
             refreshData();
         } else {
-            addLog(`❌ Gagal login: Percobaan akun "${u}"`);
-            alert("Akun/username ini tidak seharusnya di web ini!");
-            window.location.href = "index.html";
+            alert(CONFIG.pesanBukanDev);
+            window.location.href = "index.html"; // Tendang ke index
         }
     }
 
+    // 2. Fungsi Muat Data ke Tabel
     function refreshData() {
-        displayLogs();
+        // Render Admin
         const tableAdmin = document.getElementById('userTable');
-        tableAdmin.innerHTML = '<tr><td>admin_rayy <span style="background:#f59e0b; color:black; padding:2px 5px; border-radius:4px; font-size:10px;">OWNER</span></td><td>Rayy Utama</td></tr>';
+        tableAdmin.innerHTML = `<tr><td>${CONFIG.ownerUsername} (Owner)</td><td style="text-align:right;">Utama</td></tr>`;
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
-        admins.forEach(a => { tableAdmin.innerHTML += `<tr><td>${a.user}</td><td>${a.name}</td></tr>`; });
+        admins.forEach(a => { 
+            tableAdmin.innerHTML += `<tr><td>${a.user}</td><td style="text-align:right;">${a.name}</td></tr>`; 
+        });
 
+        // Render Banned (Hanya Nama Saja)
         const tableBan = document.getElementById('bannedListBody');
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
         if(banned.length === 0) {
             tableBan.innerHTML = '<tr><td style="color:#94a3b8; text-align:center; padding:10px 0;">Tidak ada data blokir</td></tr>';
         } else {
-            tableBan.innerHTML = banned.map(user => `
-                <tr>
-                    <td class="status-banned">⚠️ ${user}</td>
-                    <td style="text-align:right;">
-                        <button onclick="prosesUnbanLangsung('${user}')" style="background:#22c55e; color:white; border:none; border-radius:5px; padding:5px 10px; cursor:pointer; font-size:11px; font-weight:bold;">UNBAN</button>
-                    </td>
-                </tr>`).join('');
+            tableBan.innerHTML = '';
+            banned.forEach(user => {
+                tableBan.innerHTML += `<tr><td class="status-banned">⚠️ ${user}</td></tr>`;
+            });
         }
     }
 
+    // 3. Fungsi Blokir dengan Proteksi Dev Utama
     function prosesBan() {
         const user = document.getElementById('targetUser').value;
         if(!user) return;
-        if(user === DEV_USERNAME || user === "admin_rayy") {
-            addLog(`⚠️ Gagal Ban: Mencoba Ban Akun Pusat`);
-            alert("Username ini adalah username Dev utama untuk semua layanan di semua web nya!");
+        if(user === CONFIG.devUsername || user === CONFIG.ownerUsername) {
+            alert(CONFIG.pesanBlokirDev);
             return;
         }
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
         if(!banned.includes(user)) banned.push(user);
         localStorage.setItem('bannedUsers', JSON.stringify(banned));
-        addLog(`🚫 Memblokir akun: ${user}`);
+        alert("Berhasil Blokir: " + user);
         refreshData();
         document.getElementById('targetUser').value = "";
     }
 
-    function prosesUnbanLangsung(user) {
-        let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
-        const index = banned.indexOf(user);
-        if (index > -1) {
-            banned.splice(index, 1);
-            localStorage.setItem('bannedUsers', JSON.stringify(banned));
-            addLog(`🔓 Membuka blokir: ${user}`);
-            refreshData();
-        }
-    }
-
+    // 4. Fungsi Buka Blokir (Unban)
     function prosesUnban() {
-        prosesUnbanLangsung(document.getElementById('targetUser').value);
+        const user = document.getElementById('targetUser').value;
+        if(!user) return;
+        let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
+        localStorage.setItem('bannedUsers', JSON.stringify(banned.filter(x => x !== user)));
+        alert("Berhasil Unban: " + user);
+        refreshData();
         document.getElementById('targetUser').value = "";
     }
 
+    // 5. Fungsi Tambah Admin Baru
     function simpanAdmin() {
-        const user = document.getElementById('newUser').value;
-        const pass = document.getElementById('newPass').value;
-        const name = document.getElementById('newName').value;
-        if(!user || !pass) return;
+        const u = document.getElementById('newUser').value;
+        const p = document.getElementById('newPass').value;
+        const n = document.getElementById('newName').value;
+        if(!u || !p) return alert("Isi data!");
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
-        admins.push({ user, pass, name });
+        admins.push({ user: u, pass: p, name: n });
         localStorage.setItem('admins', JSON.stringify(admins));
-        addLog(`➕ Menambah admin baru: ${user}`);
-        alert("Admin Baru Disimpan!");
+        alert("Admin Disimpan!");
         refreshData();
+        document.getElementById('newUser').value = "";
+        document.getElementById('newPass').value = "";
+        document.getElementById('newName').value = "";
     }
 </script>
 </body>
