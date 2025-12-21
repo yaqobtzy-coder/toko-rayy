@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Developer Panel - Cloud Security</title>
+    <title>Rayy Developer Panel - High Security</title>
     <style>
         :root {
             --primary: #38bdf8;
@@ -15,8 +15,16 @@
             --text: #f8fafc;
         }
 
-        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
 
+        /* SPLASH SCREEN ANIMATION */
         #splash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
@@ -28,6 +36,7 @@
             font-weight: 900; color: var(--bg); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
         }
 
+        /* TOAST NOTIF */
         #toast {
             position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
             background: var(--primary); color: var(--bg); padding: 15px 30px;
@@ -35,36 +44,49 @@
         }
         #toast.show { top: 30px; }
 
-        .container { max-width: 550px; margin: auto; padding: 25px; opacity: 0; transition: 1s; display: none; }
-        .container.visible { opacity: 1; display: block; }
+        .container { max-width: 550px; margin: auto; padding: 25px; opacity: 0; transition: 1s; }
+        .container.visible { opacity: 1; }
 
         .card {
             background: var(--card); border-radius: 25px; padding: 25px; margin-bottom: 20px;
             border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .title { color: var(--primary); font-weight: 900; text-transform: uppercase; text-align: center; margin-bottom: 20px; }
+        .title { color: var(--primary); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; text-align: center; }
         .label { font-size: 0.75rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; display: block; }
 
         input {
             width: 100%; padding: 16px; margin: 10px 0; background: var(--dark);
-            border: 1px solid #334155; color: white; border-radius: 15px; box-sizing: border-box; outline: none;
+            border: 1px solid #334155; color: white; border-radius: 15px; box-sizing: border-box;
+            outline: none; transition: 0.3s;
         }
+        input:focus { border-color: var(--primary); }
 
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-top: 10px; }
+        .btn {
+            width: 100%; padding: 16px; border: none; border-radius: 15px;
+            font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s;
+            margin-top: 10px;
+        }
         .btn-blue { background: var(--primary); color: var(--bg); }
         .btn-red { background: var(--red); color: white; }
         .btn-sm { width: auto; padding: 8px 15px; font-size: 0.7rem; margin: 0; }
 
-        .list-container { max-height: 200px; overflow-y: auto; margin-top: 15px; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: var(--dark); border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+        .list-container { max-height: 250px; overflow-y: auto; margin-top: 15px; }
+        .list-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 15px; background: var(--dark); border-radius: 12px;
+            margin-bottom: 10px; border-left: 4px solid var(--primary);
+        }
+        .list-item.banned { border-left-color: var(--red); }
+        .item-text { font-size: 0.9rem; font-weight: 600; }
+        .item-sub { font-size: 0.7rem; color: #94a3b8; display: block; }
     </style>
 </head>
 <body>
 
     <div id="splash">
         <div class="logo-box">R</div>
-        <p style="margin-top: 20px; font-weight: 800; color: var(--primary);">CLOUD PANEL LOADING...</p>
+        <p style="margin-top: 20px; font-weight: 800; color: var(--primary);">DEV PANEL LOADING...</p>
     </div>
 
     <div id="toast">Notifikasi</div>
@@ -85,24 +107,40 @@
             </div>
 
             <div class="card">
-                <span class="label">Operational Status (Real-time APK)</span>
+                <span class="label">Operational Status</span>
                 <button id="statusBtn" class="btn" onclick="toggleToko()">Memuat...</button>
             </div>
 
             <div class="card">
-                <span class="label">Ban / Unban User (Global)</span>
-                <input type="text" id="targetUser" placeholder="Username Target">
-                <div style="gap: 10px; display: flex;">
+                <span class="label">Ban / Unban User System</span>
+                <input type="text" id="targetUser" placeholder="Masukkan Username Target">
+                <div style="display: flex; gap: 10px;">
                     <button class="btn btn-red" style="flex: 1;" onclick="execAction('BAN')">BAN USER</button>
                     <button class="btn btn-blue" style="flex: 1;" onclick="execAction('UNBAN')">UNBAN USER</button>
                 </div>
-                <div class="list-container" id="bannedList"></div>
+                
+                <div style="margin-top: 20px;">
+                    <span class="label">Current Banned List (Cloud)</span>
+                    <div id="bannedList" class="list-container"></div>
+                </div>
             </div>
 
             <div class="card">
-                <span class="label">Admin Activity Logs</span>
-                <div class="list-container" id="logList"></div>
-                <button class="btn btn-sm" style="background:#334155; color:white; width:100%; margin-top:10px;" onclick="clearLogs()">Clear Cloud Logs</button>
+                <span class="label">Admin Login Activity (Real-time Cloud)</span>
+                <div id="logList" class="list-container"></div>
+                <button class="btn" style="background:#334155; color:white; font-size:0.75rem;" onclick="clearLogs()">Wipe Cloud Logs</button>
+            </div>
+
+            <div class="card">
+                <span class="label">Create Extra Admin</span>
+                <input type="text" id="newAdminU" placeholder="New Username">
+                <input type="text" id="newAdminP" placeholder="New Password">
+                <button class="btn btn-blue" onclick="createNewAdmin()">SAVE NEW ADMIN</button>
+                
+                <div style="margin-top: 20px;">
+                    <span class="label">Extra Admin List</span>
+                    <div id="adminList" class="list-container"></div>
+                </div>
             </div>
 
             <div class="card" style="border: 1px solid var(--red);">
@@ -121,66 +159,128 @@
         const db = getDatabase(app);
 
         const SECRET = "085794";
-        const RAYY_KEY = "access=rayy-ninja";
+        const OWNER = "rayy_dev";
 
+        // Login System
         window.tryLogin = function() {
             const key = document.getElementById('devKey').value;
-            if(key === SECRET || key === RAYY_KEY) {
+            if(key === SECRET) {
+                notify("🔓 System Unlocked");
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('panelArea').style.display = 'block';
-                notify("🔓 Cloud Sync Active");
-                // Log Login ke Firebase
-                push(ref(db, 'admin_logs'), { user: "Rayy_Dev", time: new Date().toLocaleString() });
+                // Log activity to firebase
+                push(ref(db, 'sys_login_logs'), { user: OWNER, time: new Date().toLocaleString() });
             } else { notify("❌ Invalid Key!"); }
         }
 
-        // --- REAL-TIME STATUS ---
-        let currentStatus = false;
+        // Operational Status (Toko Online/Offline)
+        let tokoLocked = false;
         onValue(ref(db, 'settings/toko_locked'), (snap) => {
-            currentStatus = snap.val();
+            tokoLocked = snap.val() || false;
             const btn = document.getElementById('statusBtn');
-            btn.innerText = currentStatus ? "STATUS: OFFLINE" : "STATUS: ONLINE";
-            btn.style.background = currentStatus ? "var(--red)" : "var(--green)";
+            btn.innerText = tokoLocked ? "STATUS: OFFLINE" : "STATUS: ONLINE";
+            btn.style.background = tokoLocked ? "var(--red)" : "var(--green)";
+            btn.style.color = "white";
         });
 
-        window.toggleToko = () => set(ref(db, 'settings/toko_locked'), !currentStatus);
+        window.toggleToko = () => set(ref(db, 'settings/toko_locked'), !tokoLocked);
 
-        // --- GLOBAL BAN SYSTEM ---
+        // Ban System
         window.execAction = function(type) {
             const user = document.getElementById('targetUser').value.trim();
             if(!user) return notify("Enter username!");
-            set(ref(db, 'banned_users/' + user), type === 'BAN' ? true : null);
-            notify(user + " " + type + "NED");
+            if(user === OWNER) return notify("❌ Cannot ban Owner!");
+
+            if(type === 'BAN') {
+                set(ref(db, 'banned_users/' + user), true);
+                notify("🚫 " + user + " Banned");
+            } else {
+                remove(ref(db, 'banned_users/' + user));
+                notify("🔓 " + user + " Unbanned");
+            }
             document.getElementById('targetUser').value = "";
-        }
+        };
 
+        // Render Banned List
         onValue(ref(db, 'banned_users'), (snap) => {
-            const list = document.getElementById('bannedList');
-            list.innerHTML = "";
+            const bl = document.getElementById('bannedList');
+            bl.innerHTML = "";
             const data = snap.val();
-            for(let u in data) {
-                list.innerHTML += `<div class="list-item"><span>${u}</span><button class="btn btn-sm btn-blue" onclick="removeBan('${u}')">UNBAN</button></div>`;
+            if(!data) { bl.innerHTML = "<small>No one is banned.</small>"; return; }
+            for(let user in data) {
+                bl.innerHTML += `
+                    <div class="list-item banned">
+                        <span class="item-text">${user}</span>
+                        <button class="btn btn-sm btn-blue" onclick="unbanUser('${user}')">UNBAN</button>
+                    </div>`;
             }
         });
-        window.removeBan = (u) => set(ref(db, 'banned_users/' + u), null);
+        window.unbanUser = (u) => remove(ref(db, 'banned_users/' + u));
 
-        // --- CLOUD LOGS ---
-        onValue(ref(db, 'admin_logs'), (snap) => {
-            const list = document.getElementById('logList');
-            list.innerHTML = "";
+        // Render Admin Logs
+        onValue(ref(db, 'sys_login_logs'), (snap) => {
+            const ll = document.getElementById('logList');
+            ll.innerHTML = "";
             const data = snap.val();
+            if(!data) { ll.innerHTML = "<small>No login history yet.</small>"; return; }
+            Object.keys(data).reverse().forEach(id => {
+                const log = data[id];
+                ll.innerHTML += `
+                    <div class="list-item">
+                        <div class="item-info">
+                            <span class="item-text">${log.user}</span>
+                            <span class="item-sub">${log.time}</span>
+                        </div>
+                    </div>`;
+            });
+        });
+        window.clearLogs = () => { if(confirm("Wipe Cloud Logs?")) remove(ref(db, 'sys_login_logs')); };
+
+        // Extra Admin System
+        window.createNewAdmin = () => {
+            const u = document.getElementById('newAdminU').value.trim();
+            const p = document.getElementById('newAdminP').value.trim();
+            if(!u || !p) return notify("Fill all fields!");
+            push(ref(db, 'sys_extra_admins'), { user: u, pass: p });
+            notify("👤 New Admin Saved");
+            document.getElementById('newAdminU').value = "";
+            document.getElementById('newAdminP').value = "";
+        };
+
+        onValue(ref(db, 'sys_extra_admins'), (snap) => {
+            const al = document.getElementById('adminList');
+            al.innerHTML = "";
+            const data = snap.val();
+            if(!data) { al.innerHTML = "<small>No extra admins created.</small>"; return; }
             for(let id in data) {
-                list.innerHTML = `<div class="list-item"><div><b>${data[id].user}</b><br><small>${data[id].time}</small></div></div>` + list.innerHTML;
+                al.innerHTML += `
+                    <div class="list-item">
+                        <span class="item-text">${data[id].user}</span>
+                        <button class="btn btn-sm btn-red" onclick="delAdmin('${id}')">DELETE</button>
+                    </div>`;
             }
         });
-        window.clearLogs = () => remove(ref(db, 'admin_logs'));
+        window.delAdmin = (id) => remove(ref(db, 'sys_extra_admins/' + id));
 
-        // --- RESET DATA ---
-        window.resetTransactions = () => { if(confirm("Hapus semua data di Cloud?")) remove(ref(db, 'transactions')); }
+        // Danger Zone
+        window.resetTransactions = () => { if(confirm("DANGER: Delete all transaction data?")) remove(ref(db, 'transactions')); };
 
-        function notify(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+        // General
+        window.notify = (msg) => {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        };
 
-        window.onload = () => { setTimeout(() => { document.getElementById('splash').style.display = 'none'; document.getElementById('main-content').classList.add('visible'); }, 2000); };
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('splash').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('splash').style.display = 'none';
+                    document.getElementById('main-content').classList.add('visible');
+                }, 800);
+            }, 2000);
+        };
     </script>
 </body>
 </html>
