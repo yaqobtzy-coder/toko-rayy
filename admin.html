@@ -3,60 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin</title>
+    <title>Admin Panel - Toko Rayy</title>
     <style>
-        body { background-color: #0b1120; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; }
-        .login-card { background: #1e293b; padding: 30px; border-radius: 20px; border: 1px solid #334155; width: 100%; max-width: 400px; text-align: center; }
-        input { width: 100%; padding: 15px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        body { background-color: #0b1120; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 450px; margin: auto; }
+        .card { background: #1e293b; border-radius: 15px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; position: relative; }
+        
+        /* Gaya Login */
+        .login-box { text-align: center; margin-top: 50px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 10px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
         .btn-blue { background: #38bdf8; color: white; }
-        .btn-wa { background: #ef4444; color: white; text-decoration: none; display: block; margin-top: 20px; }
+        .btn-green { background: #22c55e; color: white; margin-top: 10px; }
+        .btn-logout { background: #334155; color: #94a3b8; margin-top: 20px; }
+
+        /* Gaya Riwayat Transaksi */
+        .order-id { color: #38bdf8; font-weight: bold; font-size: 0.9rem; }
+        .price { font-weight: bold; margin: 5px 0; display: block; }
+        .date { color: #94a3b8; font-size: 0.8rem; }
+        .status-tag { position: absolute; top: 20px; right: 20px; font-size: 0.8rem; font-weight: bold; }
+        .status-sukses { color: #22c55e; }
+        .status-pending { color: #f59e0b; }
     </style>
 </head>
 <body>
 
-<div id="loginSection" class="login-card">
-    <h2>Login Admin</h2>
-    <input type="text" id="u" placeholder="Username">
-    <input type="password" id="p" placeholder="Password">
-    <button class="btn btn-blue" onclick="login()">MASUK</button>
+<div class="container" id="app">
+    <div id="loginPage" class="login-box">
+        <h2 style="color: #38bdf8;">Riwayat Transaksi</h2>
+        <p style="color: #94a3b8; font-size: 0.9rem;">Silakan login untuk melihat data</p>
+        <input type="text" id="userIn" placeholder="Username">
+        <input type="password" id="passIn" placeholder="Password">
+        <button class="btn btn-blue" onclick="handleLogin()">MASUK SEKARANG</button>
+    </div>
+
+    <div id="historyPage" style="display: none;">
+        <h2 style="color: #38bdf8; margin-bottom: 5px;">Riwayat Transaksi</h2>
+        <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 20px;">Total: 5</p>
+
+        <div class="card" style="border-left: 4px solid #22c55e;">
+            <span class="order-id">RAYY1766275999694</span>
+            <span class="status-tag status-sukses">✅ Sukses</span>
+            <span class="price">Rp 8.000</span>
+            <span class="date">21/12/2025, 07.13.19</span>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #f59e0b;">
+            <span class="order-id">RAYY1766275313193</span>
+            <span class="status-tag status-pending">⌛ Pending</span>
+            <span class="price">Rp 5.000</span>
+            <span class="date">21/12/2025, 07.01.53</span>
+            <button class="btn btn-green" style="font-size: 0.8rem; padding: 10px;">KONFIRMASI PEMBAYARAN</button>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #22c55e;">
+            <span class="order-id">RAYY1766248489289</span>
+            <span class="status-tag status-sukses">✅ Sukses</span>
+            <span class="price">Rp 5.000</span>
+            <span class="date">20/12/2025, 23.34.49</span>
+        </div>
+
+        <button class="btn btn-logout" onclick="location.reload()">LOGOUT</button>
+    </div>
 </div>
 
 <script>
-    function login() {
-        const u = document.getElementById('u').value;
-        const p = document.getElementById('p').value;
+    const waNumber = "628131172093";
+
+    function handleLogin() {
+        const u = document.getElementById('userIn').value;
+        const p = document.getElementById('passIn').value;
         const banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
 
-        // Cek Ban
+        // 1. Cek BAN
         if (banned.includes(u)) {
             const msg = `HALO DEVELOPER TERHORMAT SAYA ADMIN ${u} INGIN MENGAJUKAN BANDING TERHADAP AKUN ADMIN SAYA, TERIMAKASIH`;
             document.body.innerHTML = `
-                <div class="login-card" style="border-color: #ef4444;">
-                    <h2 style="color: #ef4444;">AKUN ADMIN ANDA TELAH DI BAN PERMANEN OLEH DEV/RAYY</h2>
-                    <p>Hubungi Contact Developer: 628131172093</p>
-                    <a href="https://wa.me/628131172093?text=${encodeURIComponent(msg)}" class="btn btn-wa">AJUKAN BANDING KE WA</a>
-                </div>
-            `;
+                <div style="text-align:center; margin-top:100px; padding:20px;">
+                    <h2 style="color:#ef4444;">AKUN ADMIN ANDA TELAH DI BAN PERMANEN</h2>
+                    <p>Hubungi Dev: ${waNumber}</p>
+                    <a href="https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}" 
+                       style="background:#38bdf8; color:white; padding:15px; border-radius:10px; text-decoration:none; display:block; font-weight:bold;">AJUKAN BANDING</a>
+                </div>`;
             return;
         }
 
-        // Cek Owner
-        if (u === "admin_rayy" && p === "rayy123") {
-            window.location.href = "dashboard.html";
-            return;
-        }
-
-        // Cek Admin Baru
+        // 2. Cek Akun (Owner & Admin Baru)
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
-        const found = admins.find(a => a.user === u && a.pass === p);
-        if (found) {
-            alert("Halo " + found.name);
-            window.location.href = "dashboard.html";
+        const isAdmin = admins.find(a => a.user === u && a.pass === p);
+        const isOwner = (u === "admin_rayy" && p === "rayy123");
+
+        if (isOwner || isAdmin) {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('historyPage').style.display = 'block';
         } else {
             alert("Username atau Password Salah!");
         }
     }
 </script>
+
 </body>
 </html>
