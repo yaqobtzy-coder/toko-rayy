@@ -4,110 +4,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rayy Super Dev Panel</title>
+    <script src="config.js"></script>
     <style>
         body { background-color: #0b1120; color: #f8fafc; font-family: sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 450px; margin: auto; }
-        .header-panel { text-align: center; margin: 30px 0; }
-        .icon-header { font-size: 3rem; display: block; }
-        .title-text { font-size: 2.2rem; font-weight: 800; line-height: 1; color: white; display: block; }
         .card { background: #1e293b; border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid #334155; }
-        .status-online { color: #22c55e; font-weight: bold; margin-bottom: 15px; display: block; }
-        h2 { color: #38bdf8; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; margin: 0 0 15px 0; }
+        h2 { color: #38bdf8; font-size: 1.1rem; margin-bottom: 15px; }
         input { width: 100%; padding: 15px; margin: 8px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
-        .btn-green { background: #22c55e; color: white; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
         .btn-blue { background: #38bdf8; color: white; }
-        .btn-red { background: #ef4444; color: white; margin-top: 5px; }
+        .btn-red { background: #ef4444; color: white; }
+        .btn-green { background: #22c55e; color: white; }
         table { width: 100%; border-collapse: collapse; }
-        td { padding: 12px 5px; border-bottom: 1px solid #334155; font-size: 0.9rem; }
+        td { padding: 12px 0; border-bottom: 1px solid #334155; font-size: 0.9rem; }
+        #authOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0b1120; z-index:9999; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
     </style>
 </head>
 <body>
 
-<div id="authOverlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background:#0b1120; z-index:9999; display: flex; align-items: center; justify-content: center;">
-    <button onclick="checkPass()" style="padding: 15px 30px; border-radius: 10px; border: none; background: #38bdf8; color: white; font-weight: bold;">BUKA PANEL DEVELOPER</button>
+<div id="authOverlay">
+    <h2 style="color:white;">🔐 DEVELOPER LOGIN</h2>
+    <input type="text" id="devUser" placeholder="Username Dev Utama">
+    <input type="password" id="devPass" placeholder="Password Dev">
+    <button onclick="checkDevAuth()" class="btn btn-blue" style="max-width:300px;">MASUK PANEL</button>
 </div>
 
 <div class="container">
-    <div class="header-panel">
-        <span class="icon-header">🛠️</span>
-        <span class="title-text">Rayy Super Dev</span>
-        <span class="title-text">Panel</span>
+    <div class="card" style="border-color: #38bdf8;">
+        <h2>🕒 Log Aktivitas</h2>
+        <div id="logActivity" style="max-height: 100px; overflow-y: auto; font-size: 0.8rem; color: #94a3b8;"></div>
+    </div>
+
+    <div class="card" style="border-color: #ef4444;">
+        <h2 style="color: #ef4444;">🚫 Daftar Akun Terblokir</h2>
+        <table id="bannedTable"><tbody id="bannedListBody"></tbody></table>
     </div>
 
     <div class="card">
-        <span class="status-online">Status Server: Online</span>
-        <h2>👥 List Akun Terdaftar</h2>
-        <table><tbody id="userTable"></tbody></table>
+        <h2>👥 List Admin Aktif</h2>
+        <table id="userTable"></table>
     </div>
 
     <div class="card">
-        <h2>🔒 Ban Admin / Ganti Pass</h2>
+        <h2>🔒 Kelola Akses</h2>
         <input type="text" id="targetUser" placeholder="Username Target">
-        <button class="btn btn-green" onclick="prosesBan()">BAN & BLOKIR AKSES</button>
-        <button class="btn btn-blue" style="background: #0ea5e9; margin-top: 10px;" onclick="prosesUnban()">BUKA BLOKIR (UNBAN)</button>
+        <button class="btn btn-red" onclick="prosesBan()">BLOKIR (BAN)</button>
+        <button class="btn btn-green" style="margin-top:10px;" onclick="prosesUnban()">UNBAN</button>
     </div>
 
     <div class="card">
-        <h2>➕ Tambah Admin Baru</h2>
-        <input type="text" id="newUser" placeholder="Username">
-        <input type="password" id="newPass" placeholder="Password Admin">
-        <input type="text" id="newName" placeholder="Nama Lengkap">
-        <button class="btn btn-blue" onclick="simpanAdmin()">SIMPAN ADMIN BARU</button>
+        <h2>➕ Tambah Admin</h2>
+        <input type="text" id="newUser" placeholder="User">
+        <input type="password" id="newPass" placeholder="Pass">
+        <input type="text" id="newName" placeholder="Nama">
+        <button class="btn btn-blue" onclick="simpanAdmin()">SIMPAN</button>
     </div>
 </div>
 
 <script>
-    function checkPass() {
-        const pass = prompt("Password Dev:");
-        if (pass === "rayy123") {
-            document.getElementById('authOverlay').style.display = 'none';
-            loadAdmins();
-        } else { window.location.href = "index.html"; }
+    function addLog(msg) {
+        let logs = JSON.parse(localStorage.getItem('devLogs')) || [];
+        logs.unshift({ time: new Date().toLocaleString(), action: msg });
+        localStorage.setItem('devLogs', JSON.stringify(logs.slice(0, 10)));
+        displayLogs();
     }
 
-    function simpanAdmin() {
-        const user = document.getElementById('newUser').value;
-        const pass = document.getElementById('newPass').value;
-        const name = document.getElementById('newName').value;
-        if(!user || !pass || !name) return alert("Isi semua data termasuk password!");
+    function displayLogs() {
+        const logBox = document.getElementById('logActivity');
+        let logs = JSON.parse(localStorage.getItem('devLogs')) || [];
+        logBox.innerHTML = logs.map(l => `<div>[${l.time}] ${l.action}</div>`).join('');
+    }
 
-        let listAdmin = JSON.parse(localStorage.getItem('admins')) || [];
-        listAdmin.push({ user, pass, name });
-        localStorage.setItem('admins', JSON.stringify(listAdmin));
-        
-        alert("Admin Berhasil Ditambah!");
-        location.reload();
+    function checkDevAuth() {
+        const u = document.getElementById('devUser').value;
+        const p = document.getElementById('devPass').value;
+        if (u === CONFIG.devUsername && p === CONFIG.devPassword) {
+            addLog("Login Berhasil");
+            document.getElementById('authOverlay').style.display = 'none';
+            refreshData();
+        } else {
+            alert(CONFIG.pesanBukanDev);
+            window.location.href = "index.html";
+        }
+    }
+
+    function refreshData() {
+        displayLogs();
+        const tableAdmin = document.getElementById('userTable');
+        tableAdmin.innerHTML = `<tr><td>${CONFIG.ownerUsername} (Owner)</td><td>Rayy</td></tr>`;
+        let admins = JSON.parse(localStorage.getItem('admins')) || [];
+        admins.forEach(a => { tableAdmin.innerHTML += `<tr><td>${a.user}</td><td>${a.name}</td></tr>`; });
+
+        const tableBan = document.getElementById('bannedListBody');
+        let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
+        tableBan.innerHTML = banned.length ? banned.map(u => `<tr><td>⚠️ ${u}</td><td style="text-align:right;"><button onclick="prosesUnbanLangsung('${u}')">UNBAN</button></td></tr>`).join('') : '<tr><td style="text-align:center;">Kosong</td></tr>';
     }
 
     function prosesBan() {
         const user = document.getElementById('targetUser').value;
-        if(!user) return alert("Isi username!");
+        if(user === CONFIG.devUsername || user === CONFIG.ownerUsername) {
+            alert(CONFIG.pesanBlokirDev);
+            return;
+        }
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
         if(!banned.includes(user)) banned.push(user);
         localStorage.setItem('bannedUsers', JSON.stringify(banned));
-        alert(user + " Berhasil di BAN!");
+        addLog(`Ban: ${user}`);
+        refreshData();
     }
 
-    function prosesUnban() {
-        const user = document.getElementById('targetUser').value;
-        if(!user) return alert("Isi username!");
+    function prosesUnbanLangsung(u) {
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
-        const index = banned.indexOf(user);
-        if (index > -1) {
-            banned.splice(index, 1);
-            localStorage.setItem('bannedUsers', JSON.stringify(banned));
-            alert(user + " Berhasil di UNBAN!");
-        } else { alert("User ini tidak sedang di blokir."); }
+        localStorage.setItem('bannedUsers', JSON.stringify(banned.filter(x => x !== u)));
+        addLog(`Unban: ${u}`);
+        refreshData();
     }
 
-    function loadAdmins() {
-        const tableBody = document.getElementById('userTable');
-        tableBody.innerHTML = '<tr><td>admin_rayy <span style="background:#f59e0b; color:black; padding:2px 5px; border-radius:4px; font-size:10px;">OWNER</span></td><td>Rayy Utama</td></tr>';
-        let listAdmin = JSON.parse(localStorage.getItem('admins')) || [];
-        listAdmin.forEach((admin) => {
-            tableBody.innerHTML += `<tr><td>${admin.user}</td><td>${admin.name}</td></tr>`;
-        });
+    function prosesUnban() { prosesUnbanLangsung(document.getElementById('targetUser').value); }
+
+    function simpanAdmin() {
+        let admins = JSON.parse(localStorage.getItem('admins')) || [];
+        admins.push({ user: document.getElementById('newUser').value, pass: document.getElementById('newPass').value, name: document.getElementById('newName').value });
+        localStorage.setItem('admins', JSON.stringify(admins));
+        alert("Simpan Berhasil");
+        refreshData();
     }
 </script>
 </body>
