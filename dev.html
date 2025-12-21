@@ -5,39 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rayy Server Dev Panel</title>
     <style>
-        body { background-color: #0b1120; color: #f8fafc; font-family: -apple-system, sans-serif; padding: 20px; margin: 0; }
+        body { background-color: #0b1120; color: #f8fafc; font-family: sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 450px; margin: auto; }
-        
-        /* Header Title sesuai gambar */
-        .header-panel { text-align: center; margin: 40px 0; }
-        .icon-header { font-size: 3rem; display: block; margin-bottom: 5px; }
+        .header-panel { text-align: center; margin: 30px 0; }
+        .icon-header { font-size: 3rem; display: block; }
         .title-text { font-size: 2.2rem; font-weight: 800; line-height: 1; color: white; display: block; }
-
-        /* Card Style */
         .card { background: #1e293b; border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid #334155; }
-        
-        .welcome-text { color: #94a3b8; font-size: 0.95rem; margin: 0; }
-        .status-online { color: #22c55e; font-weight: bold; margin: 5px 0 20px 0; display: block; }
-
-        h2 { color: #38bdf8; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; margin-top: 0; }
-        
-        input { width: 100%; padding: 15px; margin: 8px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; font-size: 1rem; }
-        
-        /* Tombol sesuai gambar */
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; font-size: 1rem; text-transform: uppercase; }
-        .btn-green { background: #22c55e; color: white; box-shadow: 0 4px 14px 0 rgba(34, 197, 94, 0.3); }
-        .btn-blue { background: #38bdf8; color: white; box-shadow: 0 4px 14px 0 rgba(56, 189, 248, 0.3); }
-        
+        .status-online { color: #22c55e; font-weight: bold; margin-bottom: 20px; display: block; }
+        h2 { color: #38bdf8; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; margin: 0 0 15px 0; }
+        input { width: 100%; padding: 15px; margin: 8px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
+        .btn-green { background: #22c55e; color: white; }
+        .btn-blue { background: #38bdf8; color: white; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 12px 5px; border-bottom: 1px solid #334155; font-size: 0.9rem; }
-        .badge-owner { background: #f59e0b; color: black; font-size: 0.65rem; padding: 2px 6px; border-radius: 5px; font-weight: bold; }
-        .btn-hapus { background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 5px; font-size: 0.7rem; }
+        td { padding: 12px 5px; border-bottom: 1px solid #334155; font-size: 0.9rem; }
+        .btn-ban { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; }
     </style>
 </head>
 <body>
 
-<div id="authOverlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background:#0b1120; z-index:9999; display: flex; align-items: center; justify-content: center;">
-    <button onclick="checkPass()" style="padding: 15px 30px; border-radius: 15px; border: none; background: #38bdf8; color: white; font-weight: bold;">MASUK KE PANEL DEV</button>
+<div id="authOverlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background:#0b1120; z-index:9999; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px;">
+    <div id="loginBox">
+        <button onclick="checkPass()" style="padding: 15px 30px; border-radius: 10px; border: none; background: #38bdf8; color: white; font-weight: bold;">MASUK KE PANEL DEV</button>
+    </div>
 </div>
 
 <div class="container">
@@ -48,47 +38,94 @@
     </div>
 
     <div class="card">
-        <p class="welcome-text">Selamat datang di panel kendali utama server kamu.</p>
         <span class="status-online">Status Server: Online</span>
-        
         <h2>👥 List Akun Terdaftar</h2>
         <table>
-            <thead>
-                <tr><th>User</th><th>Nama</th><th>Aksi</th></tr>
-            </thead>
-            <tbody>
-                <tr><td>admin_rayy <span class="badge-owner">OWNER</span></td><td>Rayy Utama</td><td>-</td></tr>
-                <tr><td>kyle_admin</td><td>Kyle</td><td><button class="btn-hapus">Hapus</button></td></tr>
-            </tbody>
+            <tbody id="userTable">
+                </tbody>
         </table>
     </div>
 
     <div class="card">
-        <h2>🔓 Buka Blokir / Ganti Pass</h2>
-        <input type="text" placeholder="Username Target">
-        <input type="password" placeholder="Password Lama">
-        <input type="password" placeholder="Password Baru">
-        <button class="btn btn-green">UPDATE & BUKA AKSES</button>
+        <h2>🔒 Ban Admin / Ganti Pass</h2>
+        <input type="text" id="banUser" placeholder="Username yang akan di BAN">
+        <button class="btn btn-green" onclick="prosesBan()">BAN & BLOKIR AKSES</button>
     </div>
 
     <div class="card">
-        <h2>👥 Tambah Admin Baru</h2>
-        <input type="text" placeholder="Username">
-        <input type="password" placeholder="Password">
-        <input type="text" placeholder="Nama Lengkap">
-        <button class="btn btn-blue">SIMPAN ADMIN BARU</button>
+        <h2>➕ Tambah Admin Baru</h2>
+        <input type="text" id="newUser" placeholder="Username">
+        <input type="text" id="newName" placeholder="Nama Lengkap">
+        <button class="btn btn-blue" onclick="simpanAdmin()">SIMPAN ADMIN BARU</button>
     </div>
 </div>
 
 <script>
+    const waNumber = "628131172093";
+
     function checkPass() {
-        const pass = prompt("Password Dev:");
-        if (pass === "dev-rayy") {
-            document.getElementById('authOverlay').style.display = 'none';
-        } else {
-            alert("Gagal!");
-            window.location.href = "index.html";
+        const user = prompt("Masukkan Username Admin:");
+        const bannedList = JSON.parse(localStorage.getItem('bannedUsers')) || [];
+
+        if (bannedList.includes(user)) {
+            const pesan = `HALO DEVELOPER TERHORMAT SAYA ADMIN ${user} INGIN MENGAJUKAN BANDING TERHADAP AKUN ADMIN SAYA, TERIMAKASIH`;
+            const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(pesan)}`;
+            
+            document.getElementById('loginBox').innerHTML = `
+                <h2 style="color: #ef4444;">AKUN ADMIN ANDA TELAH DI BAN PERMANEN OLEH DEV/RAYY</h2>
+                <p>Hubungi Contact Developer: ${waNumber}</p>
+                <a href="${waLink}" class="btn btn-blue" style="text-decoration: none; display: block;">AJUKAN BANDING KE WA</a>
+            `;
+            return;
         }
+
+        if (user === "admin_rayy") {
+            const pass = prompt("Masukkan Password:");
+            if (pass === "rayy123") {
+                document.getElementById('authOverlay').style.display = 'none';
+                loadAdmins();
+            } else { alert("Password Salah!"); }
+        } else {
+            alert("Username tidak dikenal atau gunakan akun Owner.");
+        }
+    }
+
+    function simpanAdmin() {
+        const user = document.getElementById('newUser').value;
+        const name = document.getElementById('newName').value;
+        if(!user || !name) return alert("Isi semua data!");
+
+        let listAdmin = JSON.parse(localStorage.getItem('admins')) || [];
+        listAdmin.push({ user, name });
+        localStorage.setItem('admins', JSON.stringify(listAdmin));
+        
+        document.getElementById('newUser').value = "";
+        document.getElementById('newName').value = "";
+        loadAdmins();
+        alert("Admin Berhasil Ditambah!");
+    }
+
+    function prosesBan() {
+        const user = document.getElementById('banUser').value;
+        if(!user) return alert("Masukkan username!");
+
+        let bannedList = JSON.parse(localStorage.getItem('bannedUsers')) || [];
+        if(!bannedList.includes(user)) {
+            bannedList.push(user);
+            localStorage.setItem('bannedUsers', JSON.stringify(bannedList));
+            alert(`User ${user} BERHASIL DI BAN!`);
+            document.getElementById('banUser').value = "";
+        }
+    }
+
+    function loadAdmins() {
+        const tableBody = document.getElementById('userTable');
+        tableBody.innerHTML = '<tr><td>admin_rayy <span style="background:#f59e0b; color:black; padding:2px 5px; border-radius:4px; font-size:10px;">OWNER</span></td><td>Rayy Utama</td><td>-</td></tr>';
+        
+        let listAdmin = JSON.parse(localStorage.getItem('admins')) || [];
+        listAdmin.forEach((admin) => {
+            tableBody.innerHTML += `<tr><td>${admin.user}</td><td>${admin.name}</td><td><span style="color:#ef4444">Aktif</span></td></tr>`;
+        });
     }
 </script>
 
