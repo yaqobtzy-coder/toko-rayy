@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Toko Rayy</title>
     <script>
-        // SENSOR OTOMATIS: Mengecek status dari panel Dev
+        // SENSOR OTOMATIS: Jika di dev.html dimatikan
         if (localStorage.getItem('tokoLocked') === 'offline') {
             document.write(`
                 <body style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center; margin:0; padding:20px;">
@@ -24,13 +24,22 @@
         .container { max-width: 450px; margin: auto; }
         .card { background: #1e293b; border-radius: 15px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; position: relative; }
         .login-box { text-align: center; margin-top: 50px; }
-        input { width: 100%; padding: 15px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 10px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        input { width: 100%; padding: 15px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 10px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #38bdf8; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
         .btn-blue { background: #38bdf8; color: white; }
+        .btn-blue:hover { background: #0ea5e9; }
         .btn-logout { background: #334155; color: #94a3b8; margin-top: 20px; }
+        
+        /* Tampilan Layar Ban */
+        .ban-container { text-align: center; margin-top: 50px; padding: 25px; border: 2px solid #ef4444; border-radius: 20px; background: #1e1b1b; }
+        .ban-title { color: #ef4444; font-size: 1.8rem; font-weight: 800; margin-bottom: 15px; }
+        .ban-text { color: #cbd5e1; line-height: 1.6; margin-bottom: 25px; font-size: 1rem; }
+        .btn-wa { background: #22c55e; color: white; text-decoration: none; display: inline-block; padding: 15px 25px; border-radius: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
+
 <div class="container" id="app">
     <div id="loginPage" class="login-box">
         <h2 style="color: #38bdf8;">Riwayat Transaksi</h2>
@@ -43,33 +52,82 @@
     <div id="historyPage" style="display: none;">
         <h2 style="color: #38bdf8;">Riwayat Transaksi</h2>
         <div class="card" style="border-left: 4px solid #22c55e;">
-            <span style="color: #38bdf8; font-weight: bold;">RAYY1766275999694</span>
-            <span style="display:block; font-weight:bold; margin:5px 0;">Rp 8.000</span>
-            <span style="color: #94a3b8; font-size: 0.8rem;">Terbaru</span>
+            <span style="color: #38bdf8; font-weight: bold;">RAYY-STORE-USER</span>
+            <span style="display:block; font-weight:bold; margin:5px 0;">Dashboard Aktif</span>
+            <span style="color: #94a3b8; font-size: 0.8rem;">Selamat datang kembali admin!</span>
         </div>
         <button class="btn btn-logout" onclick="location.reload()">LOGOUT</button>
     </div>
 </div>
+
 <script>
     const waNumber = "628131172093";
     let salahHitung = 0;
+
     function handleLogin() {
-        const u = document.getElementById('userIn').value, p = document.getElementById('passIn').value;
+        const u = document.getElementById('userIn').value;
+        const p = document.getElementById('passIn').value;
+        
+        // 1. CEK BLOKIR MANUAL (DARI DEV PANEL)
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
-        if (banned.includes(u)) { 
-            alert("AKUN ANDA DI BAN!"); return; 
+        if (banned.includes(u)) {
+            tampilkanLayarBlokir(u, 'manual');
+            return;
         }
+
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
-        if ((u === "admin_rayy" && p === "rayy123") || admins.find(a => a.user === u && a.pass === p)) {
+        const isAdmin = admins.find(a => a.user === u && a.pass === p);
+        const isOwner = (u === "admin_rayy" && p === "rayy123");
+
+        if (isOwner || isAdmin) {
+            salahHitung = 0;
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('historyPage').style.display = 'block';
         } else {
+            // 2. CEK BLOKIR OTOMATIS (SALAH PASSWORD)
             salahHitung++;
+            let sisa = 3 - salahHitung;
             if (salahHitung >= 3) {
-                banned.push(u); localStorage.setItem('bannedUsers', JSON.stringify(banned));
-                alert("Salah 3x! Akun diblokir.");
-            } else { alert("Password Salah!"); }
+                banned.push(u);
+                localStorage.setItem('bannedUsers', JSON.stringify(banned));
+                tampilkanLayarBlokir(u, 'otomatis');
+            } else {
+                document.getElementById('infoLogin').innerHTML = `Sisa Kesempatan: ${sisa}x`;
+                document.getElementById('infoLogin').style.color = "#ef4444";
+                alert("Username atau Password Salah!");
+            }
         }
+    }
+
+    function tampilkanLayarBlokir(username, tipe) {
+        let konten = "";
+        
+        if (tipe === 'otomatis') {
+            // PESAN SALAH PASSWORD 3X
+            const teksWA = `Halo owner saya ${username} ingin mengajukan pemulihan terhadap akun saya (${username}) karena lupa password/username, terimakasih 🙏`;
+            konten = `
+                <div class="ban-container">
+                    <div class="ban-title">AKUN ANDA DI BAN!</div>
+                    <div class="ban-text">
+                        Halo <b>${username}</b> kamu telah di ban dari akun admin karena tindakan mu yaitu <b>salah password/username 3x berturut-turut</b>. Contact owner untuk membuka ban.
+                    </div>
+                    <a href="https://wa.me/${waNumber}?text=${encodeURIComponent(teksWA)}" class="btn-wa">CONTACT OWNER</a>
+                </div>`;
+        } else {
+            // PESAN BLOKIR MANUAL OLEH OWNER
+            const teksWA = `halo owner saya ingin menanyakan terkait akun/username saya (${username}) yang terkena blok, terimakasih 🙏`;
+            konten = `
+                <div class="ban-container">
+                    <div class="ban-title">ACCESS DENIED</div>
+                    <div class="ban-text">
+                        Halo <b>${username}</b><br>
+                        Akun anda telah di ban oleh owner dengan alasan yang tidak pasti, anda merasa salah paham atau ada kekeliruan? Contact owner agar di tangani.
+                    </div>
+                    <a href="https://wa.me/${waNumber}?text=${encodeURIComponent(teksWA)}" class="btn-wa">CONTACT OWNER</a>
+                </div>`;
+        }
+        
+        document.getElementById('app').innerHTML = konten;
     }
 </script>
 </body>
