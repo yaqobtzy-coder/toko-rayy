@@ -3,26 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Rayy - Official Store</title>
+    <title>Payment Rayy - Official</title>
     
-    <script>
-        if (localStorage.getItem('toko_locked') === 'true') {
-            document.write(`
-                <body style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center; margin:0; padding:20px;">
-                    <div style="border: 2px solid #ef4444; padding: 40px; border-radius: 30px; background: rgba(239, 68, 68, 0.1); max-width:450px;">
-                        <h1 style="color:#ef4444; font-size: 2.5rem; margin:0;">SERVER OFFLINE</h1>
-                        <p style="opacity: 0.9; margin-top:15px; line-height:1.6;">
-                            Web ini telah dimatikan, akan dinyalakan besok pagi pukul 09:00 WIB.
-                        </p>
-                        <div style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.05); border-radius:15px; font-size:0.85rem; border:1px dashed #ef4444;">
-                            <span style="color:#ef4444; font-weight:bold;">[PENTING]</span><br>
-                            BAGI YANG TELAH TF AKAN DI KONFIRMASI BESOK PAGI DAN JANGAN LUPA SS BUKTI TF KIRIM KE RAYY
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // Konfigurasi Database Rayy All Web
+        const firebaseConfig = { 
+            databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" 
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Pantau Status Toko (Online/Offline)
+        const statusRef = ref(db, 'settings/toko_locked');
+        onValue(statusRef, (snapshot) => {
+            if (snapshot.val() === true) {
+                document.body.innerHTML = `
+                    <div style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center; margin:0; padding:20px;">
+                        <div style="border: 2px solid #ef4444; padding: 40px; border-radius: 30px; background: rgba(239, 68, 68, 0.1); max-width:450px;">
+                            <h1 style="color:#ef4444; font-size: 2.5rem; margin:0;">SERVER OFFLINE</h1>
+                            <p style="opacity: 0.9; margin-top:15px; line-height:1.6;">
+                                Web ini telah dimatikan, akan dinyalakan besok pagi pukul 09:00 WIB.
+                            </p>
+                            <div style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.05); border-radius:15px; font-size:0.85rem; border:1px dashed #ef4444;">
+                                <span style="color:#ef4444; font-weight:bold;">[PENTING]</span><br>
+                                BAGI YANG TELAH TF AKAN DI KONFIRMASI BESOK PAGI DAN JANGAN LUPA SS BUKTI TF KIRIM KE RAYY
+                            </div>
                         </div>
-                    </div>
-                </body>
-            `);
-            window.stop();
-        }
+                    </div>`;
+                window.stop();
+            }
+        });
     </script>
 
     <style>
@@ -30,7 +43,6 @@
             --primary: #38bdf8;
             --bg: #0b1120;
             --card: #141b2d;
-            --dark: #0f172a;
             --text: #f8fafc;
         }
 
@@ -43,7 +55,7 @@
             overflow: hidden;
         }
 
-        /* --- ANIMASI SPLASH SCREEN SESUAI FOTO --- */
+        /* ANIMASI SPLASH LOGO BOX */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 10000; display: flex;
@@ -66,20 +78,15 @@
             font-size: 1.2rem;
             font-weight: 800;
             letter-spacing: 4px;
-            color: white;
             text-transform: uppercase;
-            opacity: 0;
-            animation: fadeInText 1s forwards 0.5s;
         }
 
         @keyframes pulse-scale {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(56, 189, 248, 0.3); }
-            50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(56, 189, 248, 0.6); }
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
         }
 
-        @keyframes fadeInText { to { opacity: 1; } }
-
-        /* --- MAIN UI --- */
+        /* MAIN UI */
         #main-app {
             opacity: 0; transform: translateY(20px);
             transition: 1s cubic-bezier(0.19, 1, 0.22, 1);
@@ -88,7 +95,7 @@
         #main-app.visible { opacity: 1; transform: translateY(0); }
 
         .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { font-size: 2.2rem; font-weight: 900; text-transform: uppercase; }
+        .header h1 { font-size: 2.2rem; font-weight: 900; }
         .header span { color: var(--primary); }
 
         .card {
@@ -111,16 +118,8 @@
             background: var(--primary);
             color: var(--bg); font-weight: 900; font-size: 1.1rem;
             cursor: pointer; text-transform: uppercase; transition: 0.3s;
-            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);
         }
-        .btn-pay:hover { transform: scale(1.02); filter: brightness(1.1); }
-
-        #toast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: var(--primary); color: var(--bg); padding: 15px 30px;
-            border-radius: 50px; font-weight: 900; z-index: 10001; transition: 0.5s;
-        }
-        #toast.show { top: 40px; }
+        .btn-pay:hover { transform: scale(1.02); }
     </style>
 </head>
 <body>
@@ -130,12 +129,9 @@
         <div class="splash-text">PAYMENT RAYY</div>
     </div>
 
-    <div id="toast">Pesan Sistem</div>
-
     <div id="main-app">
         <div class="header">
             <h1>RAYY <span>PAYMENT</span></h1>
-            <p style="opacity:0.5; font-size:0.75rem; margin-top:5px;">Automatic API Pakasir & Slug System</p>
         </div>
 
         <div class="card">
@@ -149,18 +145,11 @@
                 <input type="number" id="amount" placeholder="Contoh: 22000">
             </div>
 
-            <div class="input-group">
-                <label>Keterangan / ID Tujuan</label>
-                <input type="text" id="note" placeholder="Contoh: 08123456789">
-            </div>
-
-            <button class="btn-pay" onclick="executePayment()">PROSES PEMBAYARAN</button>
+            <button class="btn-pay" onclick="processPayment()">PROSES PEMBAYARAN</button>
         </div>
     </div>
 
     <script>
-        const SLUG = "rayy-store";
-        
         window.onload = () => {
             setTimeout(() => {
                 const splash = document.getElementById('splash-screen');
@@ -174,37 +163,25 @@
             }, 2500);
         };
 
-        function showToast(m) {
-            const t = document.getElementById('toast');
-            t.innerText = m; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
+        function processPayment() {
+            const user = document.getElementById('username').value;
+            const nominal = document.getElementById('amount').value;
+            if(!user || !nominal) return alert("Lengkapi data pembeli!");
 
-        function executePayment() {
-            const user = document.getElementById('username').value.trim();
-            const nominal = document.getElementById('amount').value.trim();
+            const orderId = "RY-" + Date.now();
 
-            if(!user || !nominal) return showToast("⚠️ Isi Nama & Nominal!");
-
-            let banned = JSON.parse(localStorage.getItem('sys_banned_list') || '[]');
-            if (banned.includes(user)) {
-                alert("ACCESS DENIED!\nUsername Anda telah diblokir.");
-                return;
-            }
-
-            const orderId = "RY-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-
+            // Simpan riwayat transaksi ke localStorage (untuk admin.html)
             let history = JSON.parse(localStorage.getItem('trx_history') || '[]');
             history.push({
-                orderId: orderId, user: user, amount: nominal,
-                status: "Pending", date: new Date().toLocaleString('id-ID'), method: "Pakasir"
+                orderId: orderId,
+                user: user,
+                amount: nominal,
+                date: new Date().toLocaleString()
             });
             localStorage.setItem('trx_history', JSON.stringify(history));
 
-            showToast("🚀 Menghubungkan ke Pakasir...");
-            setTimeout(() => {
-                window.location.href = `https://app.pakasir.com/pay/${SLUG}/${nominal}?order_id=${orderId}`;
-            }, 1500);
+            // Redirect ke Pakasir
+            window.location.href = `https://app.pakasir.com/pay/rayy-store/${nominal}?order_id=${orderId}`;
         }
     </script>
 </body>
