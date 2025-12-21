@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rayy Super Dev Panel</title>
+    <script>
+        (function ninjaCheck() {
+            const isLocked = localStorage.getItem('masterWebsiteLock');
+            const hasKey = window.location.search.includes('access=rayy-ninja');
+            if (isLocked === 'true' && !hasKey) {
+                document.write('<body style="background:#0b1120; color:#1e293b; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; margin:0;"><h1 style="font-size:12rem; user-select:none;">404</h1></body>');
+                window.stop();
+            }
+        })();
+    </script>
     <style>
         body { background-color: #0b1120; color: #f8fafc; font-family: sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 450px; margin: auto; }
@@ -32,6 +42,13 @@
 <div class="container">
     <div style="text-align: center; margin: 20px 0;">
         <h1 style="font-size: 1.8rem; font-weight: 800;">Rayy Dev Panel</h1>
+    </div>
+
+    <div class="card" style="border: 2px solid #f59e0b;">
+        <h2 style="color: #f59e0b;">🛡️ Master Ninja Switch</h2>
+        <button onclick="setMasterLock(true)" class="btn btn-red">SEMBUNYIKAN SEMUA (404)</button>
+        <button onclick="setMasterLock(false)" class="btn btn-green" style="margin-top:10px;">AKTIFKAN SEMUA</button>
+        <p style="font-size: 0.6rem; color: #94a3b8; margin-top: 10px; text-align: center;">*Gunakan ?access=rayy-ninja jika terkunci</p>
     </div>
 
     <div class="card" style="border-color: #ef4444;">
@@ -63,8 +80,6 @@
 </div>
 
 <script>
-    /* PENGATURAN DISINI (Gak perlu file config.js lagi supaya gak stuck)
-    */
     const CONFIG = {
         devUsername: "rayy_dev",
         devPassword: "085794",
@@ -73,22 +88,29 @@
         pesanBukanDev: "Akun/username ini tidak seharusnya di web ini!"
     };
 
+    function setMasterLock(status) {
+        localStorage.setItem('masterWebsiteLock', status);
+        if(status) {
+            alert("SISTEM MATI! Semua halaman menyamar jadi 404.");
+            location.reload();
+        } else {
+            alert("SISTEM AKTIF! Web normal kembali.");
+        }
+    }
+
     function checkDevAuth() {
         const u = document.getElementById('devUser').value;
         const p = document.getElementById('devPass').value;
-
-        // CEK LOGIN
         if (u === CONFIG.devUsername && p === CONFIG.devPassword) {
             document.getElementById('authOverlay').style.display = 'none';
             refreshData();
         } else {
             alert(CONFIG.pesanBukanDev);
-            window.location.href = "index.html"; // Tendang ke index
+            window.location.href = "index.html";
         }
     }
 
     function refreshData() {
-        // Render List Admin
         const tableAdmin = document.getElementById('userTable');
         tableAdmin.innerHTML = `<tr><td>${CONFIG.ownerUsername} (Owner)</td><td style="text-align:right;">Utama</td></tr>`;
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
@@ -96,7 +118,6 @@
             tableAdmin.innerHTML += `<tr><td>${a.user}</td><td style="text-align:right;">${a.name}</td></tr>`; 
         });
 
-        // Render List Banned (HANYA TEKS, GAK ADA TOMBOL SAMPING)
         const tableBan = document.getElementById('bannedListBody');
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
         if(banned.length === 0) {
@@ -112,13 +133,10 @@
     function prosesBan() {
         const user = document.getElementById('targetUser').value;
         if(!user) return;
-        
-        // Proteksi Dev Utama & Owner
         if(user === CONFIG.devUsername || user === CONFIG.ownerUsername) {
             alert(CONFIG.pesanBlokirDev);
             return;
         }
-
         let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
         if(!banned.includes(user)) banned.push(user);
         localStorage.setItem('bannedUsers', JSON.stringify(banned));
@@ -143,7 +161,6 @@
         const p = document.getElementById('newPass').value;
         const n = document.getElementById('newName').value;
         if(!u || !p) return alert("Username dan Password wajib diisi!");
-        
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
         admins.push({ user: u, pass: p, name: n });
         localStorage.setItem('admins', JSON.stringify(admins));
