@@ -1,307 +1,35 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Developer Panel - High Security</title>
+    <title>Rayy Dev Panel</title>
     <style>
-        :root {
-            --primary: #38bdf8;
-            --bg: #0b1120;
-            --card: #1e293b;
-            --dark: #0f172a;
-            --red: #ef4444;
-            --green: #22c55e;
-            --text: #f8fafc;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        /* SPLASH SCREEN ANIMATION */
-        #splash {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transition: 0.8s ease-in-out;
-        }
-        .logo-box {
-            width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
-            display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
-            font-weight: 900; color: var(--bg); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
-        }
-
-        /* TOAST NOTIF */
-        #toast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: var(--primary); color: var(--bg); padding: 15px 30px;
-            border-radius: 50px; font-weight: 800; z-index: 10000; transition: 0.5s;
-        }
-        #toast.show { top: 30px; }
-
-        .container { max-width: 550px; margin: auto; padding: 25px; opacity: 0; transition: 1s; }
-        .container.visible { opacity: 1; }
-
-        .card {
-            background: var(--card); border-radius: 25px; padding: 25px; margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .title { color: var(--primary); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; text-align: center; }
-        .label { font-size: 0.75rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; display: block; }
-
-        input {
-            width: 100%; padding: 16px; margin: 10px 0; background: var(--dark);
-            border: 1px solid #334155; color: white; border-radius: 15px; box-sizing: border-box;
-            outline: none; transition: 0.3s;
-        }
-        input:focus { border-color: var(--primary); }
-
-        .btn {
-            width: 100%; padding: 16px; border: none; border-radius: 15px;
-            font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s;
-            margin-top: 10px;
-        }
-        .btn-blue { background: var(--primary); color: var(--bg); }
-        .btn-red { background: var(--red); color: white; }
-        .btn-sm { width: auto; padding: 8px 15px; font-size: 0.7rem; margin: 0; }
-
-        .list-container { max-height: 250px; overflow-y: auto; margin-top: 15px; }
-        .list-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 15px; background: var(--dark); border-radius: 12px;
-            margin-bottom: 10px; border-left: 4px solid var(--primary);
-        }
-        .list-item.banned { border-left-color: var(--red); }
-        .item-text { font-size: 0.9rem; font-weight: 600; }
-        .item-sub { font-size: 0.7rem; color: #94a3b8; display: block; }
+        body { background: #0f172a; color: white; font-family: sans-serif; text-align: center; padding: 50px; }
+        .btn { padding: 20px 40px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin: 10px; font-size: 1.2rem; }
+        .off { background: #ef4444; color: white; }
+        .on { background: #22c55e; color: white; }
     </style>
 </head>
 <body>
+    <h1>REMOTE CONTROL APK</h1>
+    <p>Gunakan tombol di bawah untuk mengontrol status server secara real-time.</p>
+    
+    <button class="btn off" onclick="updateStatus(true)">MATIKAN SERVER (OFFLINE)</button>
+    <button class="btn on" onclick="updateStatus(false)">NYALAKAN SERVER (ONLINE)</button>
 
-    <div id="splash">
-        <div class="logo-box">R</div>
-        <p style="margin-top: 20px; font-weight: 800; color: var(--primary);">DEV PANEL LOADING...</p>
-    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    <div id="toast">Notifikasi</div>
-
-    <div class="container" id="main-content">
-        <div id="loginPage" style="margin-top: 80px;">
-            <div class="card">
-                <h2 class="title">Developer Access</h2>
-                <input type="password" id="devKey" placeholder="Enter Secret Key">
-                <button class="btn btn-blue" onclick="tryLogin()">UNLOCK SYSTEM</button>
-            </div>
-        </div>
-
-        <div id="panelArea" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color: var(--primary); margin: 0;">CONTROL CENTER</h2>
-                <button class="btn btn-red btn-sm" onclick="location.reload()">LOCK</button>
-            </div>
-
-            <div class="card">
-                <span class="label">Operational Status</span>
-                <button id="statusBtn" class="btn" onclick="toggleToko()">Memuat...</button>
-            </div>
-
-            <div class="card">
-                <span class="label">Ban / Unban User System</span>
-                <input type="text" id="targetUser" placeholder="Masukkan Username Target">
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-red" style="flex: 1;" onclick="execAction('BAN')">BAN USER</button>
-                    <button class="btn btn-blue" style="flex: 1;" onclick="execAction('UNBAN')">UNBAN USER</button>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <span class="label">Current Banned List</span>
-                    <div id="bannedList" class="list-container"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <span class="label">Admin Login Activity (Real-time)</span>
-                <div id="logList" class="list-container"></div>
-                <button class="btn" style="background:#334155; color:white; font-size:0.75rem;" onclick="clearLogs()">Wipe Login History</button>
-            </div>
-
-            <div class="card">
-                <span class="label">Create Extra Admin</span>
-                <input type="text" id="newAdminU" placeholder="New Username">
-                <input type="text" id="newAdminP" placeholder="New Password">
-                <button class="btn btn-blue" onclick="createNewAdmin()">SAVE NEW ADMIN</button>
-                
-                <div style="margin-top: 20px;">
-                    <span class="label">Extra Admin List</span>
-                    <div id="adminList" class="list-container"></div>
-                </div>
-            </div>
-
-            <div class="card" style="border: 1px solid var(--red);">
-                <span class="label" style="color: var(--red);">Danger Zone</span>
-                <button class="btn btn-red" onclick="resetTransactions()">RESET ALL TRANSACTIONS</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const SECRET = "085794";
-        const OWNER = "rayy_dev";
-
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('splash').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('splash').style.display = 'none';
-                    document.getElementById('main-content').classList.add('visible');
-                }, 800);
-            }, 2000);
-            updateStatusUI();
+        const firebaseConfig = { 
+            databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" 
         };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        function notify(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
-
-        function tryLogin() {
-            if(document.getElementById('devKey').value === SECRET) {
-                notify("🔓 System Unlocked");
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('panelArea').style.display = 'block';
-                renderAll();
-            } else { notify("❌ Invalid Key!"); }
-        }
-
-        function toggleToko() {
-            const isOff = localStorage.getItem('toko_locked') === 'true';
-            localStorage.setItem('toko_locked', !isOff);
-            updateStatusUI();
-            notify(!isOff ? "Server Offline" : "Server Online");
-        }
-
-        function updateStatusUI() {
-            const btn = document.getElementById('statusBtn');
-            if(!btn) return;
-            const isOff = localStorage.getItem('toko_locked') === 'true';
-            btn.innerText = isOff ? "STATUS: OFFLINE" : "STATUS: ONLINE";
-            btn.style.background = isOff ? "var(--red)" : "var(--green)";
-            btn.style.color = "white";
-        }
-
-        function renderAll() {
-            // Render Banned
-            const bl = document.getElementById('bannedList');
-            let banned = JSON.parse(localStorage.getItem('sys_banned_list') || '[]');
-            bl.innerHTML = banned.length ? "" : "<small>No one is banned.</small>";
-            banned.forEach(u => {
-                bl.innerHTML += `
-                    <div class="list-item banned">
-                        <span class="item-text">${u}</span>
-                        <button class="btn btn-sm btn-blue" onclick="unbanUser('${u}')">UNBAN</button>
-                    </div>`;
-            });
-
-            // Render Logs
-            const ll = document.getElementById('logList');
-            let logs = JSON.parse(localStorage.getItem('sys_login_logs') || '[]');
-            ll.innerHTML = logs.length ? "" : "<small>No login history yet.</small>";
-            logs.slice().reverse().forEach(log => {
-                ll.innerHTML += `
-                    <div class="list-item">
-                        <div class="item-info">
-                            <span class="item-text">${log.user}</span>
-                            <span class="item-sub">${log.time}</span>
-                        </div>
-                    </div>`;
-            });
-
-            // Render Admins
-            const al = document.getElementById('adminList');
-            let admins = JSON.parse(localStorage.getItem('sys_extra_admins') || '[]');
-            al.innerHTML = admins.length ? "" : "<small>No extra admins created.</small>";
-            admins.forEach((a, i) => {
-                al.innerHTML += `
-                    <div class="list-item">
-                        <span class="item-text">${a.user}</span>
-                        <button class="btn btn-sm btn-red" onclick="delAdmin(${i})">DELETE</button>
-                    </div>`;
-            });
-        }
-
-        function execAction(type) {
-            const user = document.getElementById('targetUser').value.trim();
-            if(!user) return notify("Enter username!");
-            if(user === OWNER) return notify("❌ Cannot ban Owner!");
-
-            let banned = JSON.parse(localStorage.getItem('sys_banned_list') || '[]');
-            
-            if(type === 'BAN') {
-                if(!banned.includes(user)) {
-                    banned.push(user);
-                    notify("🚫 " + user + " Banned");
-                }
-            } else {
-                banned = banned.filter(u => u !== user);
-                notify("🔓 " + user + " Unbanned");
-            }
-
-            localStorage.setItem('sys_banned_list', JSON.stringify(banned));
-            document.getElementById('targetUser').value = "";
-            renderAll();
-        }
-
-        function unbanUser(u) {
-            let banned = JSON.parse(localStorage.getItem('sys_banned_list') || '[]');
-            banned = banned.filter(user => user !== u);
-            localStorage.setItem('sys_banned_list', JSON.stringify(banned));
-            notify("🔓 Unbanned: " + u);
-            renderAll();
-        }
-
-        function createNewAdmin() {
-            const u = document.getElementById('newAdminU').value.trim();
-            const p = document.getElementById('newAdminP').value.trim();
-            if(!u || !p) return notify("Fill all fields!");
-            
-            let admins = JSON.parse(localStorage.getItem('sys_extra_admins') || '[]');
-            admins.push({user: u, pass: p});
-            localStorage.setItem('sys_extra_admins', JSON.stringify(admins));
-            
-            notify("👤 New Admin Saved");
-            document.getElementById('newAdminU').value = "";
-            document.getElementById('newAdminP').value = "";
-            renderAll();
-        }
-
-        function delAdmin(i) {
-            let admins = JSON.parse(localStorage.getItem('sys_extra_admins') || '[]');
-            admins.splice(i, 1);
-            localStorage.setItem('sys_extra_admins', JSON.stringify(admins));
-            renderAll();
-            notify("🗑️ Admin Deleted");
-        }
-
-        function clearLogs() {
-            if(confirm("Clear all login history?")) {
-                localStorage.removeItem('sys_login_logs');
-                renderAll();
-                notify("Logs Wiped");
-            }
-        }
-
-        function resetTransactions() {
-            if(confirm("DANGER: Delete all transaction data?")) {
-                localStorage.removeItem('trx_history');
-                notify("🗑️ DB Cleared");
-            }
+        window.updateStatus = function(val) {
+            set(ref(db, 'settings/toko_locked'), val)
+                .then(() => alert(val ? "Server sekarang OFFLINE" : "Server sekarang ONLINE"))
+                .catch((e) => alert("Gagal: " + e.message));
         }
     </script>
 </body>
