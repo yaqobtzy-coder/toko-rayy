@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Server Info</title>
+    <title>Rayy Server Info - Dev Only</title>
     <style>
         :root { --primary: #38bdf8; --bg: #0b1120; --card: #1e293b; --red: #ef4444; --green: #22c55e; }
         body { background-color: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow: hidden; }
@@ -23,7 +23,7 @@
         @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .splash-text { margin-top: 15px; font-weight: 800; color: var(--primary); letter-spacing: 2px; }
 
-        /* TOAST */
+        /* TOAST NOTIF */
         #customToast {
             position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
             background: var(--primary); color: var(--bg); padding: 12px 25px;
@@ -39,10 +39,13 @@
         .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
         .btn-blue { background: var(--primary); color: var(--bg); }
         .btn-red { background: var(--red); color: white; }
-        .btn-sm { width: auto; padding: 5px 10px; font-size: 0.65rem; }
+        .btn-sm { width: auto; padding: 6px 12px; font-size: 0.65rem; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
 
         .label { font-size: 0.7rem; color: #94a3b8; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #334155; font-size: 0.85rem; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #334155; }
+        .user-info { display: flex; flex-direction: column; }
+        .user-name { font-weight: bold; font-size: 0.9rem; }
+        .user-time { font-size: 0.7rem; color: #94a3b8; }
     </style>
 </head>
 <body>
@@ -66,42 +69,39 @@
 
         <div id="devPanel" style="display:none;">
             <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                <h2 style="color:var(--primary); margin:0;">Control Panel</h2>
+                <h2 style="color:var(--primary); margin:0;">Dev Control</h2>
                 <button class="btn btn-sm" style="background:#334155; color:white;" onclick="location.reload()">Logout</button>
             </div>
 
             <div class="card">
-                <span class="label">Switch Status Toko</span>
+                <span class="label">Switch Toko (Jam 9)</span>
                 <button id="statusBtn" class="btn" onclick="toggleToko()">Memuat...</button>
             </div>
 
-            <div class="card">
-                <span class="label">Riwayat Login Admin (Riil-Time)</span>
-                <div id="loginHistoryList" style="max-height: 150px; overflow-y: auto;"></div>
-            </div>
-
-            <div class="card">
-                <span class="label">Tambah Admin Baru</span>
-                <input type="text" id="newAU" placeholder="User Admin">
-                <input type="text" id="newAP" placeholder="Pass Admin">
-                <button class="btn btn-blue" onclick="addAdmin()">Simpan</button>
-                <div id="adminList" style="margin-top:15px;"></div>
-            </div>
-
-            <div class="card">
-                <span class="label">Manajemen Ban Manual</span>
-                <input type="text" id="banUserManual" placeholder="Ketik Username untuk Ban">
-                <button class="btn btn-red" onclick="banManual()">BAN USER SEKARANG</button>
-                
-                <div style="margin-top:20px;">
-                    <span class="label">Daftar User Terblokir</span>
-                    <div id="banList"></div>
+            <div class="card" style="border-color: var(--red);">
+                <span class="label" style="color: var(--red);">Ban Manual System</span>
+                <input type="text" id="manualInput" placeholder="Ketik Username User">
+                <div style="display:flex; gap:10px; margin-top:5px;">
+                    <button class="btn btn-red" style="flex:1;" onclick="manualAction('BAN')">BAN</button>
+                    <button class="btn btn-blue" style="flex:1;" onclick="manualAction('UNBAN')">UNBAN</button>
                 </div>
             </div>
 
             <div class="card">
-                <span class="label">Database Tools</span>
-                <button class="btn btn-red" onclick="resetTrx()">Reset Riwayat Transaksi</button>
+                <span class="label">Riwayat Login Admin</span>
+                <div id="loginHistoryList"></div>
+            </div>
+
+            <div class="card">
+                <span class="label">Tambah Admin</span>
+                <input type="text" id="newAU" placeholder="User Admin">
+                <input type="text" id="newAP" placeholder="Pass Admin">
+                <button class="btn btn-blue" onclick="addAdmin()">Simpan Admin</button>
+                <div id="adminList" style="margin-top:15px;"></div>
+            </div>
+
+            <div class="card">
+                <button class="btn btn-red" onclick="resetTrx()">Reset Semua Transaksi</button>
             </div>
         </div>
     </div>
@@ -128,11 +128,11 @@
 
         function handleDevLogin() {
             if (document.getElementById('devU').value === DEV_USER && document.getElementById('devP').value === DEV_PW) {
-                notify("🔓 Akses Diterima");
+                notify("🔓 Dev Mode Active");
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('devPanel').style.display = 'block';
                 renderAll();
-            } else { notify("❌ Salah Password!"); }
+            } else { notify("❌ Password Salah!"); }
         }
 
         function toggleToko() {
@@ -153,50 +153,64 @@
         }
 
         function renderAll() {
-            // Render Login History
+            // Render History
             const lh = document.getElementById('loginHistoryList');
             let history = JSON.parse(localStorage.getItem('login_logs') || '[]');
-            lh.innerHTML = history.length ? "" : "<small>Belum ada aktivitas.</small>";
+            let banned = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
+            lh.innerHTML = history.length ? "" : "<small>Kosong.</small>";
             history.slice().reverse().forEach(log => {
-                lh.innerHTML += `<div class="list-item"><span><b>${log.user}</b></span><small>${log.time}</small></div>`;
+                const isB = banned.includes(log.user);
+                lh.innerHTML += `
+                    <div class="list-item">
+                        <div class="user-info">
+                            <span class="user-name">${log.user} ${isB ? '<b style="color:var(--red)">[BAN]</b>' : ''}</span>
+                            <span class="user-time">${log.time}</span>
+                        </div>
+                        <button class="btn-sm" style="background:${isB?'var(--green)':'var(--red)'}; color:white;" 
+                        onclick="${isB?'unbanUser':'banUser'}('${log.user}')">${isB?'UNBAN':'BAN'}</button>
+                    </div>`;
             });
 
             // Render Admins
             const al = document.getElementById('adminList');
             let admins = JSON.parse(localStorage.getItem('admins') || '[]');
-            al.innerHTML = admins.length ? "<span class='label'>Daftar Admin</span>" : "";
+            al.innerHTML = admins.length ? "<span class='label'>Admin Aktif</span>" : "";
             admins.forEach((a, i) => {
-                al.innerHTML += `<div class="list-item"><span>${a.user}</span><button class="btn btn-red btn-sm" onclick="delAdmin(${i})">Hapus</button></div>`;
-            });
-
-            // Render Banned
-            const bl = document.getElementById('banList');
-            let banned = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
-            bl.innerHTML = banned.length ? "" : "<small>Tidak ada user yang diban.</small>";
-            banned.forEach((u, i) => {
-                bl.innerHTML += `<div class="list-item"><span>${u}</span><button class="btn btn-blue btn-sm" onclick="unban(${i})">Buka Ban (Unban)</button></div>`;
+                al.innerHTML += `<div class="list-item"><span>${a.user}</span><button class="btn-sm" style="background:var(--red); color:white;" onclick="delAdmin(${i})">Hapus</button></div>`;
             });
         }
 
-        // FUNGSI BAN MANUAL
-        function banManual() {
-            const user = document.getElementById('banUserManual').value;
-            if(!user) return notify("Masukkan username!");
-            let banned = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
-            if(!banned.includes(user)) {
-                banned.push(user);
-                localStorage.setItem('bannedUsers', JSON.stringify(banned));
-                notify("🚫 " + user + " Berhasil Diban!");
-                document.getElementById('banUserManual').value = "";
+        // FUNGSI MANUAL BAN/UNBAN
+        function manualAction(type) {
+            const user = document.getElementById('manualInput').value;
+            if(!user) return notify("Isi username!");
+            if(type === 'BAN') banUser(user);
+            else unbanUser(user);
+            document.getElementById('manualInput').value = "";
+        }
+
+        function banUser(user) {
+            if(user === "admin_rayy") return notify("Gagal: Owner!");
+            let b = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
+            if(!b.includes(user)) {
+                b.push(user);
+                localStorage.setItem('bannedUsers', JSON.stringify(b));
+                notify("🚫 " + user + " Diban");
                 renderAll();
-            } else {
-                notify("User sudah diban!");
             }
+        }
+
+        function unbanUser(user) {
+            let b = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
+            b = b.filter(u => u !== user);
+            localStorage.setItem('bannedUsers', JSON.stringify(b));
+            notify("🔓 " + user + " Dilepas");
+            renderAll();
         }
 
         function addAdmin() {
             const u = document.getElementById('newAU').value, p = document.getElementById('newAP').value;
-            if(!u || !p) return notify("Lengkapi data!");
+            if(!u || !p) return notify("Isi data!");
             let a = JSON.parse(localStorage.getItem('admins') || '[]');
             a.push({user: u, pass: p});
             localStorage.setItem('admins', JSON.stringify(a));
@@ -211,17 +225,10 @@
             renderAll(); notify("🗑️ Admin Dihapus");
         }
 
-        function unban(i) {
-            let b = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
-            let user = b[i];
-            b.splice(i, 1); localStorage.setItem('bannedUsers', JSON.stringify(b));
-            renderAll(); notify("🔓 " + user + " Dipulihkan");
-        }
-
         function resetTrx() {
-            if(confirm("Hapus semua history transaksi?")) {
+            if(confirm("Hapus history transaksi?")) {
                 localStorage.removeItem('trx_history');
-                notify("🗑️ History Bersih");
+                notify("🗑️ Bersih!");
             }
         }
     </script>
