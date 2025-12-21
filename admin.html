@@ -3,107 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Rayy Monitor</title>
+    <title>Rayy - Admin Monitor Secure v2.1</title>
+    
     <style>
-        :root { --primary: #38bdf8; --bg: #0b1120; --card: #1e293b; --text: #f8fafc; --red: #ef4444; --green: #22c55e; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; }
+        :root {
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.4);
+            --bg: #0b1120;
+            --card: #1e293b;
+            --dark: #0f172a;
+            --text: #f8fafc;
+            --red: #ef4444;
+            --green: #22c55e;
+            --orange: #f59e0b;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-        .container { max-width: 500px; margin: auto; padding: 20px; }
-        .card { background: var(--card); padding: 30px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; }
-        
-        input { width: 100%; padding: 15px; background: #0f172a; border: 2px solid transparent; color: white; border-radius: 12px; margin-bottom: 10px; text-align: center; }
-        .btn-unlock { width: 100%; padding: 15px; border: none; border-radius: 12px; background: var(--primary); font-weight: 900; cursor: pointer; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
-        .item { background: var(--card); padding: 20px; border-radius: 20px; margin-bottom: 10px; border-left: 5px solid var(--primary); position: relative; }
-        .status-label { font-size: 0.7rem; font-weight: 900; padding: 4px 10px; border-radius: 5px; float: right; }
-        .pending { background: rgba(255, 165, 0, 0.2); color: orange; }
-        .success { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at top right, #1e293b 0%, #0b1120 100%);
+        }
 
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-        .box-msg { border: 2px solid var(--red); padding: 40px; border-radius: 35px; width: 100%; }
-        .btn-wa { display: block; margin-top: 20px; padding: 15px; background: var(--primary); color: #000; text-decoration: none; border-radius: 15px; font-weight: 900; }
+        /* --- SPLASH SCREEN --- */
+        #splash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; transition: opacity 0.8s ease;
+        }
+        .logo-box {
+            width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
+            display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
+            font-weight: 900; color: #0b1120; box-shadow: 0 0 40px var(--primary-glow);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        /* --- CONTAINER --- */
+        .container { max-width: 550px; margin: auto; padding: 25px; opacity: 0; transform: translateY(20px); transition: 1s ease; }
+        .container.visible { opacity: 1; transform: translateY(0); }
+
+        /* --- LOGIN CARD --- */
+        .login-card {
+            background: var(--card); padding: 50px 35px; border-radius: 40px;
+            text-align: center; border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); margin-top: 80px;
+        }
+        .login-card h2 { color: var(--primary); font-weight: 900; margin-bottom: 30px; }
+
+        input {
+            width: 100%; padding: 20px; background: var(--dark); border: 2px solid transparent;
+            color: white; border-radius: 20px; font-size: 1rem; text-align: center;
+            transition: var(--transition); margin-bottom: 15px;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .btn-unlock {
+            width: 100%; padding: 20px; border: none; border-radius: 20px;
+            background: var(--primary); color: #0b1120; font-weight: 900;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+        }
+
+        /* --- MONITOR AREA --- */
+        #monitorArea { display: none; }
+        .header-monitor { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .item-card {
+            background: var(--card); padding: 25px; border-radius: 30px; margin-bottom: 15px;
+            border-left: 6px solid var(--primary); position: relative; animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .status-pill {
+            position: absolute; top: 25px; right: 25px; padding: 6px 12px;
+            border-radius: 10px; font-size: 0.65rem; font-weight: 900; text-transform: uppercase;
+        }
+        .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--orange); border: 1px solid var(--orange); }
+        .status-success { background: rgba(34, 197, 94, 0.1); color: var(--green); border: 1px solid var(--green); }
+
+        .btn-confirm {
+            width: 100%; margin-top: 20px; padding: 14px; border: none; border-radius: 15px;
+            background: var(--green); color: white; font-weight: 800; cursor: pointer;
+        }
+        .btn-confirm:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
+
+        /* --- OVERLAY BANNED --- */
+        .full-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 10001; display: flex; align-items: center;
+            justify-content: center; padding: 30px; text-align: center;
+        }
+        .box-msg { border: 2px solid var(--red); padding: 50px 30px; border-radius: 40px; background: rgba(239, 68, 68, 0.05); width: 100%; max-width: 420px; }
+        .btn-wa { display: inline-block; margin-top: 30px; padding: 18px 35px; background: var(--primary); color: #0b1120; text-decoration: none; border-radius: 20px; font-weight: 900; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div id="loginPage" style="margin-top: 100px;">
-            <div class="card">
-                <h2 style="text-align:center; color:var(--primary); margin-bottom:20px;">ADMIN LOGIN</h2>
+    <div id="splash">
+        <div class="logo-box">R</div>
+    </div>
+
+    <div class="container" id="main-content">
+        <div id="loginPage">
+            <div class="login-card">
+                <h2>ADMIN LOGIN</h2>
                 <input type="text" id="adminUser" placeholder="Username">
                 <input type="password" id="adminPass" placeholder="Password">
-                <button class="btn-unlock" onclick="authAdmin()">MASUK</button>
+                <button class="btn-unlock" onclick="authAdmin()">Login Monitor</button>
             </div>
         </div>
 
-        <div id="monitorArea" style="display:none;">
-            <h2 style="margin-bottom:20px;">LIVE MONITOR</h2>
+        <div id="monitorArea">
+            <div class="header-monitor">
+                <h2>LIVE <span style="color:var(--primary);">MONITOR</span></h2>
+                <button onclick="location.reload()" style="background:none; border:none; color:var(--red); font-weight:800; cursor:pointer;">LOGOUT</button>
+            </div>
             <div id="historyList"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // CEK BAN REAL-TIME (FIX)
-        function startRealTimeBanCheck(username) {
-            if(username === "Owner Rayy") return;
-            onValue(ref(db, 'sys_extra_admins'), (snap) => {
-                let found = false;
-                snap.forEach((child) => { if(child.val().user === username) found = true; });
-                if(!found) {
-                    document.body.innerHTML = `<div class="overlay"><div class="box-msg"><h1 style="color:red;">AKUN DIBLOKIR</h1><p>Akun Admin anda Telah di blokir oleh owner Rayy</p><a href="https://wa.me/628131172093?text=Halo%20Owner,%20akun%20saya%20(${username})%20terkena%20ban" class="btn-wa">HUBUNGI OWNER</a></div></div>`;
-                }
-            });
-        }
+        const OWNER_KEY = "085794";
+        const OWNER_WA = "628131172093";
 
+        // 1. CEK SERVER TUTUP
         onValue(ref(db, 'settings/toko_locked'), (snap) => {
             if (snap.val() === true) {
-                document.body.innerHTML = `<div class="overlay"><div class="box-msg"><h1 style="color:var(--primary);">SERVER TUTUP</h1><p>Server monitoring ditutup. Kembali besok 09:00 WIB</p></div></div>`;
+                document.body.innerHTML = `<div class="full-overlay"><div class="box-msg" style="border-color: var(--primary);"><h1>SERVER TUTUP</h1><p>Kembali besok pukul 09:00 WIB</p></div></div>`;
             }
         });
 
-        window.authAdmin = function() {
-            const u = document.getElementById('adminUser').value;
-            const p = document.getElementById('adminPass').value;
-            if(p === "085794") { showMonitor("Owner Rayy"); return; }
+        // 2. FUNGSI AUTO-KICK (REAL-TIME PROTECTION)
+        function startRealTimeProtection(username) {
+            if(username === "Owner Rayy") return;
 
-            onValue(ref(db, 'sys_extra_admins'), (snap) => {
-                let found = false;
-                snap.forEach((c) => { if(c.val().user === u && c.val().pass === p) found = true; });
-                if(found) { showMonitor(u); startRealTimeBanCheck(u); } else { alert("Salah!"); }
+            // CEK DUA TEMPAT SEKALIGUS: BANNED_USERS & SYS_EXTRA_ADMINS
+            onValue(ref(db, 'banned_users/' + username), (banSnap) => {
+                onValue(ref(db, 'sys_extra_admins'), (adminSnap) => {
+                    const admins = adminSnap.val();
+                    let isExistInAdmin = false;
+                    if(admins) {
+                        for(let id in admins) { if(admins[id].user === username) isExistInAdmin = true; }
+                    }
+
+                    // JIKA TERDETEKSI DI DAFTAR BAN (INDEX) ATAU DIHAPUS DARI DAFTAR ADMIN
+                    if(banSnap.exists() || !isExistInAdmin) {
+                        kickAdmin(username);
+                    }
+                });
+            });
+        }
+
+        function kickAdmin(username) {
+            const waLink = `https://wa.me/${OWNER_WA}?text=halo%20owner%20terhormat%20akun%20saya%20(${username})%20terkena%20ban%20tanpa%20alasan%20harap%20di%20tinjau🙏`;
+            document.body.innerHTML = `
+            <div class="full-overlay">
+                <div class="box-msg">
+                    <h1 style="color:var(--red);">AKUN DIBLOKIR</h1>
+                    <p>Akun Admin anda Telah di blokir oleh developer/owner silahkan hubungi owner Rayy</p>
+                    <a href="${waLink}" class="btn-wa">CONTACT OWNER</a>
+                </div>
+            </div>`;
+        }
+
+        // 3. PROSES LOGIN (FIX LOLOS BAN)
+        window.authAdmin = function() {
+            const u = document.getElementById('adminUser').value.trim();
+            const p = document.getElementById('adminPass').value.trim();
+
+            if(!u || !p) return alert("Isi data!");
+            if(p === OWNER_KEY) { showMonitor("Owner Rayy"); return; }
+
+            // PERTAMA: CEK APAKAH USERNAME INI DI BAN (LIST INDEX)
+            onValue(ref(db, 'banned_users/' + u), (banCheck) => {
+                if(banCheck.exists()) {
+                    alert("Gagal Login: Akun ini telah diblokir secara permanen oleh Owner!");
+                    return;
+                }
+
+                // KEDUA: JIKA TIDAK DI BAN, BARU CEK PASSWORD ADMINNYA
+                onValue(ref(db, 'sys_extra_admins'), (snap) => {
+                    const data = snap.val();
+                    let valid = false;
+                    for(let id in data) { if(data[id].user === u && data[id].pass === p) valid = true; }
+
+                    if(valid) {
+                        showMonitor(u);
+                        startRealTimeProtection(u);
+                    } else {
+                        alert("Akses Ditolak: Password salah atau akun bukan admin!");
+                    }
+                }, { onlyOnce: true });
+
             }, { onlyOnce: true });
         }
 
         function showMonitor(adminName) {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('monitorArea').style.display = 'block';
+            push(ref(db, 'sys_login_logs'), { user: adminName, time: new Date().toLocaleString() });
 
             onValue(ref(db, 'transactions'), (snapshot) => {
                 const list = document.getElementById('historyList');
                 list.innerHTML = "";
-                snapshot.forEach((child) => {
-                    const item = child.val();
-                    const statusClass = item.status === 'Success' ? 'success' : 'pending';
-                    list.innerHTML += `
-                        <div class="item">
-                            <span class="status-label ${statusClass}">${item.status || 'Pending'}</span>
-                            <b>${item.nama}</b><br><small>Rp ${item.jumlah} - ${item.waktu}</small>
-                            <button onclick="confirmPay('${child.key}')" style="display:block; width:100%; margin-top:10px; border:none; background:var(--green); color:white; border-radius:8px; padding:8px; font-weight:800; cursor:pointer;">KONFIRMASI</button>
-                        </div>`;
-                });
+                const data = snapshot.val();
+                if(data) {
+                    Object.keys(data).reverse().forEach(id => {
+                        const item = data[id];
+                        const isSuccess = item.status === "Success";
+                        list.innerHTML += `
+                            <div class="item-card">
+                                <div class="status-pill ${isSuccess ? 'status-success' : 'status-pending'}">${item.status || 'Pending'}</div>
+                                <div style="padding-right: 85px;">
+                                    <b>${item.nama}</b>
+                                    <p style="color:var(--primary); font-weight:800; margin-top:5px;">Rp ${Number(item.jumlah).toLocaleString()}</p>
+                                    <p style="font-size:0.75rem; opacity:0.4; margin-top:5px;">${item.waktu}</p>
+                                </div>
+                                <button class="btn-confirm" ${isSuccess ? 'disabled' : ''} onclick="confirmPay('${id}')">
+                                    ${isSuccess ? '✓ TERKONFIRMASI' : 'KONFIRMASI PEMBAYARAN'}
+                                </button>
+                            </div>`;
+                    });
+                }
             });
         }
 
         window.confirmPay = function(id) {
             update(ref(db, 'transactions/' + id), { status: "Success" });
         }
+
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('splash').style.display = 'none';
+                document.getElementById('main-content').classList.add('visible');
+            }, 2000);
+        };
     </script>
 </body>
 </html>
