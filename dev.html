@@ -5,55 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rayy Super Dev Panel</title>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; padding: 20px; }
-        .container { max-width: 600px; margin: auto; }
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; padding: 20px; margin: 0; }
+        .container { max-width: 500px; margin: auto; }
         
-        /* Header Style sesuai gambar */
-        .header-panel { text-align: center; margin-bottom: 30px; }
-        .header-panel h1 { font-size: 1.8rem; display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; }
-        
-        .info-box { background: #1e293b; border-radius: 15px; padding: 20px; border: 1px solid #334155; margin-bottom: 20px; text-align: left; }
-        .info-text { color: #94a3b8; margin-bottom: 10px; font-size: 0.95rem; }
-        .status-text { color: #22c55e; font-weight: bold; margin-bottom: 20px; }
+        /* Header Title sesuai gambar */
+        .header-panel { text-align: center; margin: 30px 0; }
+        .header-panel h1 { font-size: 2.2rem; line-height: 1.1; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        .header-panel h1 span { display: block; }
+        .icon-header { font-size: 3rem; margin-bottom: 10px; }
 
-        .card { background: #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #334155; }
-        h2 { color: #38bdf8; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; margin-top: 0; }
+        /* Kotak Info & List Akun */
+        .info-card { background: #1e293b; border-radius: 18px; padding: 25px; border: 1px solid #334155; margin-bottom: 25px; }
+        .welcome-text { color: #94a3b8; font-size: 0.9rem; margin-bottom: 5px; line-height: 1.4; }
+        .status-online { color: #22c55e; font-weight: bold; font-size: 1rem; margin-bottom: 20px; }
+
+        .card { background: #1e293b; border-radius: 18px; padding: 25px; margin-bottom: 25px; border: 1px solid #334155; }
+        h2 { color: #38bdf8; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; margin: 0 0 15px 0; }
         
-        input { width: 100%; padding: 12px; margin: 8px 0; background: #334155; border: 1px solid #475569; color: white; border-radius: 8px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; }
+        input { width: 100%; padding: 14px; margin: 8px 0; background: #2b384e; border: 1px solid #3d4b63; color: white; border-radius: 10px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1rem; text-transform: uppercase; }
         .btn-green { background: #22c55e; color: white; }
         .btn-blue { background: #38bdf8; color: white; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { text-align: left; padding: 12px 8px; border-bottom: 1px solid #334155; font-size: 0.9rem; }
-        th { color: #94a3b8; font-weight: normal; }
-        .badge-owner { background: #f59e0b; color: black; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
-        .btn-hapus { background: #ef4444; border: none; color: white; border-radius: 4px; padding: 4px 8px; font-size: 0.7rem; }
+        th, td { text-align: left; padding: 12px 5px; border-bottom: 1px solid #334155; font-size: 0.85rem; }
+        th { color: #94a3b8; font-weight: 600; }
+        .badge-owner { background: #f59e0b; color: black; font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
+        .badge-hapus { background: #ef4444; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="authOverlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background:#0f172a; z-index:9999; display: flex; align-items: center; justify-content: center;">
-    <button onclick="checkPass()" style="padding: 15px 30px; border-radius: 10px; border: none; background: #38bdf8; color: white; font-weight: bold; cursor: pointer;">MASUK KE PANEL DEVELOPER</button>
+    <button onclick="checkPass()" style="padding: 15px 30px; border-radius: 10px; border: none; background: #38bdf8; color: white; font-weight: bold;">BUKA PANEL DEVELOPER</button>
 </div>
 
 <div class="container">
     <div class="header-panel">
-        <h1>🛠️ Rayy Super Dev Panel</h1>
+        <h1>
+            <span class="icon-header">🛠️</span>
+            <span>Rayy Super Dev</span>
+            <span>Panel</span>
+        </h1>
     </div>
 
-    <div class="info-box">
-        <p class="info-text">Selamat datang di panel kendali utama toko kamu.</p>
-        <p class="status-text">Status Server: Online</p>
+    <div class="info-card">
+        <p class="welcome-text">Selamat datang di panel kendali utama toko kamu.</p>
+        <p class="status-online">Status Server: Online</p>
         
-        <h2>👥 List Akun Terdaftar</h2>
         <table>
             <thead>
                 <tr><th>User</th><th>Nama</th><th>Aksi</th></tr>
             </thead>
             <tbody>
                 <tr><td>admin_rayy <span class="badge-owner">OWNER</span></td><td>Rayy Utama</td><td>-</td></tr>
-                <tr><td>kyle_admin</td><td>Kyle</td><td><button class="btn-hapus">Hapus</button></td></tr>
+                <tr><td>kyle_admin</td><td>Kyle</td><td><button class="badge-hapus">Hapus</button></td></tr>
             </tbody>
         </table>
     </div>
@@ -78,10 +84,10 @@
 <script>
     function checkPass() {
         const pass = prompt("Masukkan Password Dev:");
-        if (pass === "rayy123") { // Password kamu
+        if (pass === "Dev-rayy") {
             document.getElementById('authOverlay').style.display = 'none';
         } else {
-            alert("Akses Ditolak!");
+            alert("Salah!");
             window.location.href = "index.html";
         }
     }
