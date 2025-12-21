@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Server Dev Panel</title>
+    <title>Rayy Super Dev Panel</title>
     <style>
         body { background-color: #0b1120; color: #f8fafc; font-family: sans-serif; padding: 20px; margin: 0; }
         .container { max-width: 450px; margin: auto; }
         .header-panel { text-align: center; margin: 30px 0; }
-        .icon-header { font-size: 3rem; display: block; }
-        .title-text { font-size: 2.2rem; font-weight: 800; line-height: 1; color: white; display: block; }
+        .icon-header { font-size: 3rem; display: block; margin-bottom: 5px; }
+        .title-text { font-size: 2.2rem; font-weight: 800; line-height: 1.1; color: white; display: block; }
         .card { background: #1e293b; border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid #334155; }
-        .status-online { color: #22c55e; font-weight: bold; margin-bottom: 20px; display: block; }
+        .status-online { color: #22c55e; font-weight: bold; margin-bottom: 15px; display: block; }
         h2 { color: #38bdf8; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; margin: 0 0 15px 0; }
-        input { width: 100%; padding: 15px; margin: 8px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
-        .btn-green { background: #22c55e; color: white; }
-        .btn-blue { background: #38bdf8; color: white; }
-        table { width: 100%; border-collapse: collapse; }
-        td { padding: 12px 5px; border-bottom: 1px solid #334155; font-size: 0.9rem; }
-        .btn-ban { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; }
+        input { width: 100%; padding: 15px; margin: 8px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; font-size: 1rem; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; text-transform: uppercase; font-size: 1rem; }
+        .btn-green { background: #22c55e; color: white; box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3); }
+        .btn-blue { background: #38bdf8; color: white; box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3); }
+        .btn-unban { background: #0ea5e9; color: white; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px 5px; border-bottom: 1px solid #334155; font-size: 0.9rem; }
+        .badge-owner { background: #f59e0b; color: black; font-size: 0.65rem; padding: 2px 6px; border-radius: 5px; font-weight: bold; }
+        .btn-hapus { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="authOverlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background:#0b1120; z-index:9999; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px;">
-    <div id="loginBox">
-        <button onclick="checkPass()" style="padding: 15px 30px; border-radius: 10px; border: none; background: #38bdf8; color: white; font-weight: bold;">MASUK KE PANEL DEV</button>
-    </div>
+<div id="authOverlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background:#0b1120; z-index:9999; display: flex; align-items: center; justify-content: center; text-align: center;">
+    <button onclick="checkPass()" style="padding: 15px 30px; border-radius: 12px; border: none; background: #38bdf8; color: white; font-weight: bold; font-size: 1.1rem; cursor: pointer;">BUKA PANEL DEVELOPER</button>
 </div>
 
 <div class="container">
@@ -41,6 +41,9 @@
         <span class="status-online">Status Server: Online</span>
         <h2>👥 List Akun Terdaftar</h2>
         <table>
+            <thead>
+                <tr><th>User</th><th>Nama</th><th>Aksi</th></tr>
+            </thead>
             <tbody id="userTable">
                 </tbody>
         </table>
@@ -48,86 +51,86 @@
 
     <div class="card">
         <h2>🔒 Ban Admin / Ganti Pass</h2>
-        <input type="text" id="banUser" placeholder="Username yang akan di BAN">
+        <input type="text" id="targetUser" placeholder="Username yang akan di BAN/UNBAN">
         <button class="btn btn-green" onclick="prosesBan()">BAN & BLOKIR AKSES</button>
+        <button class="btn btn-unban" onclick="prosesUnban()">BUKA BLOKIR (UNBAN)</button>
     </div>
 
     <div class="card">
         <h2>➕ Tambah Admin Baru</h2>
         <input type="text" id="newUser" placeholder="Username">
+        <input type="password" id="newPass" placeholder="Password Admin">
         <input type="text" id="newName" placeholder="Nama Lengkap">
         <button class="btn btn-blue" onclick="simpanAdmin()">SIMPAN ADMIN BARU</button>
     </div>
 </div>
 
 <script>
-    const waNumber = "628131172093";
-
     function checkPass() {
-        const user = prompt("Masukkan Username Admin:");
-        const bannedList = JSON.parse(localStorage.getItem('bannedUsers')) || [];
-
-        if (bannedList.includes(user)) {
-            const pesan = `HALO DEVELOPER TERHORMAT SAYA ADMIN ${user} INGIN MENGAJUKAN BANDING TERHADAP AKUN ADMIN SAYA, TERIMAKASIH`;
-            const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(pesan)}`;
-            
-            document.getElementById('loginBox').innerHTML = `
-                <h2 style="color: #ef4444;">AKUN ADMIN ANDA TELAH DI BAN PERMANEN OLEH DEV/RAYY</h2>
-                <p>Hubungi Contact Developer: ${waNumber}</p>
-                <a href="${waLink}" class="btn btn-blue" style="text-decoration: none; display: block;">AJUKAN BANDING KE WA</a>
-            `;
-            return;
-        }
-
-        if (user === "admin_rayy") {
-            const pass = prompt("Masukkan Password:");
-            if (pass === "rayy123") {
-                document.getElementById('authOverlay').style.display = 'none';
-                loadAdmins();
-            } else { alert("Password Salah!"); }
+        const pass = prompt("Password Developer:");
+        if (pass === "rayy123") {
+            document.getElementById('authOverlay').style.display = 'none';
+            loadAdmins();
         } else {
-            alert("Username tidak dikenal atau gunakan akun Owner.");
+            alert("Akses Ditolak!");
+            window.location.href = "index.html";
         }
     }
 
     function simpanAdmin() {
         const user = document.getElementById('newUser').value;
+        const pass = document.getElementById('newPass').value;
         const name = document.getElementById('newName').value;
-        if(!user || !name) return alert("Isi semua data!");
+        if(!user || !pass || !name) return alert("Harap isi semua kolom!");
 
         let listAdmin = JSON.parse(localStorage.getItem('admins')) || [];
-        listAdmin.push({ user, name });
+        listAdmin.push({ user, pass, name });
         localStorage.setItem('admins', JSON.stringify(listAdmin));
         
-        document.getElementById('newUser').value = "";
-        document.getElementById('newName').value = "";
-        loadAdmins();
-        alert("Admin Berhasil Ditambah!");
+        alert("Admin " + user + " Berhasil Disimpan!");
+        location.reload();
     }
 
     function prosesBan() {
-        const user = document.getElementById('banUser').value;
-        if(!user) return alert("Masukkan username!");
+        const user = document.getElementById('targetUser').value;
+        if(!user) return alert("Masukkan username target!");
+        let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
+        if(!banned.includes(user)) banned.push(user);
+        localStorage.setItem('bannedUsers', JSON.stringify(banned));
+        alert("Username " + user + " Berhasil di BAN PERMANEN!");
+        document.getElementById('targetUser').value = "";
+    }
 
-        let bannedList = JSON.parse(localStorage.getItem('bannedUsers')) || [];
-        if(!bannedList.includes(user)) {
-            bannedList.push(user);
-            localStorage.setItem('bannedUsers', JSON.stringify(bannedList));
-            alert(`User ${user} BERHASIL DI BAN!`);
-            document.getElementById('banUser').value = "";
-        }
+    function prosesUnban() {
+        const user = document.getElementById('targetUser').value;
+        if(!user) return alert("Masukkan username target!");
+        let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
+        const index = banned.indexOf(user);
+        if (index > -1) {
+            banned.splice(index, 1);
+            localStorage.setItem('bannedUsers', JSON.stringify(banned));
+            alert("Blokir " + user + " Berhasil Dibuka!");
+        } else { alert("User tidak dalam daftar blokir."); }
+        document.getElementById('targetUser').value = "";
     }
 
     function loadAdmins() {
         const tableBody = document.getElementById('userTable');
-        tableBody.innerHTML = '<tr><td>admin_rayy <span style="background:#f59e0b; color:black; padding:2px 5px; border-radius:4px; font-size:10px;">OWNER</span></td><td>Rayy Utama</td><td>-</td></tr>';
-        
+        tableBody.innerHTML = '<tr><td>admin_rayy <span class="badge-owner">OWNER</span></td><td>Rayy Utama</td><td>-</td></tr>';
         let listAdmin = JSON.parse(localStorage.getItem('admins')) || [];
-        listAdmin.forEach((admin) => {
-            tableBody.innerHTML += `<tr><td>${admin.user}</td><td>${admin.name}</td><td><span style="color:#ef4444">Aktif</span></td></tr>`;
+        listAdmin.forEach((admin, index) => {
+            tableBody.innerHTML += `<tr><td>${admin.user}</td><td>${admin.name}</td><td><button class="btn-hapus" onclick="hapusAdmin(${index})">Hapus</button></td></tr>`;
         });
     }
-</script>
 
+    function hapusAdmin(index) {
+        if(confirm("Hapus admin ini?")) {
+            let listAdmin = JSON.parse(localStorage.getItem('admins'));
+            listAdmin.splice(index, 1);
+            localStorage.setItem('admins', JSON.stringify(listAdmin));
+            loadAdmins();
+        }
+    }
+</script>
 </body>
 </html>
