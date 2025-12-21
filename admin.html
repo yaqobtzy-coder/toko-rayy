@@ -1,212 +1,43 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Transaction Core</title>
-    <script>
-        // SINKRONISASI STATUS SERVER DARI DEV
-        if (localStorage.getItem('toko_locked') === 'true') {
-            document.write(`
-                <body style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center;">
-                    <div style="border: 2px solid #ef4444; padding: 30px; border-radius: 20px;">
-                        <h1 style="color:#ef4444; margin:0;">SERVER OFFLINE</h1>
-                        <p style="opacity:0.7;">Kembali lagi besok jam 09:00 Pagi.</p>
-                    </div>
-                </body>
-            `);
-            window.stop();
-        }
-    </script>
+    <title>Admin - Riwayat Transaksi</title>
     <style>
-        :root { --primary: #38bdf8; --bg: #0b1120; --card: #1e293b; --red: #ef4444; --green: #22c55e; --text: #f1f5f9; }
-        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        
-        #splash {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; transition: 0.6s;
-        }
-        .splash-logo { width: 80px; height: 80px; background: var(--primary); border-radius: 20px; font-size: 2.5rem; font-weight: 900; color: var(--bg); display: flex; align-items: center; justify-content: center; }
-
-        .toast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: var(--primary); color: var(--bg); padding: 15px 30px;
-            border-radius: 50px; font-weight: 800; z-index: 10000; transition: 0.5s;
-        }
-        .toast.show { top: 30px; }
-
-        .container { max-width: 500px; margin: auto; padding: 20px; }
-        .card { background: var(--card); border-radius: 25px; padding: 25px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .header h2 { margin: 0; color: var(--primary); font-size: 1.2rem; }
-
-        input { width: 100%; padding: 16px; margin: 10px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 15px; box-sizing: border-box; outline: none; }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .btn-blue { background: var(--primary); color: var(--bg); }
-        .btn-sm { width: auto; padding: 6px 12px; font-size: 0.65rem; margin-top: 10px; }
-
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
-        .stat-box { background: #0f172a; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid rgba(56,189,248,0.1); }
-        .stat-num { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
-        .stat-label { font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; }
-
-        .trx-item { background: #0f172a; padding: 18px; border-radius: 18px; margin-bottom: 12px; border-left: 4px solid orange; position: relative; }
-        .trx-item.sukses { border-left-color: var(--green); }
-        .status-tag { position: absolute; top: 15px; right: 15px; font-size: 0.6rem; padding: 3px 8px; border-radius: 5px; font-weight: bold; }
-        .tag-pending { background: rgba(255, 165, 0, 0.2); color: orange; }
-        .tag-sukses { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+        body { background: #0b1120; color: white; font-family: sans-serif; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #1e293b; padding: 15px; text-align: left; }
+        th { background: #38bdf8; color: #0b1120; }
+        tr:nth-child(even) { background: #141b2d; }
     </style>
 </head>
 <body>
-
-    <div id="splash"><div class="splash-logo">R</div></div>
-    <div id="toast" class="toast">Notif</div>
-
-    <div class="container">
-        <div id="loginView" style="margin-top: 50px;">
-            <div style="text-align:center; margin-bottom:30px;">
-                <h1 style="margin:0; font-weight:900;">ADMIN <span style="color:var(--primary)">ACCESS</span></h1>
-                <p style="opacity:0.6; font-size:0.8rem;">Rayy Server Management</p>
-            </div>
-            <div class="card">
-                <input type="text" id="user" placeholder="Username">
-                <input type="password" id="pass" placeholder="Password">
-                <button class="btn btn-blue" onclick="handleLogin()">AUTHENTICATE</button>
-            </div>
-        </div>
-
-        <div id="dashView" style="display: none;">
-            <div class="header">
-                <h2 id="adminName">Welcome Admin</h2>
-                <button onclick="location.reload()" style="background:none; border:1px solid #334155; color:white; padding:5px 12px; border-radius:10px; font-size:0.7rem;">LOGOUT</button>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-num" id="totalTrx">0</div>
-                    <div class="stat-label">Total Transaksi</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-num" id="income" style="color:var(--green)">Rp 0</div>
-                    <div class="stat-label">Total Income</div>
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                <span style="font-size: 0.75rem; font-weight: 800; color: var(--primary);">TRANSACTION LOGS</span>
-                <span onclick="loadTrx()" style="cursor:pointer; font-size:0.75rem;">🔄 Refresh</span>
-            </div>
-
-            <div id="trxContainer"></div>
-        </div>
-    </div>
+    <h1>Riwayat Transaksi Masuk</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Username</th>
+                <th>Nominal</th>
+                <th>Waktu</th>
+            </tr>
+        </thead>
+        <tbody id="log-table"></tbody>
+    </table>
 
     <script>
-        const OWNER_ID = "rayy_dev";
-        const OWNER_KEY = "085794";
-        let failCount = 0;
-
-        window.onload = () => {
-            setTimeout(() => { document.getElementById('splash').style.display = 'none'; }, 1500);
-        };
-
-        function showToast(m) {
-            const t = document.getElementById('toast');
-            t.innerText = m; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
-
-        function handleLogin() {
-            const u = document.getElementById('user').value.trim();
-            const p = document.getElementById('pass').value.trim();
-
-            // SINKRONISASI DATA DARI DEV (sys_banned_list & sys_extra_admins)
-            let banned = JSON.parse(localStorage.getItem('sys_banned_list') || '[]');
-            let extras = JSON.parse(localStorage.getItem('sys_extra_admins') || '[]');
-
-            // Cek Banned
-            if (banned.includes(u)) {
-                alert("AKUN ANDA DIBLOKIR!");
-                return;
-            }
-
-            // Validasi Kredensial
-            let match = (u === "admin_rayy" && p === "rayy123") || 
-                        (u === OWNER_ID && p === OWNER_KEY) ||
-                        extras.find(a => a.user === u && a.pass === p);
-
-            if (match) {
-                showToast("🔓 Access Granted");
-                
-                // Simpan Log ke Database Dev
-                let logs = JSON.parse(localStorage.getItem('sys_login_logs') || '[]');
-                logs.push({ user: u, time: new Date().toLocaleString('id-ID') });
-                localStorage.setItem('sys_login_logs', JSON.stringify(logs.slice(-30)));
-
-                document.getElementById('loginView').style.display = 'none';
-                document.getElementById('dashView').style.display = 'block';
-                document.getElementById('adminName').innerText = "Hi, " + u;
-                loadTrx();
-            } else {
-                if(u !== OWNER_ID) {
-                    failCount++;
-                    if(failCount >= 3) {
-                        banned.push(u);
-                        localStorage.setItem('sys_banned_list', JSON.stringify(banned));
-                        alert("Terlalu banyak kesalahan. AKUN DIBLOKIR!");
-                    } else { showToast("❌ Login Failed! (" + failCount + "/3)"); }
-                } else { showToast("❌ Owner Password Wrong!"); }
-            }
-        }
-
-        function loadTrx() {
-            const container = document.getElementById('trxContainer');
-            const data = JSON.parse(localStorage.getItem('trx_history') || '[]');
-            
-            let totalIncome = 0;
-            data.forEach(t => { if(t.status === 'Sukses') totalIncome += parseInt(t.amount); });
-            document.getElementById('totalTrx').innerText = data.length;
-            document.getElementById('income').innerText = "Rp " + totalIncome.toLocaleString('id-ID');
-
-            if (data.length === 0) {
-                container.innerHTML = "<p style='text-align:center; opacity:0.5; margin-top:30px;'>No Transactions.</p>";
-                return;
-            }
-
-            container.innerHTML = "";
-            data.slice().reverse().forEach((trx, index) => {
-                const realIdx = data.length - 1 - index;
-                const isS = trx.status === 'Sukses';
-                container.innerHTML += `
-                    <div class="trx-item ${isS ? 'sukses' : ''}">
-                        <span class="status-tag ${isS ? 'tag-sukses' : 'tag-pending'}">${trx.status.toUpperCase()}</span>
-                        <div style="font-weight:bold; font-size:1.1rem; color:var(--primary);">Rp ${parseInt(trx.amount).toLocaleString('id-ID')}</div>
-                        <div style="font-size:0.7rem; color:#94a3b8; margin-top:5px;">ID: ${trx.orderId} | User: ${trx.user || 'Guest'}</div>
-                        <div style="margin-top:10px; display:flex; gap:10px;">
-                            ${!isS ? `<button class="btn btn-blue btn-sm" onclick="confirmTrx(${realIdx})">CONFIRM</button>` : ''}
-                            <button class="btn btn-red btn-sm" style="background:#334155;" onclick="delTrx(${realIdx})">DELETE</button>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        function confirmTrx(idx) {
-            let data = JSON.parse(localStorage.getItem('trx_history') || '[]');
-            data[idx].status = "Sukses";
-            localStorage.setItem('trx_history', JSON.stringify(data));
-            showToast("✅ Confirmed!");
-            loadTrx();
-        }
-
-        function delTrx(idx) {
-            if(confirm("Hapus transaksi ini?")) {
-                let data = JSON.parse(localStorage.getItem('trx_history') || '[]');
-                data.splice(idx, 1);
-                localStorage.setItem('trx_history', JSON.stringify(data));
-                loadTrx();
-            }
-        }
+        const logs = JSON.parse(localStorage.getItem('trx_history') || '[]');
+        const table = document.getElementById('log-table');
+        
+        logs.reverse().forEach(item => {
+            table.innerHTML += `
+                <tr>
+                    <td>${item.orderId}</td>
+                    <td>${item.user}</td>
+                    <td>Rp ${parseInt(item.amount).toLocaleString()}</td>
+                    <td>${item.date}</td>
+                </tr>
+            `;
+        });
     </script>
 </body>
 </html>
