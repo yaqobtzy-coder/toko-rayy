@@ -7,20 +7,13 @@
     <style>
         body { background-color: #0b1120; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
         .container { max-width: 450px; margin: auto; }
-        .card { background: #1e293b; border-radius: 15px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; position: relative; transition: 0.3s; }
-        
-        /* Gaya Login */
+        .card { background: #1e293b; border-radius: 15px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; position: relative; }
         .login-box { text-align: center; margin-top: 50px; }
-        input { width: 100%; padding: 15px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 10px; box-sizing: border-box; font-size: 1rem; }
+        input { width: 100%; padding: 15px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 10px; box-sizing: border-box; }
         .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
         .btn-blue { background: #38bdf8; color: white; }
-        .btn-green { background: #22c55e; color: white; margin-top: 10px; }
+        .btn-green { background: #22c55e; color: white; margin-top: 10px; width: 100%; }
         .btn-logout { background: #334155; color: #94a3b8; margin-top: 20px; }
-
-        /* Gaya Riwayat Transaksi */
-        .order-id { color: #38bdf8; font-weight: bold; font-size: 0.9rem; }
-        .price { font-weight: bold; margin: 5px 0; display: block; }
-        .date { color: #94a3b8; font-size: 0.8rem; }
         .status-tag { position: absolute; top: 20px; right: 20px; font-size: 0.8rem; font-weight: bold; }
         .status-sukses { color: #22c55e; }
         .status-pending { color: #f59e0b; }
@@ -31,86 +24,78 @@
 <div class="container" id="app">
     <div id="loginPage" class="login-box">
         <h2 style="color: #38bdf8;">Riwayat Transaksi</h2>
-        <p style="color: #94a3b8; font-size: 0.9rem;">Silakan login untuk akses data</p>
+        <p id="infoLogin" style="color: #94a3b8; font-size: 0.8rem;">Kesempatan Salah: 3x</p>
         <input type="text" id="userIn" placeholder="Username">
         <input type="password" id="passIn" placeholder="Password">
         <button class="btn btn-blue" onclick="handleLogin()">MASUK SEKARANG</button>
     </div>
 
     <div id="historyPage" style="display: none;">
-        <h2 style="color: #38bdf8; margin-bottom: 5px;">Riwayat Transaksi</h2>
-        <p id="totalTrans" style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 20px;">Total: 5</p>
-
+        <h2 style="color: #38bdf8;">Riwayat Transaksi</h2>
         <div class="card" style="border-left: 4px solid #22c55e;">
-            <span class="order-id">RAYY1766275999694</span>
+            <span style="color: #38bdf8; font-weight: bold;">RAYY1766275999694</span>
             <span class="status-tag status-sukses">✅ Sukses</span>
-            <span class="price">Rp 8.000</span>
-            <span class="date">21/12/2025, 07.13.19</span>
+            <span style="display:block; font-weight:bold; margin:5px 0;">Rp 8.000</span>
+            <span style="color: #94a3b8; font-size: 0.8rem;">21/12/2025, 07.13.19</span>
         </div>
-
-        <div id="trans2" class="card" style="border-left: 4px solid #f59e0b;">
-            <span class="order-id">RAYY1766275313193</span>
-            <span id="tag2" class="status-tag status-pending">⌛ Pending</span>
-            <span class="price">Rp 5.000</span>
-            <span class="date">21/12/2025, 07.01.53</span>
-            <div id="btnArea2">
-                <button class="btn btn-green" style="font-size: 0.8rem; padding: 10px;" onclick="konfirmasi('2')">KONFIRMASI PEMBAYARAN</button>
-            </div>
-        </div>
-
-        <div id="trans3" class="card" style="border-left: 4px solid #f59e0b;">
-            <span class="order-id">RAYY1766250800260</span>
-            <span id="tag3" class="status-tag status-pending">⌛ Pending</span>
-            <span class="price">Rp 5.000</span>
-            <span class="date">21/12/2025, 00.13.20</span>
-            <div id="btnArea3">
-                <button class="btn btn-green" style="font-size: 0.8rem; padding: 10px;" onclick="konfirmasi('3')">KONFIRMASI PEMBAYARAN</button>
-            </div>
-        </div>
-
         <button class="btn btn-logout" onclick="location.reload()">LOGOUT</button>
     </div>
 </div>
 
 <script>
-    // Fungsi Login
+    const waNumber = "628131172093";
+    let salahHitung = 0;
+
     function handleLogin() {
         const u = document.getElementById('userIn').value;
         const p = document.getElementById('passIn').value;
-        const banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
+        
+        // 1. Ambil Data BAN dari LocalStorage (Agar sinkron dengan dev.html)
+        let banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
 
+        // 2. Cek Jika User Sudah di BAN
         if (banned.includes(u)) {
-            alert("AKUN ANDA DI BAN!");
+            tampilkanLayarBlokir(u);
             return;
         }
 
+        // 3. Cek Akun
         let admins = JSON.parse(localStorage.getItem('admins')) || [];
         const isAdmin = admins.find(a => a.user === u && a.pass === p);
         const isOwner = (u === "admin_rayy" && p === "rayy123");
 
         if (isOwner || isAdmin) {
+            salahHitung = 0; // Reset jika berhasil
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('historyPage').style.display = 'block';
         } else {
-            alert("Username/Password Salah!");
+            // 4. Logika Salah Password 3x
+            salahHitung++;
+            let sisa = 3 - salahHitung;
+            
+            if (salahHitung >= 3) {
+                // Masukkan ke daftar BAN otomatis
+                banned.push(u);
+                localStorage.setItem('bannedUsers', JSON.stringify(banned));
+                tampilkanLayarBlokir(u);
+            } else {
+                alert(`Password Salah! Sisa kesempatan: ${sisa}`);
+                document.getElementById('infoLogin').innerHTML = `Sisa Kesempatan: ${sisa}x`;
+                document.getElementById('infoLogin').style.color = "#ef4444";
+            }
         }
     }
 
-    // Fungsi Konfirmasi (Fitur Baru)
-    function konfirmasi(id) {
-        if(confirm("Konfirmasi pembayaran ini?")) {
-            // Ubah Warna Border jadi Hijau
-            document.getElementById('trans' + id).style.borderLeft = "4px solid #22c55e";
-            // Ubah Teks Status
-            const tag = document.getElementById('tag2');
-            document.getElementById('tag' + id).innerHTML = "✅ Sukses";
-            document.getElementById('tag' + id).className = "status-tag status-sukses";
-            // Hapus Tombol
-            document.getElementById('btnArea' + id).innerHTML = "";
-            alert("Pembayaran Berhasil Dikonfirmasi!");
-        }
+    function tampilkanLayarBlokir(username) {
+        const msg = `HALO DEVELOPER TERHORMAT SAYA ADMIN ${username} INGIN MENGAJUKAN BANDING TERHADAP AKUN ADMIN SAYA, TERIMAKASIH`;
+        document.body.innerHTML = `
+            <div style="text-align:center; margin-top:100px; padding:20px; font-family:sans-serif; background:#0b1120; color:white; height:100vh;">
+                <h2 style="color:#ef4444;">AKUN ANDA TELAH DI BAN OTOMATIS</h2>
+                <p>Karena terdeteksi salah password 3x atau diblokir Dev.</p>
+                <a href="https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}" 
+                   style="background:#22c55e; color:white; padding:15px; border-radius:10px; text-decoration:none; display:inline-block; font-weight:bold; margin-top:20px;">HUBUNGI DEVELOPER</a>
+            </div>`;
     }
 </script>
-
 </body>
 </html>
