@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Transaksi - Admin APK</title>
+    <title>Dashboard Transaksi</title>
     <script>
-        // FITUR: AUTO-OFF JAM 9 PAGI
+        // SENSOR OTOMATIS: Jam 9 Pagi
         if (localStorage.getItem('tokoLocked') === 'offline') {
             document.write(`
                 <body style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center; margin:0; padding:20px;">
-                    <div><h2 style="color:#ef4444; font-size:1.5rem; text-transform:uppercase; border: 2px solid #ef4444; padding: 25px; border-radius: 15px; background: rgba(239, 68, 68, 0.1);">WEB AKAN BISA DI AKSES JAM 9 PAGI</h2></div>
+                    <div><h2 style="color:#ef4444; border: 2px solid #ef4444; padding: 25px; border-radius: 15px;">WEB AKAN BISA DI AKSES JAM 9 PAGI</h2></div>
                 </body>
             `);
             window.stop();
@@ -19,78 +19,58 @@
         :root { --primary: #38bdf8; --bg: #0b1120; --card: #1e293b; --red: #ef4444; --green: #22c55e; }
         body { background-color: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow: hidden; }
 
-        /* --- LAYAR VIDEO SPLASH (WELCOME) --- */
+        /* --- ANIMASI SPLASH SCREEN CSS --- */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 99999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transition: opacity 0.8s;
+            align-items: center; justify-content: center; transition: opacity 0.8s, visibility 0.8s;
         }
-        .v-container { width: 90%; max-width: 400px; text-align: center; }
-        video { width: 100%; border-radius: 20px; box-shadow: 0 0 30px rgba(56, 189, 248, 0.4); }
-        .splash-text { margin-top: 20px; font-weight: 900; letter-spacing: 3px; color: var(--primary); font-size: 1.1rem; text-transform: uppercase; }
-
-        /* --- LAYAR VIDEO EXIT (GOODBYE) --- */
-        #exit-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 100000; display: none; flex-direction: column;
-            align-items: center; justify-content: center;
+        .splash-logo {
+            width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
+            display: flex; align-items: center; justify-content: center; font-size: 3rem;
+            font-weight: 900; color: var(--bg); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
+            animation: bounceIn 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        .splash-text { margin-top: 20px; font-weight: 800; letter-spacing: 2px; color: var(--primary); text-transform: uppercase; }
 
-        /* --- NOTIFIKASI ANIMASI ATAS-BAWAH --- */
+        /* --- NOTIFIKASI MELUNCUR (ATAS-BAWAH) --- */
         #customToast {
             position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
             background: var(--primary); color: var(--bg); padding: 15px 30px;
-            border-radius: 50px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 100001; transition: all 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+            border-radius: 50px; font-weight: 800; z-index: 100001;
+            transition: all 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6);
         }
         #customToast.show { top: 30px; }
 
         /* --- LAYOUT UTAMA --- */
-        .container { max-width: 450px; margin: auto; padding: 20px; height: 100vh; overflow-y: auto; opacity: 0; transition: opacity 1s; box-sizing: border-box; }
+        .container { max-width: 450px; margin: auto; padding: 20px; height: 100vh; opacity: 0; transition: opacity 1s; box-sizing: border-box; }
         .container.visible { opacity: 1; }
-        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; position: relative; animation: slideIn 0.5s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        input { width: 100%; padding: 16px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 15px; box-sizing: border-box; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
-        
+        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; position: relative; }
+        input { width: 100%; padding: 16px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 15px; box-sizing: border-box; outline: none; }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .btn:active { transform: scale(0.96); }
         .btn-blue { background: var(--primary); color: var(--bg); }
         .btn-sm { width: auto; padding: 8px 15px; font-size: 0.7rem; margin-top: 10px; margin-right: 5px; }
-        
-        .status-badge { float: right; font-size: 0.7rem; padding: 4px 10px; border-radius: 8px; font-weight: bold; text-transform: uppercase; }
+
+        .status-badge { float: right; font-size: 0.7rem; padding: 4px 10px; border-radius: 8px; font-weight: bold; }
         .status-Pending { background: #f59e0b; color: #000; }
         .status-Sukses { background: var(--green); color: #fff; }
 
-        /* LAYAR BAN MERAH */
-        .ban-container { text-align: center; margin-top: 50px; padding: 30px; border: 3px solid var(--red); border-radius: 25px; background: #1a0000; box-shadow: 0 0 30px rgba(239, 68, 68, 0.3); }
+        .ban-container { text-align: center; margin-top: 50px; padding: 30px; border: 3px solid var(--red); border-radius: 25px; background: #1a0000; }
     </style>
 </head>
 <body>
 
     <div id="splash-screen">
-        <div class="v-container">
-            <video id="vidWelcome" autoplay muted playsinline>
-                <source src="welcome.mp4" type="video/mp4">
-            </video>
-            <div class="splash-text">Dashboard Transaksi</div>
-        </div>
-    </div>
-
-    <div id="exit-screen">
-        <div class="v-container">
-            <video id="vidExit" muted playsinline>
-                <source src="goodbye.mp4" type="video/mp4">
-            </video>
-        </div>
+        <div class="splash-logo">R</div>
+        <div class="splash-text">Dashboard Transaksi</div>
     </div>
 
     <div id="customToast">Notifikasi</div>
 
     <div class="container" id="main-content">
         <div id="loginPage" style="text-align:center; margin-top:50px;">
-            <h1 style="color:var(--primary); font-size: 2rem; margin-bottom: 30px;">Admin Login</h1>
+            <h1 style="color:var(--primary);">Admin Login</h1>
             <div class="card">
                 <input type="text" id="userIn" placeholder="Username">
                 <input type="password" id="passIn" placeholder="Password">
@@ -101,10 +81,10 @@
         <div id="historyPage" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h2 style="color:var(--primary); margin:0;">Riwayat Riil-Time</h2>
-                <button onclick="muatTransaksi()" style="background:#334155; border:none; color:white; padding:10px; border-radius:10px; cursor:pointer;">🔄</button>
+                <button onclick="muatTransaksi()" style="background:#334155; border:none; color:white; padding:10px; border-radius:10px;">🔄</button>
             </div>
             <div id="listTransaksi"></div>
-            <button class="btn" style="background:#334155; color:white; margin-top:30px;" onclick="handleExit()">Keluar Aplikasi</button>
+            <button class="btn" style="background:#334155; color:white; margin-top:30px;" onclick="location.reload()">Logout</button>
         </div>
     </div>
 
@@ -113,27 +93,15 @@
         let lastTrxCount = 0;
         let salahHitung = 0;
 
-        // Kontrol Splash Screen
         window.onload = () => {
-            const vid = document.getElementById('vidWelcome');
-            vid.onended = () => {
-                document.getElementById('splash-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('splash-screen').style.display = 'none';
-                    document.getElementById('main-content').classList.add('visible');
-                    document.body.style.overflow = "auto";
-                }, 800);
-            };
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.style.opacity = '0';
+                splash.style.visibility = 'hidden';
+                document.getElementById('main-content').classList.add('visible');
+                document.body.style.overflow = "auto";
+            }, 2500);
         };
-
-        // Kontrol Exit Screen
-        function handleExit() {
-            document.body.style.overflow = "hidden";
-            document.getElementById('exit-screen').style.display = 'flex';
-            const vidE = document.getElementById('vidExit');
-            vidE.play();
-            vidE.onended = () => { location.reload(); };
-        }
 
         function tampilkanNotif(pesan) {
             const toast = document.getElementById('customToast');
@@ -155,12 +123,11 @@
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('historyPage').style.display = 'block';
                 muatTransaksi();
-                setInterval(checkNewTransaction, 5000); // Cek transaksi tiap 5 detik
+                setInterval(checkNewTransaction, 5000);
             } else {
                 salahHitung++;
                 if(salahHitung >= 3) {
-                    if(!banned.includes(u)) banned.push(u);
-                    localStorage.setItem('bannedUsers', JSON.stringify(banned));
+                    banned.push(u); localStorage.setItem('bannedUsers', JSON.stringify(banned));
                     tampilkanLayarBlokir(u, 'otomatis');
                 } else { tampilkanNotif("🔒 Akses Ditolak!"); }
             }
@@ -180,7 +147,6 @@
                         <span class="status-badge status-${trx.status}">${trx.status}</span>
                         <div style="color:var(--primary); font-weight:bold; font-size:0.85rem;">ID: ${trx.orderId}</div>
                         <div style="font-size:1.3rem; font-weight:bold; margin:8px 0;">Rp ${parseInt(trx.amount).toLocaleString('id-ID')}</div>
-                        <div style="font-size:0.7rem; color:#94a3b8; margin-bottom:10px;">${trx.date}</div>
                         ${trx.status === 'Pending' ? `<button class="btn btn-blue btn-sm" onclick="confirmTrx(${realIdx})">CONFIRM</button>` : ''}
                         <button class="btn btn-sm" style="background:var(--red); color:white;" onclick="hapusTrx(${realIdx})">HAPUS</button>
                     </div>`;
@@ -191,12 +157,12 @@
             let history = JSON.parse(localStorage.getItem('trx_history') || '[]');
             history[idx].status = "Sukses";
             localStorage.setItem('trx_history', JSON.stringify(history));
-            tampilkanNotif("✅ Pembayaran Dikonfirmasi!");
+            tampilkanNotif("✅ Transaksi Sukses!");
             muatTransaksi();
         }
 
         function hapusTrx(idx) {
-            if(confirm("Hapus data ini selamanya?")) {
+            if(confirm("Hapus riwayat ini?")) {
                 let history = JSON.parse(localStorage.getItem('trx_history') || '[]');
                 history.splice(idx, 1);
                 localStorage.setItem('trx_history', JSON.stringify(history));
@@ -208,18 +174,17 @@
         function checkNewTransaction() {
             const history = JSON.parse(localStorage.getItem('trx_history') || '[]');
             if (history.length > lastTrxCount) { 
-                tampilkanNotif("🔔 Transaksi Baru Masuk!"); 
+                tampilkanNotif("🔔 Transaksi Baru!"); 
                 muatTransaksi(); 
             }
         }
 
         function tampilkanLayarBlokir(username, tipe) {
-            let waText = tipe === 'otomatis' ? `Halo owner saya ${username} kena ban otomatis...` : `Halo owner akun ${username} kena ban manual...`;
+            let waText = `Halo owner saya ${username} kena ban...`;
             document.getElementById('main-content').innerHTML = `
                 <div class="ban-container">
                     <h1 style="color:var(--red);">AKUN DI BAN!</h1>
-                    <p>Akses ditutup. Silakan hubungi owner untuk bantuan.</p>
-                    <a href="https://wa.me/${waNumber}?text=${encodeURIComponent(waText)}" class="btn btn-blue" style="text-decoration:none; display:inline-block; background:var(--green); color:white;">KONTAK OWNER</a>
+                    <a href="https://wa.me/${waNumber}?text=${encodeURIComponent(waText)}" class="btn btn-blue" style="text-decoration:none; background:var(--green); color:white;">HUBUNGI OWNER</a>
                 </div>`;
         }
     </script>
