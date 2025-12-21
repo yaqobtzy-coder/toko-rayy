@@ -4,110 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rayy Payment - Official System</title>
-    
     <style>
         :root {
             --primary: #38bdf8;
-            --primary-glow: rgba(56, 189, 248, 0.4);
             --bg: #0b1120;
             --card: #141b2d;
             --dark: #0f172a;
             --text: #f8fafc;
             --red: #ef4444;
-            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0b1120 100%);
+        /* ANIMASI NOTIF DARI ATAS */
+        #customToast {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; background: var(--primary); color: #000;
+            padding: 15px; border-radius: 15px; text-align: center; font-weight: 800;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10005;
+            transition: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
+        #customToast.show { top: 20px; }
 
         /* SPLASH SCREEN */
-        #splash {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transition: 0.8s ease-in-out;
-        }
-        .logo-box {
-            width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
-            display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
-            font-weight: 900; color: var(--bg); box-shadow: 0 0 40px var(--primary-glow);
-            animation: pulse 2s infinite ease-in-out;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 40px var(--primary-glow); }
-            50% { transform: scale(1.05); box-shadow: 0 0 60px var(--primary-glow); }
-        }
+        #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.8s; }
+        .logo-box { width: 100px; height: 100px; background: var(--primary); border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; font-weight: 900; color: #000; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
-        /* MAIN UI */
-        .container {
-            width: 100%; max-width: 460px; padding: 30px;
-            opacity: 0; transform: translateY(30px);
-            transition: 1.2s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-        .container.visible { opacity: 1; transform: translateY(0); }
+        .container { width: 100%; max-width: 460px; padding: 30px; opacity: 0; transform: translateY(30px); transition: 1s; }
+        .visible { opacity: 1; transform: translateY(0); }
 
-        .card {
-            background: var(--card); border-radius: 40px; padding: 45px 35px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
+        .card { background: var(--card); border-radius: 40px; padding: 40px 30px; border: 1px solid rgba(255,255,255,0.05); }
         .input-group { margin-bottom: 25px; }
-        .input-group label {
-            display: block; font-size: 0.75rem; font-weight: 800;
-            color: var(--primary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 2px;
-        }
+        .input-group label { display: block; font-size: 0.7rem; font-weight: 800; color: var(--primary); margin-bottom: 10px; letter-spacing: 2px; }
+        input { width: 100%; padding: 18px; background: var(--dark); border: 2px solid transparent; color: white; border-radius: 18px; font-size: 1rem; transition: 0.3s; }
+        input:focus { border-color: var(--primary); }
+        .btn-pay { width: 100%; padding: 20px; border: none; border-radius: 20px; background: var(--primary); color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase; }
 
-        input {
-            width: 100%; padding: 20px; background: var(--dark); border: 2px solid transparent;
-            color: white; border-radius: 20px; font-size: 1rem; transition: var(--transition);
-        }
-        input:focus { border-color: var(--primary); background: #0b1120; }
-
-        .btn-pay {
-            width: 100%; padding: 22px; border: none; border-radius: 22px;
-            background: var(--primary); color: var(--bg); font-weight: 900;
-            cursor: pointer; transition: var(--transition); text-transform: uppercase;
-        }
-        .btn-pay:hover { transform: translateY(-5px); box-shadow: 0 10px 25px var(--primary-glow); }
-
-        /* OVERLAY TUTUP / BANNED */
-        .full-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); display: flex; align-items: center; justify-content: center;
-            z-index: 10000; padding: 25px; text-align: center;
-        }
-        .msg-box {
-            border: 2px solid var(--red); padding: 40px 30px; border-radius: 35px;
-            background: rgba(239, 68, 68, 0.05); max-width: 400px;
-        }
-        .msg-box h1 { color: var(--red); margin-bottom: 15px; font-weight: 900; }
-        .msg-box p { line-height: 1.6; opacity: 0.9; font-size: 1.1rem; }
+        /* OVERLAY OFFLINE */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 25px; text-align: center; }
+        .box-msg { border: 2px solid var(--red); padding: 40px; border-radius: 35px; background: rgba(239,68,68,0.05); }
     </style>
 </head>
 <body>
 
+    <div id="customToast">Pesan Notifikasi</div>
+
     <div id="splash">
         <div class="logo-box">R</div>
-        <p style="margin-top:20px; color:var(--primary); letter-spacing:3px; font-weight:800;">RAYY PAYMENT</p>
     </div>
 
     <div class="container" id="main-content">
         <h1 style="text-align:center; margin-bottom:30px; font-weight:900;">RAYY <span style="color:var(--primary);">STORE</span></h1>
         <div class="card">
             <div class="input-group">
-                <label>ID PEMBELI / NAMA</label>
-                <input type="text" id="username" placeholder="Masukkan ID">
+                <label>ID PEMBELI</label>
+                <input type="text" id="username" placeholder="Nama / ID">
             </div>
             <div class="input-group">
                 <label>NOMINAL (RP)</label>
@@ -125,30 +78,30 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // CEK STATUS TOKO (SERVER TUTUP)
+        function myNotif(msg) {
+            const t = document.getElementById('customToast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => { t.classList.remove('show'); }, 3000);
+        }
+
         onValue(ref(db, 'settings/toko_locked'), (snap) => {
             if (snap.val() === true) {
-                document.body.innerHTML = `
-                <div class="full-overlay">
-                    <div class="msg-box" style="border-color: #facc15; background: rgba(250, 204, 21, 0.05);">
-                        <h1 style="color:#facc15;">SERVER TUTUP</h1>
-                        <p style="color:#fff;">Server tutup pukul 21:00 WIB akan di buka lagi pukul 09:00 WIB, yang terlanjur bayar akan di proses besok hari.</p>
-                    </div>
-                </div>`;
+                document.body.innerHTML = `<div class="overlay"><div class="box-msg"><h1 style="color:#ef4444;">SERVER TUTUP</h1><p>Server tutup pukul 21:00 WIB akan di buka lagi pukul 09:00 WIB, yang terlanjur bayar akan di proses besok hari.</p></div></div>`;
             }
         });
 
         window.prosesPembayaran = function() {
             const user = document.getElementById('username').value.trim();
             const nominal = document.getElementById('amount').value;
-            if(!user || !nominal) return alert("Isi data!");
+            if(!user || !nominal) return myNotif("Isi data dulu bos!");
 
             onValue(ref(db, 'banned_users/' + user), (snap) => {
                 if (snap.exists()) {
-                    alert("Akun anda telah di blokir oleh Developer/Owner Rayy!");
+                    myNotif("⚠️ Akun anda telah di blokir!");
                 } else {
                     push(ref(db, 'transactions'), {
-                        nama: user, jumlah: nominal, waktu: new Date().toLocaleString()
+                        nama: user, jumlah: nominal, waktu: new Date().toLocaleString(), status: "Pending"
                     }).then(() => {
                         window.location.href = `https://app.pakasir.com/pay/rayy-store/${nominal}?order_id=RY-${Date.now()}`;
                     });
@@ -156,15 +109,7 @@
             }, { onlyOnce: true });
         }
 
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('splash').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('splash').style.display = 'none';
-                    document.getElementById('main-content').classList.add('visible');
-                }, 800);
-            }, 2500);
-        };
+        window.onload = () => { setTimeout(() => { document.getElementById('splash').style.display = 'none'; document.getElementById('main-content').classList.add('visible'); }, 2000); };
     </script>
 </body>
 </html>
