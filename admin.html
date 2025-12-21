@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy - Admin Monitor System</title>
+    <title>Rayy - Admin Monitor System v2.0</title>
     <style>
         :root {
             --primary: #38bdf8;
@@ -11,6 +11,7 @@
             --card: #1e293b;
             --dark: #0f172a;
             --text: #f8fafc;
+            --red: #ef4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -22,7 +23,7 @@
             overflow: hidden; 
         }
 
-        /* --- SPLASH SCREEN --- */
+        /* SPLASH SCREEN */
         #splash {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
@@ -45,12 +46,11 @@
         }
         .container.visible { opacity: 1; transform: translateY(0); }
 
-        /* --- LOGIN CARD --- */
+        /* LOGIN CARD */
         .login-card { 
             background: var(--card); padding: 40px; border-radius: 35px; text-align: center; 
             border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
-        .login-card h2 { color: var(--primary); margin-bottom: 25px; font-weight: 900; }
         input { 
             width: 100%; padding: 18px; background: var(--dark); border: 2px solid transparent; 
             color: white; border-radius: 18px; margin-bottom: 12px; outline: none; text-align: center;
@@ -60,21 +60,15 @@
         .btn-unlock { 
             width: 100%; padding: 18px; border: none; border-radius: 18px; 
             background: var(--primary); color: var(--bg); font-weight: 900; 
-            cursor: pointer; text-transform: uppercase; transition: 0.3s;
+            cursor: pointer; text-transform: uppercase;
         }
-        .btn-unlock:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3); }
 
-        /* --- MONITOR AREA --- */
-        #monitorArea { display: none; animation: fadeIn 0.8s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+        /* MONITOR AREA */
+        #monitorArea { display: none; }
         .card { background: var(--card); border-radius: 30px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.05); }
         .label { font-size: 0.75rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: block; letter-spacing: 1.5px; }
         
-        .list-container { max-height: 550px; overflow-y: auto; padding-right: 5px; }
-        .list-container::-webkit-scrollbar { width: 5px; }
-        .list-container::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-
+        .list-container { max-height: 550px; overflow-y: auto; }
         .list-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 18px; background: #0f172a; border-radius: 20px;
@@ -86,6 +80,14 @@
         .item-info b { display: block; font-size: 1.1rem; color: #fff; }
         .item-info small { color: #94a3b8; font-size: 0.8rem; }
         .status-badge { background: rgba(34, 197, 94, 0.15); color: #22c55e; padding: 6px 14px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(34, 197, 94, 0.3); }
+
+        /* LOCK SCREEN STYLE */
+        .lock-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); display: flex; align-items: center; justify-content: center;
+            z-index: 10000; text-align: center; padding: 20px;
+        }
+        .lock-box { border: 2px solid var(--primary); padding: 40px; border-radius: 35px; background: rgba(56, 189, 248, 0.05); max-width: 400px; }
     </style>
 </head>
 <body>
@@ -98,23 +100,22 @@
     <div class="container" id="main-content">
         <div id="loginPage">
             <div class="login-card">
-                <h2>ADMIN ACCESS</h2>
+                <h2 style="color: var(--primary); margin-bottom: 25px;">ADMIN ACCESS</h2>
                 <input type="text" id="adminUser" placeholder="Username">
                 <input type="password" id="adminPass" placeholder="Password / Key">
-                <button class="btn-unlock" onclick="authAdmin()">Login Panel</button>
+                <button class="btn-unlock" onclick="authAdmin()">Login System</button>
             </div>
         </div>
 
         <div id="monitorArea">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 0 10px;">
-                <h2 style="color: var(--primary); font-weight: 900; letter-spacing: -1px;">LIVE <span style="color:#fff;">HISTORY</span></h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 style="color: var(--primary); font-weight: 900;">LIVE <span style="color:#fff;">HISTORY</span></h2>
                 <button onclick="location.reload()" style="background:rgba(239, 68, 68, 0.1); border:none; color:#ef4444; padding:8px 15px; border-radius:12px; cursor:pointer; font-weight:700; font-size:0.75rem;">LOGOUT</button>
             </div>
-
             <div class="card">
                 <span class="label">Transaksi Real-time</span>
                 <div id="historyList" class="list-container">
-                    <p style="text-align:center; opacity:0.4; padding: 20px;">Menunggu data dari Cloud...</p>
+                    <p style="text-align:center; opacity:0.4; padding: 20px;">Menghubungkan...</p>
                 </div>
             </div>
         </div>
@@ -128,20 +129,31 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Akses Utama
         const OWNER_KEY = "085794";
+
+        // --- SISTEM AUTO-LOCK SINKRON DENGAN DEV.HTML ---
+        onValue(ref(db, 'settings/toko_locked'), (snap) => {
+            if (snap.val() === true) {
+                document.body.innerHTML = `
+                <div class="lock-overlay">
+                    <div class="lock-box">
+                        <h1 style="color:var(--primary); font-size:2rem; font-weight:900;">SYSTEM LOCKED</h1>
+                        <p style="margin: 20px 0; opacity:0.8; line-height:1.6;">Akses Admin Monitor ditutup sementara oleh Developer Utama.</p>
+                        <div style="font-size:0.7rem; letter-spacing:3px; opacity:0.4; font-weight:800;">RAYY SECURITY SYSTEM</div>
+                    </div>
+                </div>`;
+            }
+        });
 
         window.authAdmin = function() {
             const u = document.getElementById('adminUser').value.trim();
             const p = document.getElementById('adminPass').value.trim();
 
-            // Cek Login Owner
             if(p === OWNER_KEY) {
                 showMonitor("Owner Rayy");
                 return;
             }
 
-            // Cek Login Extra Admin dari Firebase
             onValue(ref(db, 'sys_extra_admins'), (snap) => {
                 const admins = snap.val();
                 let found = false;
@@ -151,23 +163,16 @@
                         break;
                     }
                 }
-
-                if(found) {
-                    showMonitor(u);
-                } else {
-                    alert("Akses Ditolak: Username atau Password salah!");
-                }
+                if(found) { showMonitor(u); } 
+                else { alert("Akses Ditolak!"); }
             }, { onlyOnce: true });
         }
 
         function showMonitor(adminName) {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('monitorArea').style.display = 'block';
-            
-            // Catat log login ke dev.html
             push(ref(db, 'sys_login_logs'), { user: adminName, time: new Date().toLocaleString() });
 
-            // Ambil data transaksi real-time
             onValue(ref(db, 'transactions'), (snapshot) => {
                 const list = document.getElementById('historyList');
                 list.innerHTML = "";
@@ -185,7 +190,7 @@
                             </div>`;
                     });
                 } else {
-                    list.innerHTML = "<p style='text-align:center; opacity:0.3; padding:20px;'>Belum ada riwayat.</p>";
+                    list.innerHTML = "<p style='text-align:center; opacity:0.3; padding:20px;'>Belum ada transaksi.</p>";
                 }
             });
         }
@@ -196,7 +201,6 @@
                 setTimeout(() => {
                     document.getElementById('splash').style.display = 'none';
                     document.getElementById('main-content').classList.add('visible');
-                    document.body.style.overflow = 'auto';
                 }, 800);
             }, 2500);
         };
