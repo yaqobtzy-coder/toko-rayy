@@ -3,154 +3,457 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Admin - Secure Monitor</title>
+    <title>Rayy Store - Premium Admin Monitoring System v2.6</title>
+    
     <style>
         :root {
             --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.4);
             --bg: #0b1120;
             --card: #1e293b;
-            --red: #ef4444;
+            --dark: #0f172a;
             --text: #f8fafc;
+            --red: #ef4444;
+            --green: #22c55e;
+            --orange: #f59e0b;
+            --transition-smooth: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
+        /* RESET & BASE STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Tampilan Blokir Mewah (Sesuai Foto 1) */
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: radial-gradient(circle at top right, #1e293b 0%, #0b1120 100%);
+            overflow-x: hidden;
+        }
+
+        /* CONTAINER UTAMA */
+        .container {
+            width: 100%;
+            max-width: 550px;
+            padding: 30px;
+            z-index: 10;
+        }
+
+        /* --- LOGIN PANEL STYLING --- */
+        .login-card {
+            background: var(--card);
+            padding: 55px 40px;
+            border-radius: 45px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUpFade 0.8s ease-out;
+        }
+
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-card h2 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            font-weight: 900;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .login-card p {
+            font-size: 0.85rem;
+            opacity: 0.5;
+            margin-bottom: 35px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .input-wrapper {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 22px;
+            background: var(--dark);
+            border: 2px solid transparent;
+            color: white;
+            border-radius: 22px;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.15);
+            background: #0b1120;
+        }
+
+        .btn-unlock {
+            width: 100%;
+            padding: 22px;
+            border: none;
+            border-radius: 22px;
+            background: var(--primary);
+            color: #0b1120;
+            font-weight: 900;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 15px;
+            transition: var(--transition-smooth);
+            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2);
+        }
+
+        .btn-unlock:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px var(--primary-glow);
+        }
+
+        /* --- DASHBOARD MONITORING STYLING --- */
+        #monitorArea {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .header-monitor {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+            padding: 0 10px;
+        }
+
+        .header-monitor h2 {
+            font-weight: 900;
+            font-size: 1.9rem;
+            letter-spacing: -1px;
+        }
+
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--red);
+            color: var(--red);
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .history-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .item-card {
+            background: var(--card);
+            padding: 28px;
+            border-radius: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-left: 8px solid var(--primary);
+            position: relative;
+            transition: 0.3s;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 28px;
+            right: 28px;
+            padding: 7px 15px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--orange); border: 1px solid var(--orange); }
+        .status-success { background: rgba(34, 197, 94, 0.1); color: var(--green); border: 1px solid var(--green); }
+
+        .btn-confirm-action {
+            width: 100%;
+            margin-top: 25px;
+            padding: 16px;
+            border: none;
+            border-radius: 18px;
+            background: var(--green);
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(34, 197, 94, 0.2);
+        }
+
+        .btn-confirm-action:disabled {
+            background: #334155;
+            color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* --- VISUAL BLOKIR MEWAH (SESUAI FOTO) --- */
         .ban-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 10000; display: flex; 
-            align-items: center; justify-content: center; padding: 25px;
-        }
-        .ban-box {
-            border: 2px solid var(--red); padding: 50px 30px; border-radius: 40px;
-            background: rgba(239, 68, 68, 0.05); width: 100%; max-width: 420px;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
             text-align: center;
         }
-        .ban-box h1 { color: var(--red); font-size: 2.2rem; font-weight: 900; margin-bottom: 20px; }
-        .ban-box p { margin-bottom: 30px; line-height: 1.6; opacity: 0.9; }
-        
-        .btn-wa {
-            display: inline-block; padding: 18px 35px; background: var(--primary);
-            color: #0b1120; text-decoration: none; border-radius: 20px; 
-            font-weight: 900; text-transform: uppercase;
+
+        .ban-box {
+            border: 2px solid var(--red);
+            padding: 60px 35px;
+            border-radius: 45px;
+            background: rgba(239, 68, 68, 0.05);
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 0 50px rgba(239, 68, 68, 0.1);
         }
 
-        /* UI Login & Dashboard */
-        .container { width: 100%; max-width: 480px; padding: 20px; }
-        .card { background: var(--card); padding: 40px 30px; border-radius: 35px; text-align: center; }
-        input { width: 100%; padding: 18px; margin-bottom: 15px; border-radius: 15px; border: none; background: #0f172a; color: white; text-align: center; }
-        .btn-login { width: 100%; padding: 18px; background: var(--primary); border: none; border-radius: 15px; font-weight: 900; cursor: pointer; }
+        .ban-box h1 {
+            color: var(--red);
+            font-size: 2.8rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        .ban-box p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 35px;
+            opacity: 0.8;
+            color: #f8fafc;
+        }
+
+        .btn-contact-owner {
+            display: inline-block;
+            padding: 20px 40px;
+            background: var(--primary);
+            color: #0b1120;
+            text-decoration: none;
+            border-radius: 22px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: var(--transition-smooth);
+            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-contact-owner:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 35px var(--primary-glow);
+        }
     </style>
 </head>
 <body>
 
-    <div class="container" id="main-ui">
-        <div id="loginArea" class="card">
-            <h2 style="margin-bottom:25px; color:var(--primary);">ADMIN LOGIN</h2>
-            <input type="text" id="userAdmin" placeholder="Username">
-            <input type="password" id="passAdmin" placeholder="Password">
-            <button class="btn-login" onclick="prosesLogin()">LOGIN MONITOR</button>
+    <div class="container">
+        
+        <div id="loginSection">
+            <div class="login-card">
+                <h2>ADMIN LOGIN</h2>
+                <p>Rayy Store Monitoring System</p>
+                
+                <div class="input-wrapper">
+                    <input type="text" id="inputUser" placeholder="Username Admin">
+                </div>
+                <div class="input-wrapper">
+                    <input type="password" id="inputPass" placeholder="Password Admin">
+                </div>
+                
+                <button class="btn-unlock" onclick="handleAdminLogin()">Masuk Ke Dashboard</button>
+            </div>
         </div>
-        <div id="monitorArea" style="display:none;">
-            <h2 style="margin-bottom:20px;">DASHBOARD TRANSAKSI</h2>
-            <div id="listTransaksi"></div>
+
+        <div id="monitorArea">
+            <div class="header-monitor">
+                <h2>DASHBOARD <span style="color:var(--primary);">TRANSAKSI</span></h2>
+                <button class="btn-logout" onclick="location.reload()">LOGOUT</button>
+            </div>
+
+            <div id="historyListDisplay" class="history-container">
+                <p style="text-align:center; opacity:0.3; margin-top:50px;">Memuat data transaksi...</p>
+            </div>
         </div>
+
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // Konfigurasi Database Utama
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        const OWNER_WA = "628131172093";
+        // Data Penting Owner
+        const RAYY_PHONE = "628131172093"; //
+        const ACCESS_KEY = "085794";
 
-        // Fungsi Tampilkan Pesan Blokir Mewah
-        function tampilkanLayarBan(username) {
-            const pesanKeOwner = `halo owner terhormat akun saya (${username}) terkana ban tanpa alasan harap di tinjau🙏`;
-            const linkWA = `https://wa.me/${OWNER_WA}?text=${encodeURIComponent(pesanKeOwner)}`;
+        // 1. FUNGSI TAMPILKAN LAYAR BLOKIR (SESUAI REQUEST)
+        function triggerBlockScreen(username) {
+            // Teks Pesan Sesuai Permintaan
+            const message = `halo owner terhormat akun saya (${username}) terkana ban tanpa alasan harap di tinjau🙏`;
+            const waLink = `https://wa.me/${RAYY_PHONE}?text=${encodeURIComponent(message)}`;
             
             document.body.innerHTML = `
                 <div class="ban-overlay">
                     <div class="ban-box">
                         <h1>AKUN DIBLOKIR</h1>
                         <p>Akun Admin anda Telah di blokir oleh developer/owner silahkan hubungi owner Rayy</p>
-                        <a href="${linkWA}" class="btn-wa">CONTACT OWNER</a>
+                        <a href="${waLink}" class="btn-contact-owner">CONTACT OWNER</a>
                     </div>
                 </div>`;
         }
 
-        // Cek Ban Real-time
-        function proteksiAdmin(username) {
+        // 2. PROTEKSI REAL-TIME (ANTI LOLOS BAN)
+        function startLiveSecurity(username) {
             if(username === "Owner Rayy") return;
+
+            // Monitor folder banned_users secara real-time
             onValue(ref(db, 'banned_users/' + username), (snap) => {
-                if(snap.exists()) tampilkanLayarBan(username);
+                if(snap.exists()) {
+                    triggerBlockScreen(username);
+                }
+            });
+
+            // Monitor juga apakah masih terdaftar di extra_admins
+            onValue(ref(db, 'sys_extra_admins'), (adminSnap) => {
+                const admins = adminSnap.val();
+                let exists = false;
+                if(admins) {
+                    for(let id in admins) {
+                        if(admins[id].user === username) { exists = true; break; }
+                    }
+                }
+                if(!exists) triggerBlockScreen(username);
             });
         }
 
-        window.prosesLogin = function() {
-            const u = document.getElementById('userAdmin').value;
-            const p = document.getElementById('passAdmin').value;
+        // 3. FUNGSI LOGIN DENGAN DOUBLE CHECK
+        window.handleAdminLogin = function() {
+            const u = document.getElementById('inputUser').value.trim();
+            const p = document.getElementById('inputPass').value.trim();
 
-            if(p === "085794") { // Akses Owner
-                bukaDashboard("Owner Rayy");
+            if(!u || !p) { alert("Harap isi semua kolom!"); return; }
+
+            // Cek Jika Dia Owner Langsung
+            if(p === ACCESS_KEY) {
+                initDashboard("Owner Rayy");
                 return;
             }
 
-            // Cek Ban & Akun Admin
-            onValue(ref(db, 'banned_users/' + u), (banSnap) => {
-                if(banSnap.exists()) {
-                    tampilkanLayarBan(u);
+            // Langkah 1: Cek Status Ban Terlebih Dahulu
+            onValue(ref(db, 'banned_users/' + u), (banCheck) => {
+                if(banCheck.exists()) {
+                    triggerBlockScreen(u);
                 } else {
-                    onValue(ref(db, 'sys_extra_admins'), (adminSnap) => {
-                        let valid = false;
-                        adminSnap.forEach(d => { if(d.val().user === u && d.val().pass === p) valid = true; });
-                        
-                        if(valid) {
-                            bukaDashboard(u);
-                            proteksiAdmin(u);
+                    // Langkah 2: Cek Kredensial Admin
+                    onValue(ref(db, 'sys_extra_admins'), (snap) => {
+                        const data = snap.val();
+                        let isVerified = false;
+
+                        if(data) {
+                            for(let key in data) {
+                                if(data[key].user === u && data[key].pass === p) {
+                                    isVerified = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if(isVerified) {
+                            initDashboard(u);
+                            startLiveSecurity(u);
                         } else {
-                            alert("Akses Ditolak!");
+                            alert("Akses Ditolak: Akun tidak ditemukan atau password salah!");
                         }
                     }, { onlyOnce: true });
                 }
             }, { onlyOnce: true });
         }
 
-        function bukaDashboard(name) {
-            document.getElementById('loginArea').style.display = 'none';
+        // 4. MEMBUKA DASHBOARD TRANSAKSI
+        function initDashboard(adminName) {
+            document.getElementById('loginSection').style.display = 'none';
             document.getElementById('monitorArea').style.display = 'block';
-            
-            onValue(ref(db, 'transactions'), (snap) => {
-                const list = document.getElementById('listTransaksi');
-                list.innerHTML = "";
-                snap.forEach(child => {
-                    const tr = child.val();
-                    const isSelesai = tr.status === "Success";
-                    list.innerHTML += `
-                        <div style="background:var(--card); padding:20px; border-radius:20px; margin-bottom:10px; border-left:5px solid ${isSelesai ? '#22c55e' : '#38bdf8'}; text-align:left;">
-                            <div style="float:right; font-size:0.7rem; font-weight:900; color:${isSelesai ? '#22c55e' : '#f59e0b'};">${tr.status || 'Pending'}</div>
-                            <b>${tr.nama}</b><br><small>Rp ${tr.jumlah}</small>
-                            <button onclick="konfirmasi('${child.key}')" style="width:100%; margin-top:10px; padding:10px; border-radius:10px; border:none; background:#22c55e; color:white; font-weight:800;" ${isSelesai ? 'disabled' : ''}>
-                                ${isSelesai ? 'TERKONFIRMASI' : 'KONFIRMASI'}
-                            </button>
-                        </div>`;
-                });
+
+            // Mendengarkan Database Transaksi
+            onValue(ref(db, 'transactions'), (snapshot) => {
+                const display = document.getElementById('historyListDisplay');
+                display.innerHTML = "";
+                const data = snapshot.val();
+
+                if(data) {
+                    Object.keys(data).reverse().forEach(key => {
+                        const tr = data[key];
+                        const isDone = tr.status === "Success";
+                        const badgeClass = isDone ? "status-success" : "status-pending";
+                        const btnLabel = isDone ? "✓ TRANSAKSI SELESAI" : "KONFIRMASI PEMBAYARAN";
+
+                        display.innerHTML += `
+                            <div class="item-card" style="border-left-color: ${isDone ? '#22c55e' : '#38bdf8'}">
+                                <div class="status-badge ${badgeClass}">${tr.status || 'Pending'}</div>
+                                <div style="padding-right: 80px;">
+                                    <h3 style="font-size:1.2rem; margin-bottom:5px;">${tr.nama}</h3>
+                                    <p style="color:var(--primary); font-weight:800; font-size:1.1rem;">Rp ${Number(tr.jumlah).toLocaleString()}</p>
+                                    <p style="font-size:0.75rem; opacity:0.4; margin-top:8px;">Waktu: ${tr.waktu}</p>
+                                </div>
+                                <button class="btn-confirm-action" ${isDone ? 'disabled' : ''} onclick="confirmPaymentNow('${key}')">
+                                    ${btnLabel}
+                                </button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    display.innerHTML = `<p style="text-align:center; opacity:0.2; margin-top:50px;">Belum ada data transaksi masuk.</p>`;
+                }
             });
         }
 
-        window.konfirmasi = (id) => { update(ref(db, 'transactions/' + id), { status: "Success" }); }
+        // 5. PROSES KONFIRMASI (UPDATE TANPA HAPUS)
+        window.confirmPaymentNow = function(id) {
+            const targetRef = ref(db, 'transactions/' + id);
+            update(targetRef, {
+                status: "Success"
+            }).then(() => {
+                console.log("Status updated successfully.");
+            });
+        }
+
     </script>
 </body>
 </html>
