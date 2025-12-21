@@ -3,117 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Server Riwayat Trx</title>
+    <title>Login Admin</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: white; margin: 10px; }
-        .container { max-width: 600px; margin: auto; background: #1e293b; padding: 15px; border-radius: 12px; }
-        #dashboard, #banned-screen { display: none; }
-        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: none; }
-        button { background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; }
-        
-        /* STYLE LIST TRANSAKSI */
-        .trx-card { 
-            background: #334155; padding: 15px; border-radius: 10px; margin-bottom: 15px; 
-            border-left: 5px solid #eab308; /* Default kuning untuk Pending */
-        }
-        .trx-card.sukses { border-left: 5px solid #22c55e; }
-        
-        .trx-info { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
-        .order-id { color: #38bdf8; font-weight: bold; font-family: monospace; }
-        .amount { font-size: 16px; font-weight: bold; margin: 5px 0; }
-        
-        /* TOMBOL KONFIRMASI DI BAWAH */
-        .btn-confirm { 
-            background: #22c55e; color: white; margin-top: 10px; 
-            text-transform: uppercase; letter-spacing: 1px;
-        }
+        body { background-color: #0b1120; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; }
+        .login-card { background: #1e293b; padding: 30px; border-radius: 20px; border: 1px solid #334155; width: 100%; max-width: 400px; text-align: center; }
+        input { width: 100%; padding: 15px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 12px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        .btn-blue { background: #38bdf8; color: white; }
+        .btn-wa { background: #ef4444; color: white; text-decoration: none; display: block; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <audio id="successSound" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3" preload="auto"></audio>
 
-    <div class="container">
-        <div id="login-screen">
-            <h2 style="text-align: center; color: #38bdf8;">Login Admin</h2>
-            <input type="text" id="username" placeholder="Username">
-            <input type="password" id="password" placeholder="Password">
-            <button onclick="checkLogin()">MASUK</button>
-        </div>
+<div id="loginSection" class="login-card">
+    <h2>Login Admin</h2>
+    <input type="text" id="u" placeholder="Username">
+    <input type="password" id="p" placeholder="Password">
+    <button class="btn btn-blue" onclick="login()">MASUK</button>
+</div>
 
-        <div id="dashboard">
-            <h3 style="color:#38bdf8;">Riwayat Transaksi</h3>
-            <p style="font-size: 12px; color: #94a3b8;">Total: <span id="total-count">0</span></p>
-            
-            <div id="trx-list">
+<script>
+    function login() {
+        const u = document.getElementById('u').value;
+        const p = document.getElementById('p').value;
+        const banned = JSON.parse(localStorage.getItem('bannedUsers')) || [];
+
+        // Cek Ban
+        if (banned.includes(u)) {
+            const msg = `HALO DEVELOPER TERHORMAT SAYA ADMIN ${u} INGIN MENGAJUKAN BANDING TERHADAP AKUN ADMIN SAYA, TERIMAKASIH`;
+            document.body.innerHTML = `
+                <div class="login-card" style="border-color: #ef4444;">
+                    <h2 style="color: #ef4444;">AKUN ADMIN ANDA TELAH DI BAN PERMANEN OLEH DEV/RAYY</h2>
+                    <p>Hubungi Contact Developer: 628131172093</p>
+                    <a href="https://wa.me/628131172093?text=${encodeURIComponent(msg)}" class="btn btn-wa">AJUKAN BANDING KE WA</a>
                 </div>
-
-            <button onclick="location.reload()" style="background:#475569; color:white; margin-top:20px;">LOGOUT</button>
-        </div>
-    </div>
-
-    <script>
-        function checkLogin() {
-            const uIn = document.getElementById('username').value;
-            const pIn = document.getElementById('password').value;
-            const USERS = JSON.parse(localStorage.getItem('dev_users')) || [{user:"admin_rayy", pass:"085794"}];
-            const match = USERS.find(u => u.user === uIn && u.pass === pIn);
-
-            if (match) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'block';
-                loadData();
-                startAuto();
-            } else { alert("Login Gagal!"); }
+            `;
+            return;
         }
 
-        function loadData() {
-            const history = JSON.parse(localStorage.getItem('trx_history') || '[]');
-            document.getElementById('total-count').innerText = history.length;
-            
-            const list = document.getElementById('trx-list');
-            list.innerHTML = [...history].reverse().map((t, index) => {
-                const originalIndex = history.length - 1 - index; 
-                const isSukses = t.status === 'Sukses';
-                
-                return `
-                <div class="trx-card ${isSukses ? 'sukses' : ''}">
-                    <div class="trx-info">
-                        <span class="order-id">${t.orderId}</span>
-                        <span style="color:${isSukses ? '#22c55e' : '#eab308'}">${isSukses ? '✅ Sukses' : '⏳ Pending'}</span>
-                    </div>
-                    <div class="amount">Rp ${parseInt(t.amount).toLocaleString()}</div>
-                    <div style="font-size: 11px; color: #94a3b8;">${t.date}</div>
-                    
-                    ${!isSukses ? `<button class="btn-confirm" onclick="konf(${originalIndex})">Konfirmasi Pembayaran</button>` : ''}
-                </div>
-                `;
-            }).join('');
+        // Cek Owner
+        if (u === "admin_rayy" && p === "rayy123") {
+            window.location.href = "dashboard.html";
+            return;
         }
 
-        function konf(idx) {
-            let history = JSON.parse(localStorage.getItem('trx_history') || '[]');
-            if(confirm("Konfirmasi transaksi ini sekarang?")) {
-                history[idx].status = 'Sukses';
-                localStorage.setItem('trx_history', JSON.stringify(history));
-                loadData();
-                document.getElementById('successSound').play().catch(() => {});
-            }
+        // Cek Admin Baru
+        let admins = JSON.parse(localStorage.getItem('admins')) || [];
+        const found = admins.find(a => a.user === u && a.pass === p);
+        if (found) {
+            alert("Halo " + found.name);
+            window.location.href = "dashboard.html";
+        } else {
+            alert("Username atau Password Salah!");
         }
-
-        function startAuto() {
-            setInterval(() => {
-                let history = JSON.parse(localStorage.getItem('trx_history') || '[]');
-                let change = false;
-                history.forEach((t, i) => {
-                    if (t.status === 'Pending') { history[i].status = 'Sukses'; change = true; }
-                });
-                if (change) {
-                    localStorage.setItem('trx_history', JSON.stringify(history));
-                    loadData();
-                    document.getElementById('successSound').play().catch(() => {});
-                }
-            }, 5000);
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
