@@ -3,85 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Admin - Control Center</title>
+    <title>Rayy - Transaction Monitor</title>
     <style>
-        :root { --primary: #38bdf8; --bg: #0b1120; --card: #1e293b; --red: #ef4444; --green: #22c55e; --text: #f8fafc; }
+        :root {
+            --primary: #38bdf8;
+            --bg: #0b1120;
+            --card: #1e293b;
+            --text: #f8fafc;
+        }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
         .container { max-width: 500px; margin: auto; }
-        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        .label { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px; display: block; }
-        input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
-        .btn-blue { background: var(--primary); color: var(--bg); }
-        .btn-red { background: var(--red); color: white; }
-        .list-item { background: #0f172a; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--primary); display: flex; justify-content: space-between; align-items: center; }
-        #historyList { max-height: 400px; overflow-y: auto; }
+        .title { color: var(--primary); text-align: center; font-weight: 900; text-transform: uppercase; margin-bottom: 25px; }
+        
+        .card {
+            background: var(--card); border-radius: 25px; padding: 25px; 
+            border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .label { font-size: 0.75rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: block; }
+        
+        .list-container { max-height: 500px; overflow-y: auto; }
+        .list-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; background: #0f172a; border-radius: 15px;
+            margin-bottom: 12px; border-left: 4px solid var(--primary);
+            animation: slideIn 0.5s ease;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        
+        .item-info b { display: block; font-size: 1rem; color: var(--text); }
+        .item-info small { color: #94a3b8; font-size: 0.75rem; }
+        .status-badge { background: rgba(34, 197, 94, 0.2); color: #22c55e; padding: 5px 12px; border-radius: 50px; font-size: 0.65rem; font-weight: 800; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2 style="color: var(--primary); text-align: center;">RAYY DEV CLOUD</h2>
+        <h2 class="title">Live <span style="color:white;">Monitor</span></h2>
 
         <div class="card">
-            <span class="label">Operational Status</span>
-            <button id="statusBtn" class="btn" onclick="toggleToko()">Memuat...</button>
-        </div>
-
-        <div class="card">
-            <span class="label">Live Transaction History</span>
-            <div id="historyList">Memuat riwayat...</div>
-            <button class="btn" style="background:#334155; color:white; margin-top:10px; font-size:0.7rem;" onclick="hapusRiwayat()">Clear History</button>
-        </div>
-
-        <div class="card">
-            <span class="label">Ban User</span>
-            <input type="text" id="target" placeholder="Nama User">
-            <button class="btn btn-red" onclick="banUser()">Banned User</button>
+            <span class="label">Recent Transactions (Real-time)</span>
+            <div id="historyList" class="list-container">
+                <p style="text-align:center; opacity:0.5;">Menghubungkan ke server...</p>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // 1. MONITOR STATUS TOKO
-        let locked = false;
-        onValue(ref(db, 'settings/toko_locked'), (snap) => {
-            locked = snap.val();
-            const btn = document.getElementById('statusBtn');
-            btn.innerText = locked ? "OFFLINE (KLIK UNTUK ONLINE)" : "ONLINE (KLIK UNTUK OFFLINE)";
-            btn.style.background = locked ? "var(--red)" : "var(--green)";
-        });
-        window.toggleToko = () => set(ref(db, 'settings/toko_locked'), !locked);
-
-        // 2. MONITOR RIWAYAT TRANSAKSI (REAL-TIME)
-        onValue(ref(db, 'transactions'), (snap) => {
+        // Pantau Transaksi dari Firebase secara Real-time
+        onValue(ref(db, 'transactions'), (snapshot) => {
             const list = document.getElementById('historyList');
             list.innerHTML = "";
-            const data = snap.val();
+            const data = snapshot.val();
+            
             if(data) {
+                // Urutkan dari yang terbaru (paling atas)
                 Object.keys(data).reverse().forEach(id => {
                     const item = data[id];
                     list.innerHTML += `
-                    <div class="list-item">
-                        <div><b>${item.nama}</b><br><small>Rp ${item.jumlah} - ${item.waktu}</small></div>
-                        <div style="font-size:0.6rem; color:var(--primary)">SUCCESS</div>
-                    </div>`;
+                        <div class="list-item">
+                            <div class="item-info">
+                                <b>${item.nama}</b>
+                                <small>Rp ${Number(item.jumlah).toLocaleString()} • ${item.waktu}</small>
+                            </div>
+                            <div class="status-badge">SUCCESS</div>
+                        </div>`;
                 });
-            } else { list.innerHTML = "Belum ada transaksi."; }
+            } else {
+                list.innerHTML = "<p style='text-align:center; opacity:0.5;'>Belum ada transaksi hari ini.</p>";
+            }
         });
-
-        // 3. FITUR LAIN
-        window.banUser = () => {
-            const u = document.getElementById('target').value;
-            if(u) set(ref(db, 'banned_users/' + u), true).then(() => alert(u + " Diblokir!"));
-        }
-        window.hapusRiwayat = () => { if(confirm("Hapus semua riwayat?")) remove(ref(db, 'transactions')); }
     </script>
 </body>
 </html>
