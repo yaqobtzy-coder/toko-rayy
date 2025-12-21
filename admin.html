@@ -3,67 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Store - Admin APK</title>
-    <script>
-        // SENSOR OTOMATIS: Tutup Web Jam 9 Pagi
-        if (localStorage.getItem('tokoLocked') === 'offline') {
-            document.write(`
-                <body style="background:#0b1120; color:white; display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center; margin:0; padding:20px;">
-                    <div><h2 style="color:#ef4444; font-size:1.5rem; text-transform:uppercase; border: 2px solid #ef4444; padding: 25px; border-radius: 15px;">WEB AKAN BISA DI AKSES JAM 9 PAGI</h2></div>
-                </body>
-            `);
-            window.stop();
-        }
-    </script>
+    <title>Dashboard Transaksi</title>
     <style>
         :root { --primary: #38bdf8; --bg: #0b1120; --card: #1e293b; --red: #ef4444; --green: #22c55e; }
-        body { background-color: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        body { background-color: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow: hidden; }
 
-        /* --- SPLASH SCREEN ANIMASI --- */
+        /* --- LAYAR VIDEO SPLASH (WELCOME) --- */
         #splash-screen {
-            position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg);
-            display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:99999;
-            transition: opacity 0.8s ease, visibility 0.8s;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 99999; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; transition: opacity 0.8s;
         }
-        .splash-logo {
-            width:100px; height:100px; background:var(--primary); border-radius:25px;
-            display:flex; align-items:center; justify-content:center; font-size:3rem; font-weight:900; color:var(--bg);
-            box-shadow: 0 0 40px rgba(56, 189, 248, 0.4); animation: bounceIn 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .v-container { width: 100%; max-width: 400px; position: relative; text-align: center; }
+        video { width: 100%; border-radius: 20px; box-shadow: 0 0 30px rgba(56, 189, 248, 0.3); }
+        .splash-text { margin-top: 20px; font-weight: 900; letter-spacing: 4px; color: var(--primary); font-size: 1.2rem; text-transform: uppercase; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* --- LAYAR VIDEO EXIT (GOODBYE) --- */
+        #exit-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 100000; display: none; flex-direction: column;
+            align-items: center; justify-content: center;
         }
-        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-        
-        /* --- NOTIFIKASI ANIMASI ATAS-BAWAH --- */
+
+        /* --- NOTIFIKASI ANIMASI --- */
         #customToast {
             position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
             background: var(--primary); color: var(--bg); padding: 15px 30px;
-            border-radius: 50px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 100000; transition: all 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+            border-radius: 50px; font-weight: 800; z-index: 100001;
+            transition: all 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6);
         }
         #customToast.show { top: 30px; }
 
-        .container { max-width: 450px; margin: auto; padding: 20px; opacity: 0; transition: opacity 1s; }
+        .container { max-width: 450px; margin: auto; padding: 20px; height: 100vh; overflow-y: auto; opacity: 0; transition: opacity 1s; }
         .container.visible { opacity: 1; }
-        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; position: relative; }
-        
-        input { width: 100%; padding: 16px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 15px; box-sizing: border-box; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--primary); }
+        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #334155; }
+        input { width: 100%; padding: 16px; margin: 10px 0; background: #2d3a4f; border: 1px solid #3d4b63; color: white; border-radius: 15px; box-sizing: border-box; outline: none; }
         .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
         .btn-blue { background: var(--primary); color: var(--bg); }
-        .btn-sm { width: auto; padding: 8px 15px; font-size: 0.7rem; margin-top: 10px; margin-right: 5px; }
-        
+        .btn-logout { background: #334155; color: white; margin-top: 30px; }
         .status-badge { float: right; font-size: 0.7rem; padding: 4px 10px; border-radius: 8px; font-weight: bold; }
         .status-Pending { background: #f59e0b; color: #000; }
         .status-Sukses { background: var(--green); color: #fff; }
-
-        /* LAYAR BAN */
-        .ban-container { text-align: center; margin-top: 50px; padding: 30px; border: 3px solid var(--red); border-radius: 25px; background: #1a0000; }
     </style>
 </head>
 <body>
 
     <div id="splash-screen">
-        <div class="splash-logo">R</div>
-        <div style="margin-top:20px; font-weight:bold; letter-spacing:3px;">RAYY ADMIN</div>
+        <div class="v-container">
+            <video id="vidWelcome" autoplay muted playsinline>
+                <source src="video_welcome.mp4" type="video/mp4">
+            </video>
+            <div class="splash-text">Dashboard Transaksi</div>
+        </div>
+    </div>
+
+    <div id="exit-screen">
+        <div class="v-container">
+            <video id="vidExit" muted playsinline>
+                <source src="video_exit.mp4" type="video/mp4">
+            </video>
+        </div>
     </div>
 
     <div id="customToast">Notifikasi</div>
@@ -71,7 +71,6 @@
     <div class="container" id="main-content">
         <div id="loginPage" style="text-align:center; margin-top:50px;">
             <h1 style="color:var(--primary);">Admin Login</h1>
-            <p id="infoLogin" style="color:#94a3b8; font-size:0.8rem;">Gunakan akun admin_rayy</p>
             <div class="card">
                 <input type="text" id="userIn" placeholder="Username">
                 <input type="password" id="passIn" placeholder="Password">
@@ -81,26 +80,44 @@
 
         <div id="historyPage" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="color:var(--primary); margin:0;">Riwayat Transaksi</h2>
-                <button onclick="muatTransaksi()" style="background:#334155; border:none; color:white; padding:8px; border-radius:8px;">🔄</button>
+                <h2 style="color:var(--primary); margin:0;">Transaksi</h2>
+                <button onclick="muatTransaksi()" style="background:none; border:none; color:white; font-size:1.5rem;">🔄</button>
             </div>
             <div id="listTransaksi"></div>
-            <button class="btn" style="background:#334155; color:white; margin-top:30px;" onclick="location.reload()">Logout</button>
+            <button class="btn btn-logout" onclick="handleExit()">Keluar Aplikasi</button>
         </div>
     </div>
 
     <script>
         const waNumber = "628131172093";
         let lastTrxCount = 0;
-        let salahHitung = 0;
 
+        // Start Splash
         window.onload = () => {
-            setTimeout(() => {
+            const vid = document.getElementById('vidWelcome');
+            vid.onended = () => {
                 document.getElementById('splash-screen').style.opacity = '0';
-                document.getElementById('splash-screen').style.visibility = 'hidden';
-                document.getElementById('main-content').classList.add('visible');
-            }, 2000);
+                setTimeout(() => {
+                    document.getElementById('splash-screen').style.display = 'none';
+                    document.getElementById('main-content').classList.add('visible');
+                    document.body.style.overflow = "auto";
+                }, 800);
+            };
+            // Backup jika video gagal load/putar
+            setTimeout(() => { if(vid.paused) vid.play(); }, 500);
         };
+
+        // Fungsi Keluar dengan Video Exit
+        function handleExit() {
+            document.getElementById('exit-screen').style.display = 'flex';
+            const vidE = document.getElementById('vidExit');
+            vidE.play();
+            vidE.onended = () => {
+                // Menghapus session atau reload
+                localStorage.removeItem('isAdminLoggedIn'); 
+                location.reload();
+            };
+        }
 
         function tampilkanNotif(pesan) {
             const toast = document.getElementById('customToast');
@@ -112,11 +129,8 @@
         function handleLogin() {
             const u = document.getElementById('userIn').value;
             const p = document.getElementById('passIn').value;
-            let banned = JSON.parse(localStorage.getItem('bannedUsers') || '[]');
-            
-            if (banned.includes(u)) { tampilkanLayarBlokir(u, 'manual'); return; }
-
             let admins = JSON.parse(localStorage.getItem('admins') || '[]');
+            
             if ((u === "admin_rayy" && p === "rayy123") || admins.find(a => a.user === u && a.pass === p)) {
                 tampilkanNotif("🔓 Akses Diterima!");
                 document.getElementById('loginPage').style.display = 'none';
@@ -124,11 +138,7 @@
                 muatTransaksi();
                 setInterval(checkNewTransaction, 5000);
             } else {
-                salahHitung++;
-                if(salahHitung >= 3) {
-                    banned.push(u); localStorage.setItem('bannedUsers', JSON.stringify(banned));
-                    tampilkanLayarBlokir(u, 'otomatis');
-                } else { tampilkanNotif("🔒 Username/Password Salah!"); }
+                tampilkanNotif("🔒 Akses Ditolak!");
             }
         }
 
@@ -145,43 +155,18 @@
                     <div class="card">
                         <span class="status-badge status-${trx.status}">${trx.status}</span>
                         <div style="color:var(--primary); font-weight:bold; font-size:0.8rem;">ID: ${trx.orderId}</div>
-                        <div style="font-size:1.3rem; font-weight:bold; margin:5px 0;">Rp ${parseInt(trx.amount).toLocaleString('id-ID')}</div>
-                        ${trx.status === 'Pending' ? `<button class="btn btn-blue btn-sm" onclick="confirmTrx(${realIdx})">CONFIRM</button>` : ''}
-                        <button class="btn btn-sm" style="background:var(--red); color:white;" onclick="hapusTrx(${realIdx})">HAPUS</button>
+                        <div style="font-size:1.2rem; font-weight:bold; margin:5px 0;">Rp ${parseInt(trx.amount).toLocaleString('id-ID')}</div>
+                        <button class="btn btn-blue" style="width:auto; padding:8px 15px; font-size:0.7rem;" onclick="confirmTrx(${realIdx})">CONFIRM</button>
                     </div>`;
             });
         }
 
-        function confirmTrx(idx) {
-            let history = JSON.parse(localStorage.getItem('trx_history') || '[]');
-            history[idx].status = "Sukses";
-            localStorage.setItem('trx_history', JSON.stringify(history));
-            tampilkanNotif("✅ Transaksi Disukseskan!");
-            muatTransaksi();
-        }
-
-        function hapusTrx(idx) {
-            if(confirm("Hapus riwayat ini?")) {
-                let history = JSON.parse(localStorage.getItem('trx_history') || '[]');
-                history.splice(idx, 1);
-                localStorage.setItem('trx_history', JSON.stringify(history));
-                muatTransaksi();
-            }
-        }
-
         function checkNewTransaction() {
             const history = JSON.parse(localStorage.getItem('trx_history') || '[]');
-            if (history.length > lastTrxCount) { tampilkanNotif("🔔 Ada Transaksi Baru!"); muatTransaksi(); }
-        }
-
-        function tampilkanLayarBlokir(username, tipe) {
-            let waText = tipe === 'otomatis' ? `Halo owner saya ${username} kena ban otomatis...` : `Halo owner akun ${username} kena ban manual...`;
-            document.getElementById('main-content').innerHTML = `
-                <div class="ban-container">
-                    <h1 style="color:var(--red);">AKUN DI BAN!</h1>
-                    <p>Silakan hubungi owner untuk membuka akses.</p>
-                    <a href="https://wa.me/${waNumber}?text=${encodeURIComponent(waText)}" class="btn btn-blue" style="text-decoration:none; display:inline-block; background:var(--green); color:white;">HUBUNGI OWNER</a>
-                </div>`;
+            if (history.length > lastTrxCount) { 
+                tampilkanNotif("🔔 Transaksi Baru!"); 
+                muatTransaksi(); 
+            }
         }
     </script>
 </body>
