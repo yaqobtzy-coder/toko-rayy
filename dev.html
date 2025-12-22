@@ -3,284 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Developer Panel - High Security</title>
+    <title>Rayy Dev Panel - Auto Schedule v3.0</title>
     <style>
         :root {
             --primary: #38bdf8;
             --bg: #0b1120;
             --card: #1e293b;
             --dark: #0f172a;
+            --text: #f8fafc;
             --red: #ef4444;
             --green: #22c55e;
-            --text: #f8fafc;
         }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        /* SPLASH SCREEN ANIMATION */
-        #splash {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 9999; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transition: 0.8s ease-in-out;
-        }
-        .logo-box {
-            width: 100px; height: 100px; background: var(--primary); border-radius: 25px;
-            display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
-            font-weight: 900; color: var(--bg); box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
-        }
-
-        /* TOAST NOTIF */
-        #toast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: var(--primary); color: var(--bg); padding: 15px 30px;
-            border-radius: 50px; font-weight: 800; z-index: 10000; transition: 0.5s;
-        }
-        #toast.show { top: 30px; }
-
-        .container { max-width: 550px; margin: auto; padding: 25px; opacity: 0; transition: 1s; }
-        .container.visible { opacity: 1; }
-
-        .card {
-            background: var(--card); border-radius: 25px; padding: 25px; margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .title { color: var(--primary); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; text-align: center; }
-        .label { font-size: 0.75rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; display: block; }
-
-        input {
-            width: 100%; padding: 16px; margin: 10px 0; background: var(--dark);
-            border: 1px solid #334155; color: white; border-radius: 15px; box-sizing: border-box;
-            outline: none; transition: 0.3s;
-        }
-        input:focus { border-color: var(--primary); }
-
-        .btn {
-            width: 100%; padding: 16px; border: none; border-radius: 15px;
-            font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s;
-            margin-top: 10px;
-        }
-        .btn-blue { background: var(--primary); color: var(--bg); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 600px; }
+        .card { background: var(--card); padding: 30px; border-radius: 30px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        h2 { color: var(--primary); margin-bottom: 20px; font-weight: 900; text-align: center; }
+        .grid-settings { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .status-box { padding: 20px; border-radius: 20px; background: var(--dark); text-align: center; border: 2px solid transparent; transition: 0.3s; }
+        .status-on { border-color: var(--green); color: var(--green); }
+        .status-off { border-color: var(--red); color: var(--red); }
+        input, select { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--dark); color: white; margin-top: 10px; }
+        .btn { width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: 900; cursor: pointer; margin-top: 10px; text-transform: uppercase; transition: 0.3s; }
+        .btn-blue { background: var(--primary); color: #0b1120; }
         .btn-red { background: var(--red); color: white; }
-        .btn-sm { width: auto; padding: 8px 15px; font-size: 0.7rem; margin: 0; }
-
-        .list-container { max-height: 250px; overflow-y: auto; margin-top: 15px; }
-        .list-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 15px; background: var(--dark); border-radius: 12px;
-            margin-bottom: 10px; border-left: 4px solid var(--primary);
-        }
-        .list-item.banned { border-left-color: var(--red); }
-        .item-text { font-size: 0.9rem; font-weight: 600; }
-        .item-sub { font-size: 0.7rem; color: #94a3b8; display: block; }
+        .btn-green { background: var(--green); color: white; }
+        .list-item { background: var(--dark); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
 
-    <div id="splash">
-        <div class="logo-box">R</div>
-        <p style="margin-top: 20px; font-weight: 800; color: var(--primary);">DEV PANEL LOADING...</p>
-    </div>
+<div class="container">
+    <h2>DEV CONTROL PANEL</h2>
 
-    <div id="toast">Notifikasi</div>
-
-    <div class="container" id="main-content">
-        <div id="loginPage" style="margin-top: 80px;">
-            <div class="card">
-                <h2 class="title">Developer Access</h2>
-                <input type="password" id="devKey" placeholder="Enter Secret Key">
-                <button class="btn btn-blue" onclick="tryLogin()">UNLOCK SYSTEM</button>
-            </div>
-        </div>
-
-        <div id="panelArea" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="color: var(--primary); margin: 0;">CONTROL CENTER</h2>
-                <button class="btn btn-red btn-sm" onclick="location.reload()">LOCK</button>
-            </div>
-
-            <div class="card">
-                <span class="label">Operational Status</span>
-                <button id="statusBtn" class="btn" onclick="toggleToko()">Memuat...</button>
-            </div>
-
-            <div class="card">
-                <span class="label">Ban / Unban User System</span>
-                <input type="text" id="targetUser" placeholder="Masukkan Username Target">
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-red" style="flex: 1;" onclick="execAction('BAN')">BAN USER</button>
-                    <button class="btn btn-blue" style="flex: 1;" onclick="execAction('UNBAN')">UNBAN USER</button>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <span class="label">Current Banned List (Cloud)</span>
-                    <div id="bannedList" class="list-container"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <span class="label">Admin Login Activity (Real-time Cloud)</span>
-                <div id="logList" class="list-container"></div>
-                <button class="btn" style="background:#334155; color:white; font-size:0.75rem;" onclick="clearLogs()">Wipe Cloud Logs</button>
-            </div>
-
-            <div class="card">
-                <span class="label">Create Extra Admin</span>
-                <input type="text" id="newAdminU" placeholder="New Username">
-                <input type="text" id="newAdminP" placeholder="New Password">
-                <button class="btn btn-blue" onclick="createNewAdmin()">SAVE NEW ADMIN</button>
-                
-                <div style="margin-top: 20px;">
-                    <span class="label">Extra Admin List</span>
-                    <div id="adminList" class="list-container"></div>
-                </div>
-            </div>
-
-            <div class="card" style="border: 1px solid var(--red);">
-                <span class="label" style="color: var(--red);">Danger Zone</span>
-                <button class="btn btn-red" onclick="resetTransactions()">RESET ALL TRANSACTIONS</button>
-            </div>
+    <div class="card">
+        <p style="text-align:center; opacity:0.6; font-size:0.8rem; margin-bottom:15px;">KONTROL MANUAL SERVER</p>
+        <div class="grid-settings">
+            <div id="statusManual" class="status-box">MEMUAT...</div>
+            <button class="btn btn-blue" onclick="toggleServer()">SWITCH MANUAL</button>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    <div class="card">
+        <p style="text-align:center; opacity:0.6; font-size:0.8rem; margin-bottom:15px;">JADWAL BUKA/TUTUP OTOMATIS</p>
+        <div style="display:flex; gap:10px;">
+            <div style="flex:1;">
+                <label style="font-size:0.7rem;">JAM BUKA</label>
+                <input type="time" id="openTime">
+            </div>
+            <div style="flex:1;">
+                <label style="font-size:0.7rem;">JAM TUTUP</label>
+                <input type="time" id="closeTime">
+            </div>
+        </div>
+        <button class="btn btn-green" onclick="saveJadwal()">SIMPAN JADWAL OTOMATIS</button>
+    </div>
 
-        const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    <div class="card">
+        <h3>MANAJEMEN AKSES</h3>
+        <input type="text" id="targetUser" placeholder="Username (Untuk Admin/Ban)">
+        <input type="text" id="targetPass" placeholder="Password (Hanya untuk Admin)">
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-blue" onclick="addAdmin()" style="font-size:0.7rem;">TAMBAH ADMIN</button>
+            <button class="btn btn-red" onclick="banUser()" style="font-size:0.7rem;">BAN USER/ADMIN</button>
+        </div>
+    </div>
 
-        const SECRET = "085794";
-        const OWNER = "rayy_dev";
+    <div class="card">
+        <p style="opacity:0.5; font-size:0.8rem;">DAFTAR BANNED USER</p>
+        <div id="banList" style="margin-top:10px;"></div>
+    </div>
+</div>
 
-        // Login System
-        window.tryLogin = function() {
-            const key = document.getElementById('devKey').value;
-            if(key === SECRET) {
-                notify("🔓 System Unlocked");
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('panelArea').style.display = 'block';
-                // Log activity to firebase
-                push(ref(db, 'sys_login_logs'), { user: OWNER, time: new Date().toLocaleString() });
-            } else { notify("❌ Invalid Key!"); }
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, update, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // 1. MONITOR STATUS MANUAL & JADWAL
+    onValue(ref(db, 'settings'), (snap) => {
+        const data = snap.val();
+        const statBox = document.getElementById('statusManual');
+        if(data.toko_locked) {
+            statBox.innerHTML = "STATUS: CLOSED";
+            statBox.className = "status-box status-off";
+        } else {
+            statBox.innerHTML = "STATUS: OPEN";
+            statBox.className = "status-box status-on";
         }
+        if(data.jadwal) {
+            document.getElementById('openTime').value = data.jadwal.buka;
+            document.getElementById('closeTime').value = data.jadwal.tutup;
+        }
+    });
 
-        // Operational Status (Toko Online/Offline)
-        let tokoLocked = false;
+    // 2. TOGGLE MANUAL
+    window.toggleServer = function() {
         onValue(ref(db, 'settings/toko_locked'), (snap) => {
-            tokoLocked = snap.val() || false;
-            const btn = document.getElementById('statusBtn');
-            btn.innerText = tokoLocked ? "STATUS: OFFLINE" : "STATUS: ONLINE";
-            btn.style.background = tokoLocked ? "var(--red)" : "var(--green)";
-            btn.style.color = "white";
+            update(ref(db, 'settings'), { toko_locked: !snap.val() });
+        }, { onlyOnce: true });
+    }
+
+    // 3. SAVE JADWAL
+    window.saveJadwal = function() {
+        const buka = document.getElementById('openTime').value;
+        const tutup = document.getElementById('closeTime').value;
+        if(!buka || !tutup) return alert("Isi Jam!");
+        update(ref(db, 'settings/jadwal'), { buka, tutup, auto: true }).then(() => alert("Jadwal Disimpan!"));
+    }
+
+    // 4. ADD ADMIN
+    window.addAdmin = function() {
+        const user = document.getElementById('targetUser').value;
+        const pass = document.getElementById('targetPass').value;
+        if(!user || !pass) return alert("Isi data!");
+        set(ref(db, 'sys_extra_admins/' + user), { user, pass }).then(() => alert("Admin Ditambah!"));
+    }
+
+    // 5. BAN USER
+    window.banUser = function() {
+        const user = document.getElementById('targetUser').value;
+        if(!user) return alert("Isi Nama!");
+        set(ref(db, 'banned_users/' + user), { status: "banned" }).then(() => alert("User Di-Ban!"));
+    }
+
+    // 6. TAMPILKAN DAFTAR BAN
+    onValue(ref(db, 'banned_users'), (snap) => {
+        const list = document.getElementById('banList');
+        list.innerHTML = "";
+        snap.forEach(child => {
+            list.innerHTML += `<div class="list-item"><span>${child.key}</span><button onclick="unban('${child.key}')" style="color:red; background:none; border:none; cursor:pointer;">HAPUS</button></div>`;
         });
+    });
 
-        window.toggleToko = () => set(ref(db, 'settings/toko_locked'), !tokoLocked);
-
-        // Ban System
-        window.execAction = function(type) {
-            const user = document.getElementById('targetUser').value.trim();
-            if(!user) return notify("Enter username!");
-            if(user === OWNER) return notify("❌ Cannot ban Owner!");
-
-            if(type === 'BAN') {
-                set(ref(db, 'banned_users/' + user), true);
-                notify("🚫 " + user + " Banned");
-            } else {
-                remove(ref(db, 'banned_users/' + user));
-                notify("🔓 " + user + " Unbanned");
-            }
-            document.getElementById('targetUser').value = "";
-        };
-
-        // Render Banned List
-        onValue(ref(db, 'banned_users'), (snap) => {
-            const bl = document.getElementById('bannedList');
-            bl.innerHTML = "";
-            const data = snap.val();
-            if(!data) { bl.innerHTML = "<small>No one is banned.</small>"; return; }
-            for(let user in data) {
-                bl.innerHTML += `
-                    <div class="list-item banned">
-                        <span class="item-text">${user}</span>
-                        <button class="btn btn-sm btn-blue" onclick="unbanUser('${user}')">UNBAN</button>
-                    </div>`;
-            }
-        });
-        window.unbanUser = (u) => remove(ref(db, 'banned_users/' + u));
-
-        // Render Admin Logs
-        onValue(ref(db, 'sys_login_logs'), (snap) => {
-            const ll = document.getElementById('logList');
-            ll.innerHTML = "";
-            const data = snap.val();
-            if(!data) { ll.innerHTML = "<small>No login history yet.</small>"; return; }
-            Object.keys(data).reverse().forEach(id => {
-                const log = data[id];
-                ll.innerHTML += `
-                    <div class="list-item">
-                        <div class="item-info">
-                            <span class="item-text">${log.user}</span>
-                            <span class="item-sub">${log.time}</span>
-                        </div>
-                    </div>`;
-            });
-        });
-        window.clearLogs = () => { if(confirm("Wipe Cloud Logs?")) remove(ref(db, 'sys_login_logs')); };
-
-        // Extra Admin System
-        window.createNewAdmin = () => {
-            const u = document.getElementById('newAdminU').value.trim();
-            const p = document.getElementById('newAdminP').value.trim();
-            if(!u || !p) return notify("Fill all fields!");
-            push(ref(db, 'sys_extra_admins'), { user: u, pass: p });
-            notify("👤 New Admin Saved");
-            document.getElementById('newAdminU').value = "";
-            document.getElementById('newAdminP').value = "";
-        };
-
-        onValue(ref(db, 'sys_extra_admins'), (snap) => {
-            const al = document.getElementById('adminList');
-            al.innerHTML = "";
-            const data = snap.val();
-            if(!data) { al.innerHTML = "<small>No extra admins created.</small>"; return; }
-            for(let id in data) {
-                al.innerHTML += `
-                    <div class="list-item">
-                        <span class="item-text">${data[id].user}</span>
-                        <button class="btn btn-sm btn-red" onclick="delAdmin('${id}')">DELETE</button>
-                    </div>`;
-            }
-        });
-        window.delAdmin = (id) => remove(ref(db, 'sys_extra_admins/' + id));
-
-        // Danger Zone
-        window.resetTransactions = () => { if(confirm("DANGER: Delete all transaction data?")) remove(ref(db, 'transactions')); };
-
-        // General
-        window.notify = (msg) => {
-            const t = document.getElementById('toast');
-            t.innerText = msg; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        };
-
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('splash').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('splash').style.display = 'none';
-                    document.getElementById('main-content').classList.add('visible');
-                }, 800);
-            }, 2000);
-        };
-    </script>
+    window.unban = (id) => { remove(ref(db, 'banned_users/' + id)); }
+</script>
 </body>
 </html>
