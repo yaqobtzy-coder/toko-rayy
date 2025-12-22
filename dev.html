@@ -3,296 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rayy Dev Panel - Master Access v8.0</title>
-    
+    <title>Rayy Dev - Intelligence System v9.0</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
-    
     <style>
-        :root {
-            --primary: #38bdf8;
-            --bg: #020617;
-            --card: #0f172a;
-            --dark: #010409;
-            --text: #f8fafc;
-            --red: #ef4444;
-            --green: #22c55e;
-            --gold: #f59e0b;
-        }
-
+        :root { --primary: #38bdf8; --bg: #020617; --card: #0f172a; --red: #ef4444; --green: #22c55e; --gold: #f59e0b; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; }
+        body { background: var(--bg); color: #f8fafc; min-height: 100vh; padding: 20px; }
+        .glass { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.2); padding: 25px; border-radius: 25px; margin-bottom: 20px; }
+        h2 { font-size: 1rem; color: var(--primary); margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; }
+        input { width: 100%; padding: 15px; background: #010409; border: 1px solid #1e293b; color: #fff; border-radius: 12px; margin-bottom: 10px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .btn-blue { background: var(--primary); color: #000; }
+        .btn-red { background: var(--red); color: #fff; }
+        .btn-green { background: var(--green); color: #fff; }
         
-        body {
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-            background-image: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.1) 0%, transparent 50%);
-        }
-
-        /* --- LOADING SCREEN --- */
-        #loader {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg);
-            z-index: 100000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .spinner {
-            width: 50px; height: 50px;
-            border: 3px solid rgba(56, 189, 248, 0.1);
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* --- AUTH SECTION --- */
-        #devAuth {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .auth-card {
-            background: var(--card);
-            padding: 40px;
-            border-radius: 30px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        }
-
-        /* --- DASHBOARD --- */
-        .container {
-            width: 100%;
-            max-width: 600px;
-            padding: 40px 20px;
-            display: none;
-        }
-
-        .glass-card {
-            background: rgba(15, 23, 42, 0.8);
-            padding: 30px;
-            border-radius: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 20px;
-        }
-
-        .status-box {
-            width: 100%;
-            padding: 30px;
-            border-radius: 20px;
-            background: var(--dark);
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-bottom: 20px;
-            border: 2px solid #1e293b;
-        }
-        .status-box.online { color: var(--green); border-color: var(--green); }
-        .status-box.offline { color: var(--red); border-color: var(--red); }
-
-        input {
-            width: 100%;
-            padding: 18px;
-            background: var(--dark);
-            border: 1px solid #1e293b;
-            color: #fff;
-            border-radius: 15px;
-            margin-bottom: 15px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 20px;
-            border: none;
-            border-radius: 15px;
-            font-weight: 800;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-        .btn-primary { background: var(--primary); color: #000; }
-        .btn-success { background: var(--green); color: #fff; }
-        .btn-danger { background: var(--red); color: #fff; }
-
-        /* --- DENIED OVERLAY --- */
-        #deniedOverlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 999999;
-            display: none; flex-direction: column;
-            align-items: center; justify-content: center; padding: 40px; text-align: center;
-        }
+        /* Log Styling */
+        .log-container { max-height: 200px; overflow-y: auto; background: #000; padding: 10px; border-radius: 10px; font-size: 0.7rem; }
+        .log-entry { border-left: 2px solid var(--primary); padding-left: 10px; margin-bottom: 8px; color: #94a3b8; }
+        .device-chip { font-size: 0.6rem; background: #1e293b; padding: 2px 6px; border-radius: 4px; color: var(--gold); }
+        
+        #devAuth { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; }
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="spinner"></div>
-        <p style="margin-top: 15px; font-size: 0.7rem; opacity: 0.5;">AUTHENTICATING DEVICE...</p>
-    </div>
-
-    <div id="deniedOverlay">
-        <h1 style="color: var(--red); font-size: 4rem;">403</h1>
-        <h2 style="margin-bottom: 20px;">AKSES DITOLAK</h2>
-        <p style="opacity: 0.6;">Sistem mendeteksi perangkat ilegal. Hanya HP Owner Rayy yang bisa masuk.</p>
-        <div id="badId" style="margin-top: 20px; color: var(--gold); font-size: 0.7rem;"></div>
-        <button onclick="location.reload()" style="margin-top: 30px; background: none; border: 1px solid var(--primary); color: var(--primary); padding: 10px 20px; border-radius: 10px;">Coba Lagi</button>
-    </div>
-
     <div id="devAuth">
-        <div class="auth-card">
-            <h2 style="color: var(--primary); margin-bottom: 30px;">LOGIN MASTER</h2>
-            <input type="text" id="devUser" placeholder="Username">
-            <input type="password" id="devPass" placeholder="Password">
-            <button class="btn btn-primary" onclick="handleLogin()">VERIFIKASI</button>
+        <div class="glass" style="width: 100%; max-width: 350px; text-align: center;">
+            <h2>DEV ACCESS</h2>
+            <input type="password" id="passDev" placeholder="ACCESS KEY">
+            <button class="btn btn-blue" onclick="authDev()">UNLOCK</button>
         </div>
     </div>
 
-    <div class="container" id="mainPanel">
-        <header style="text-align: center; margin-bottom: 30px;">
-            <h1 style="font-weight: 800;">DEV PANEL v8.0</h1>
-            <p id="ipTag" style="font-size: 0.6rem; opacity: 0.4;">IP: FETCHING...</p>
-        </header>
+    <div id="mainDev" style="display: none; max-width: 600px; margin: 0 auto;">
+        <h1 style="text-align: center; margin-bottom: 30px; font-weight: 800;">RAYY <span style="color:var(--primary)">INTELLIGENCE</span></h1>
 
-        <div class="glass-card">
-            <div id="statusIndicator" class="status-box">SYNCING...</div>
-            <button class="btn btn-primary" onclick="togglePower()">FORCE SWITCH</button>
-        </div>
-
-        <div class="glass-card">
-            <p style="font-size: 0.7rem; color: var(--primary); margin-bottom: 10px;">SCHEDULE SETUP</p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <input type="time" id="openT">
-                <input type="time" id="closeT">
+        <div class="glass">
+            <h2>LIVE DEVICE MONITOR</h2>
+            <div id="loginLogs" class="log-container">
+                <p style="opacity:0.3">Waiting for logs...</p>
             </div>
-            <button class="btn btn-success" onclick="saveJadwal()">UPDATE JADWAL</button>
         </div>
 
-        <div class="glass-card">
-            <p style="font-size: 0.7rem; color: var(--red); margin-bottom: 10px;">ADMIN & BAN</p>
-            <input type="text" id="targetBan" placeholder="Username">
-            <button class="btn btn-danger" onclick="doBan()">BAN USER</button>
+        <div class="glass">
+            <h2>ADD NEW ADMIN</h2>
+            <input type="text" id="newAdminUser" placeholder="Username">
+            <input type="text" id="newAdminPass" placeholder="Password">
+            <button class="btn btn-green" onclick="addNewAdmin()">CREATE ADMIN ACCESS</button>
         </div>
-        
-        <div style="text-align: center; margin-bottom: 50px;">
-            <button onclick="resetAkses()" style="color: var(--red); background: none; border: none; font-size: 0.6rem; text-decoration: underline;">RESET MASTER DEVICE</button>
+
+        <div class="glass">
+            <h2>ACTIVE ADMINS</h2>
+            <div id="adminList"></div>
         </div>
+
+        <div class="glass">
+            <h2>BANISHMENT</h2>
+            <input type="text" id="banUser" placeholder="Username to Ban">
+            <button class="btn btn-red" onclick="banTarget()">EXECUTE BAN</button>
+        </div>
+
+        <button onclick="location.reload()" style="background:none; border:none; color:var(--red); font-size:0.7rem; width:100%; text-decoration:underline;">LOGOUT MASTER</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, push, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let myId = "";
-        let currentLock = false;
-        let isManual = false;
-
-        // FUNGSI BUAT ID YANG LEBIH STABIL
-        function getStableId() {
-            const screen = window.screen.width + "x" + window.screen.height;
-            const platform = navigator.platform;
-            return "MASTER-" + btoa(screen + platform).substring(0, 10);
-        }
-
-        window.onload = () => {
-            myId = getStableId();
-            fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => document.getElementById('ipTag').innerText = "IP: " + d.ip);
-            setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 1500);
+        // -- AUTH LOGIC --
+        window.authDev = () => {
+            const p = document.getElementById('passDev').value;
+            if(p === "085794") {
+                document.getElementById('devAuth').style.display = 'none';
+                document.getElementById('mainDev').style.display = 'block';
+                loadData();
+            } else { alert("WRONG KEY!"); }
         };
 
-        window.handleLogin = function() {
-            const u = document.getElementById('devUser').value;
-            const p = document.getElementById('devPass').value;
+        function loadData() {
+            // Monitor Riwayat Login
+            onValue(ref(db, 'system_logs'), (snap) => {
+                const logs = snap.val();
+                const container = document.getElementById('loginLogs');
+                container.innerHTML = "";
+                if(logs) {
+                    Object.values(logs).reverse().forEach(log => {
+                        container.innerHTML += `
+                            <div class="log-entry">
+                                [${log.time}] <b>${log.user}</b> logged in.<br>
+                                <span class="device-chip">${log.deviceId}</span>
+                            </div>
+                        `;
+                    });
+                }
+            });
 
-            if(u === "rayy_dev" && p === "085794") {
-                onValue(ref(db, 'settings/master_device'), (snap) => {
-                    const saved = snap.val();
-                    if(!saved) {
-                        if(confirm("Daftarkan HP ini sebagai milik Rayy?")) {
-                            set(ref(db, 'settings/master_device'), myId).then(() => location.reload());
-                        }
-                    } else if (saved === myId) {
-                        document.getElementById('devAuth').style.display = 'none';
-                        document.getElementById('mainPanel').style.display = 'block';
-                        startSys();
-                    } else {
-                        document.getElementById('devAuth').style.display = 'none';
-                        document.getElementById('deniedOverlay').style.display = 'flex';
-                        document.getElementById('badId').innerText = "DEVICE ID: " + myId;
-                    }
-                }, { onlyOnce: true });
-            } else { alert("WRONG ACCESS KEY!"); }
-        };
-
-        function startSys() {
-            onValue(ref(db, 'settings'), (snap) => {
-                const data = snap.val();
-                if(!data) return;
-                currentLock = data.toko_locked;
-                const ind = document.getElementById('statusIndicator');
-                ind.innerText = currentLock ? "OFFLINE / CLOSED" : "ONLINE / OPEN";
-                ind.className = "status-box " + (currentLock ? "offline" : "online");
-                if(data.jadwal) {
-                    document.getElementById('openT').value = data.jadwal.buka;
-                    document.getElementById('closeT').value = data.jadwal.tutup;
-                    sync(data.jadwal.buka, data.jadwal.tutup);
+            // List Admin Aktif
+            onValue(ref(db, 'sys_extra_admins'), (snap) => {
+                const admins = snap.val();
+                const container = document.getElementById('adminList');
+                container.innerHTML = "";
+                if(admins) {
+                    Object.keys(admins).forEach(name => {
+                        container.innerHTML += `
+                            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.8rem;">
+                                <span>👤 ${name}</span>
+                                <button onclick="delAdmin('${name}')" style="color:var(--red); background:none; border:none; cursor:pointer;">DEL</button>
+                            </div>
+                        `;
+                    });
                 }
             });
         }
 
-        function sync(b, t) {
-            if(window.timer) clearInterval(window.timer);
-            window.timer = setInterval(() => {
-                if(isManual) return;
-                const now = new Date();
-                const cur = (now.getHours() * 60) + now.getMinutes();
-                const [hB, mB] = b.split(':').map(Number);
-                const [hT, mT] = t.split(':').map(Number);
-                let lock = (cur < (hB * 60 + mB) || cur > (hT * 60 + mT));
-                if(lock !== currentLock) update(ref(db, 'settings'), { toko_locked: lock });
-            }, 1000);
-        }
-
-        window.togglePower = () => {
-            isManual = true;
-            update(ref(db, 'settings'), { toko_locked: !currentLock }).then(() => {
-                setTimeout(() => { isManual = false; }, 15000); // Tunggu 15 detik baru auto lagi
-            });
-        };
-
-        window.saveJadwal = () => {
-            const b = document.getElementById('openT').value;
-            const t = document.getElementById('closeT').value;
-            if(b && t) update(ref(db, 'settings/jadwal'), { buka: b, tutup: t }).then(() => alert("Sip!"));
-        };
-
-        window.doBan = () => {
-            const u = document.getElementById('targetBan').value;
-            if(u) set(ref(db, 'banned_users/' + u), { status: 'banned' }).then(() => alert("Beres!"));
-        };
-
-        window.resetAkses = () => {
-            if(confirm("Hapus ID HP ini? Kamu harus daftar ulang.")) {
-                remove(ref(db, 'settings/master_device')).then(() => location.reload());
+        // -- ACTIONS --
+        window.addNewAdmin = () => {
+            const u = document.getElementById('newAdminUser').value.trim();
+            const p = document.getElementById('newAdminPass').value.trim();
+            if(u && p) {
+                set(ref(db, 'sys_extra_admins/' + u), { pass: p, registered: new Date().toLocaleString() })
+                .then(() => alert("Admin Berhasil Ditambah!"));
             }
         };
+
+        window.delAdmin = (name) => {
+            if(confirm("Hapus " + name + "?")) remove(ref(db, 'sys_extra_admins/' + name));
+        };
+
+        window.banTarget = () => {
+            const u = document.getElementById('banUser').value.trim();
+            if(u) set(ref(db, 'banned_users/' + u), { time: new Date().toLocaleString() }).then(() => alert("User Banned!"));
+        };
+
     </script>
 </body>
 </html>
