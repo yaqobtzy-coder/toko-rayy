@@ -1,250 +1,42 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RAYY STORE | TITAN ADMIN CONTROL v10.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>ADMIN | MONITOR</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #38bdf8;
-            --primary-glow: rgba(56, 189, 248, 0.4);
-            --bg: #030712;
-            --card: #0f172a;
-            --dark: #020617;
-            --accent: #1e293b;
-            --text: #f8fafc;
-            --text-dim: #94a3b8;
-            --green: #10b981;
-            --red: #ef4444;
-            --gold: #f59e0b;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
-
-        /* ADVANCED BACKGROUND ENGINE */
-        .bg-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at 50% -20%, #1e293b 0%, #030712 80%); }
-        .grid-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-image: linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px); background-size: 30px 30px; }
-
-        /* AUTHENTICATION LAYER */
-        #authSection { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; transition: 0.8s cubic-bezier(0.7, 0, 0.3, 1); }
-        .auth-box { width: 100%; max-width: 420px; background: var(--card); border-radius: 40px; padding: 60px 40px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 40px 100px rgba(0,0,0,0.8); text-align: center; position: relative; overflow: hidden; }
-        .auth-box::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent, var(--primary), transparent); }
-        .auth-box h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -2px; margin-bottom: 10px; }
-        .auth-box p { color: var(--text-dim); font-size: 0.75rem; margin-bottom: 40px; letter-spacing: 3px; font-weight: 600; }
-
-        .input-group { position: relative; margin-bottom: 20px; }
-        .input-group input { width: 100%; padding: 22px 25px; background: var(--dark); border: 2px solid var(--accent); border-radius: 20px; color: #fff; font-size: 1rem; transition: 0.4s; font-weight: 600; }
-        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 30px rgba(56,189,248,0.15); transform: translateY(-2px); }
-
-        .btn-auth { width: 100%; padding: 22px; background: var(--primary); color: #000; border: none; border-radius: 20px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.4s; box-shadow: 0 15px 40px var(--primary-glow); }
-        .btn-auth:hover { transform: translateY(-3px); filter: brightness(1.1); }
-
-        /* DASHBOARD LAYOUT */
-        .container { width: 100%; max-width: 1400px; margin: 0 auto; padding: 50px 30px; display: none; opacity: 0; transform: translateY(30px); transition: 1s ease; }
-        .container.visible { display: block; opacity: 1; transform: translateY(0); }
-        
-        /* ANALYTICS CARDS */
-        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 50px; }
-        .stat-card { background: var(--card); padding: 35px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; transition: 0.4s; }
-        .stat-card:hover { transform: translateY(-5px); border-color: var(--primary); }
-        .stat-card h4 { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; font-weight: 800; }
-        .stat-card .value { font-size: 2.2rem; font-weight: 900; color: var(--primary); font-family: 'JetBrains Mono'; }
-
-        /* TRANSACTION MONITOR */
-        .trx-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .trx-header h2 { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; }
-        
-        .trx-list { display: grid; gap: 20px; }
-        .trx-card { background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; transition: 0.3s; position: relative; }
-        .trx-card::after { content: ""; position: absolute; left: 0; top: 20%; height: 60%; width: 5px; background: var(--primary); border-radius: 0 5px 5px 0; }
-        
-        .trx-info h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
-        .trx-info p { font-size: 0.8rem; color: var(--text-dim); font-family: 'JetBrains Mono'; }
-        
-        .trx-price { font-size: 1.5rem; font-weight: 900; color: var(--primary); margin: 0 30px; }
-        
-        .status-pill { padding: 10px 20px; border-radius: 15px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: inline-block; }
-        .pill-pending { background: rgba(245, 158, 11, 0.1); color: var(--gold); border: 1px solid rgba(245, 158, 11, 0.2); }
-        .pill-success { background: rgba(16, 185, 129, 0.1); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.2); }
-
-        .btn-approve { background: var(--green); color: #fff; border: none; padding: 15px 35px; border-radius: 18px; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 0.8rem; }
-        .btn-approve:hover { transform: scale(1.05); box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); }
-
-        /* NOTIFICATION SYSTEM */
-        #notifToast { position: fixed; bottom: -100px; right: 40px; background: var(--primary); color: #000; padding: 25px 50px; border-radius: 25px; font-weight: 900; transition: 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100000; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        #notifToast.active { bottom: 40px; }
-
-        @media (max-width: 992px) {
-            .trx-card { flex-direction: column; text-align: center; gap: 20px; }
-            .btn-approve { width: 100%; }
-            .trx-price { margin: 10px 0; }
-        }
+        body { background: #0b1120; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; padding: 20px; }
+        .trx-card { background: #141b2d; padding: 20px; border-radius: 20px; margin-bottom: 15px; border: 1px solid rgba(56,189,248,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .status { background: rgba(56,189,248,0.2); color: #38bdf8; padding: 5px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; }
+        #auth-guard { position: fixed; inset: 0; background: #000; z-index: 99; display: flex; align-items: center; justify-content: center; flex-direction: column; }
     </style>
 </head>
 <body>
-
-    <div class="bg-glow"></div>
-    <div class="grid-overlay"></div>
-    <div id="notifToast">ORDER MASUK!</div>
-
-    <div id="authSection">
-        <div class="auth-box">
-            <h1>RAYY <span style="color:var(--primary)">STORE</span></h1>
-            <p>ADMIN COMMAND CENTER</p>
-            <div class="input-group">
-                <input type="text" id="admUser" placeholder="Username">
-            </div>
-            <div class="input-group">
-                <input type="password" id="admPass" placeholder="Access Key">
-            </div>
-            <button class="btn-auth" onclick="loginSystem()">Authenticate</button>
-        </div>
+    <div id="auth-guard"><h1>SECURITY CHECK...</h1><p id="my-hwid"></p></div>
+    <div id="panel" style="display:none;">
+        <h1 style="margin-bottom:20px;">LIVE <span style="color:#38bdf8">TRANSACTION</span></h1>
+        <div id="list"></div>
     </div>
-
-    <div class="container" id="mainDashboard">
-        <header style="margin-bottom: 60px; display: flex; justify-content: space-between; align-items: flex-end;">
-            <div>
-                <p style="color:var(--primary); font-size: 0.8rem; letter-spacing: 6px; font-weight: 900; text-transform: uppercase;">Central Intelligence</p>
-                <h1 style="font-size: 3rem; font-weight: 900; letter-spacing: -2px;">DASHBOARD</h1>
-            </div>
-            <div id="userTag" style="font-size: 0.8rem; background: var(--accent); padding: 12px 25px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); font-weight: 700;">
-                OPERATOR: <span style="color:var(--primary);">OFFLINE</span>
-            </div>
-        </header>
-
-        <div class="stats-container">
-            <div class="stat-card">
-                <h4>Net Revenue</h4>
-                <div class="value" id="revVal">Rp 0</div>
-            </div>
-            <div class="stat-card">
-                <h4>Verified Trx</h4>
-                <div class="value" id="successVal">0</div>
-            </div>
-            <div class="stat-card">
-                <h4>Pending Queue</h4>
-                <div class="value" id="pendingVal" style="color:var(--gold)">0</div>
-            </div>
-        </div>
-
-        <div class="trx-header">
-            <h2>Active Transmissions</h2>
-            <div style="font-size: 0.7rem; color: var(--text-dim); background: rgba(56, 189, 248, 0.1); padding: 8px 15px; border-radius: 10px; border: 1px solid var(--primary-glow);">SATELLITE SYNC: ACTIVE</div>
-        </div>
-
-        <div class="trx-list" id="trxContainer">
-            </div>
-    </div>
-
-    <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
+        const HWID = "RY-" + btoa(navigator.userAgent).substring(10, 22).toUpperCase();
+        document.getElementById('my-hwid').innerText = "ID: " + HWID;
 
-        // MASTER CONFIGURATION
-        const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        let currentAdmin = "";
-
-        // AUTHENTICATION LOGIC [cite: 2025-12-21]
-        window.loginSystem = function() {
-            const u = document.getElementById('admUser').value;
-            const p = document.getElementById('admPass').value;
-
-            onValue(ref(db, 'sys_extra_admins/' + u), (snap) => {
-                const data = snap.val();
-                if(data && data.pass === p) {
-                    currentAdmin = u;
-                    const auth = document.getElementById('authSection');
-                    auth.style.opacity = '0';
-                    auth.style.pointerEvents = 'none';
-                    
-                    setTimeout(() => {
-                        const dash = document.getElementById('mainDashboard');
-                        dash.style.display = 'block';
-                        setTimeout(() => dash.classList.add('visible'), 50);
-                        document.getElementById('userTag').querySelector('span').innerText = u.toUpperCase();
-                        
-                        // SECURE LOGGING [cite: 2025-12-21]
-                        push(ref(db, 'system_logs'), {
-                            user: u,
-                            deviceId: "SEC-X-" + btoa(navigator.userAgent).substring(10, 20),
-                            time: new Date().toLocaleString(),
-                            action: "MASTER_ACCESS_GRANTED"
-                        });
-
-                        startDataStream();
-                    }, 800);
-                } else { alert("ACCESS DENIED. UNAUTHORIZED DEVICE."); }
-            }, { onlyOnce: true });
-        };
-
-        // REAL-TIME DATA STREAMING [cite: 2025-12-21]
-        function startDataStream() {
+        const auth = await get(ref(db, `authorized_admins/${HWID}`));
+        if(auth.exists()) {
+            document.getElementById('auth-guard').style.display = 'none';
+            document.getElementById('panel').style.display = 'block';
             onValue(ref(db, 'transactions'), (snap) => {
-                const container = document.getElementById('trxContainer');
-                container.innerHTML = "";
+                const list = document.getElementById('list'); list.innerHTML = "";
                 const data = snap.val();
-                
-                let rev = 0;
-                let sCount = 0;
-                let pCount = 0;
-
-                if(data) {
-                    document.getElementById('alertSound').play();
-                    triggerNotif();
-                    
-                    Object.keys(data).reverse().forEach(id => {
-                        const item = data[id];
-                        if(item.status === "Success") {
-                            rev += Number(item.jumlah);
-                            sCount++;
-                        } else {
-                            pCount++;
-                        }
-
-                        const card = document.createElement('div');
-                        card.className = 'trx-card';
-                        card.innerHTML = `
-                            <div class="trx-info">
-                                <span class="status-pill ${item.status === 'Pending' ? 'pill-pending' : 'pill-success'}">${item.status}</span>
-                                <h3>${item.nama}</h3>
-                                <p>UID: ${id}</p>
-                                <p>TS: ${item.waktu}</p>
-                            </div>
-                            <div class="trx-price">Rp ${Number(item.jumlah).toLocaleString()}</div>
-                            ${item.status === 'Pending' ? 
-                                `<button class="btn-approve" onclick="confirmTrx('${id}')">AUTHORIZE</button>` : 
-                                `<div style="text-align:right;"><p style="font-size:0.6rem; color:var(--text-dim);">VERIFIED BY</p><b style="color:var(--green); font-size:0.8rem;">${item.processedBy || 'ROOT'}</b></div>`
-                            }
-                        `;
-                        container.appendChild(card);
-                    });
-                }
-                
-                // UPDATE ANALYTICS
-                document.getElementById('revVal').innerText = "Rp " + rev.toLocaleString();
-                document.getElementById('successVal').innerText = sCount;
-                document.getElementById('pendingVal').innerText = pCount;
+                if(data) Object.keys(data).reverse().forEach(k => {
+                    const t = data[k];
+                    list.innerHTML += `<div class="trx-card"><div><h3>${t.nama}</h3><small>${t.waktu}</small></div><div style="text-align:right;"><b style="color:#10b981">Rp${t.jumlah}</b><br><span class="status">${t.status}</span></div></div>`;
+                });
             });
-        }
-
-        window.confirmTrx = (id) => {
-            update(ref(ref(db, 'transactions/' + id)), {
-                status: "Success",
-                processedBy: currentAdmin
-            });
-        };
-
-        function triggerNotif() {
-            const toast = document.getElementById('notifToast');
-            toast.classList.add('active');
-            setTimeout(() => toast.classList.remove('active'), 3500);
         }
     </script>
 </body>
