@@ -2,19 +2,16 @@
 <html lang="id">
 <head>
     <title>ADMIN | MONITOR</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #0b1120; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; padding: 20px; }
-        .trx-card { background: #141b2d; padding: 20px; border-radius: 20px; margin-bottom: 15px; border: 1px solid rgba(56,189,248,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .status { background: rgba(56,189,248,0.2); color: #38bdf8; padding: 5px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; }
-        #auth-guard { position: fixed; inset: 0; background: #000; z-index: 99; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        body { background: #0b1120; color: #fff; font-family: sans-serif; padding: 20px; }
+        .trx { background: #141b2d; padding: 20px; border-radius: 20px; margin-bottom: 10px; border-left: 5px solid #38bdf8; display: flex; justify-content: space-between; align-items: center; }
+        #guard { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
     </style>
 </head>
 <body>
-    <div id="auth-guard"><h1>SECURITY CHECK...</h1><p id="my-hwid"></p></div>
-    <div id="panel" style="display:none;">
-        <h1 style="margin-bottom:20px;">LIVE <span style="color:#38bdf8">TRANSACTION</span></h1>
+    <div id="guard"><h1>ACCESS RESTRICTED</h1><p id="hwid-info" style="color:#38bdf8"></p></div>
+    <div id="content" style="display:none;">
+        <h1 style="margin-bottom:30px;">LIVE <span style="color:#38bdf8">PAYMENT</span></h1>
         <div id="list"></div>
     </div>
 
@@ -22,19 +19,20 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
-        const HWID = "RY-" + btoa(navigator.userAgent).substring(10, 22).toUpperCase();
-        document.getElementById('my-hwid').innerText = "ID: " + HWID;
+        
+        const myHWID = "RY-" + btoa(navigator.userAgent).substring(5, 15).toUpperCase();
+        document.getElementById('hwid-info').innerText = "HWID: " + myHWID;
 
-        const auth = await get(ref(db, `authorized_admins/${HWID}`));
+        const auth = await get(ref(db, `authorized_admins/${myHWID}`));
         if(auth.exists()) {
-            document.getElementById('auth-guard').style.display = 'none';
-            document.getElementById('panel').style.display = 'block';
-            onValue(ref(db, 'transactions'), (snap) => {
+            document.getElementById('guard').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            onValue(ref(db, 'transactions'), snap => {
                 const list = document.getElementById('list'); list.innerHTML = "";
                 const data = snap.val();
                 if(data) Object.keys(data).reverse().forEach(k => {
                     const t = data[k];
-                    list.innerHTML += `<div class="trx-card"><div><h3>${t.nama}</h3><small>${t.waktu}</small></div><div style="text-align:right;"><b style="color:#10b981">Rp${t.jumlah}</b><br><span class="status">${t.status}</span></div></div>`;
+                    list.innerHTML += `<div class="trx"><div><b>${t.nama}</b><br><small>${t.waktu}</small></div><div style="text-align:right;">Rp${t.jumlah}<br><small style="color:#38bdf8">${t.status}</small></div></div>`;
                 });
             });
         }
