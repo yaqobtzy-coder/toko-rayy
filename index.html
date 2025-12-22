@@ -1,98 +1,126 @@
-/* RAYY STORE ENGINE v14.0 - NO PASSWORD EDITION
-   LOGIC: PURE TRANSACTIONAL & AUTO-SCHEDULE
-*/
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAYY STORE | OFFICIAL</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --p: #38bdf8; --bg: #020617; --c: rgba(15, 23, 42, 0.7); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); color: #fff; min-height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        
+        /* FULL BACKGROUND ANIMATION */
+        .ocean { position: fixed; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%); }
+        .bubble { position: absolute; width: 250px; height: 250px; background: var(--p); filter: blur(120px); border-radius: 50%; opacity: 0.15; animation: move 8s infinite alternate ease-in-out; }
+        @keyframes move { from { transform: translate(-30%, -30%); } to { transform: translate(30%, 30%); } }
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, set, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        /* THE CARD */
+        .glass-card { background: var(--c); backdrop-filter: blur(25px); padding: 45px; border-radius: 45px; border: 1px solid rgba(255,255,255,0.1); width: 90%; max-width: 480px; box-shadow: 0 40px 100px rgba(0,0,0,0.6); animation: entrance 1s ease-out; position: relative; overflow: hidden; }
+        @keyframes entrance { from { opacity: 0; transform: scale(0.9) translateY(40px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .glass-card::after { content: ""; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: shine 4s infinite; }
+        @keyframes shine { to { left: 200%; } }
 
-// --- KONEKSI DATABASE ---
-const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+        h1 { font-size: 2.8rem; font-weight: 800; text-align: center; margin-bottom: 35px; letter-spacing: -3px; }
+        .input-group { margin-bottom: 25px; }
+        label { display: block; font-size: 0.75rem; margin-bottom: 10px; color: var(--p); font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 20px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 22px; color: #fff; font-size: 1rem; transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        input:focus { border-color: var(--p); box-shadow: 0 0 25px rgba(56, 189, 248, 0.25); outline: none; background: rgba(0,0,0,0.6); transform: translateY(-2px); }
 
-// 1. GENERATE HWID (Identitas HP User - Buat jaga-jaga kalo mau di-ban)
-const HWID = "RY-" + btoa(navigator.userAgent + screen.width).substring(10, 25).toUpperCase();
+        .btn-order { width: 100%; padding: 22px; background: var(--p); border: none; border-radius: 22px; color: #000; font-weight: 800; cursor: pointer; transition: 0.5s; text-transform: uppercase; letter-spacing: 3px; font-size: 1rem; margin-top: 15px; }
+        .btn-order:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 20px 40px rgba(56, 189, 248, 0.4); filter: brightness(1.1); }
+        .btn-order:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
 
-// 2. SISTEM AUTO-CLOSE (Sinkron sama Dev Panel lu)
-const initSync = () => {
-    const payBtn = document.getElementById('btnBayar'); // Pastikan ID tombol di HTML lu 'btnBayar'
-    const statusText = document.getElementById('serverStatus');
+        .badge-status { text-align: center; margin-bottom: 20px; font-size: 0.7rem; font-weight: 800; letter-spacing: 4px; color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div class="ocean"><div class="bubble"></div></div>
 
-    onValue(ref(db, 'settings'), (snap) => {
-        const data = snap.val();
-        if(!data) return;
+    <div class="glass-card">
+        <div id="status" class="badge-status">SYNCING TO SATELLITE...</div>
+        <h1>RAYY<span style="color:var(--p)">STORE</span></h1>
+        
+        <div class="input-group">
+            <label>NICKNAME / ID GAME</label>
+            <input type="text" id="u_name" placeholder="RayyGans_01">
+        </div>
+        
+        <div class="input-group">
+            <label>PRODUK LAYANAN</label>
+            <select id="u_item">
+                <option value="100 Diamonds">100 DIAMONDS - Rp 15,000</option>
+                <option value="Weekly Pass">WEEKLY PASS - Rp 28,000</option>
+                <option value="1000 Diamonds">1000 DIAMONDS - Rp 140,000</option>
+            </select>
+        </div>
 
-        const now = new Date();
-        const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        const { open, close } = data.schedule;
-        const isLocked = data.toko_locked;
+        <div class="input-group">
+            <label>NOMINAL PEMBAYARAN</label>
+            <input type="number" id="u_price" placeholder="Input Harga Manual">
+        </div>
 
-        // Logic Buka/Tutup Otomatis
-        const isClosed = (currentTime < open || currentTime > close);
+        <button class="btn-order" id="main_btn" onclick="executeOrder()">Pay Now</button>
+    </div>
 
-        if(isLocked || isClosed) {
-            if(payBtn) {
-                payBtn.disabled = true;
-                payBtn.style.background = "#334155";
-                payBtn.innerText = isLocked ? "SERVER MAINTENANCE" : "STORE CLOSED";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
+        const HWID = "RY-" + btoa(navigator.userAgent).substring(15, 25).toUpperCase();
+
+        // 1. LIVE SYSTEM SYNC (POWER & SCHEDULE)
+        onValue(ref(db, 'settings'), (snap) => {
+            const data = snap.val();
+            const btn = document.getElementById('main_btn');
+            const st = document.getElementById('status');
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+
+            if(data.toko_locked || (time < data.schedule.open || time > data.schedule.close)) {
+                btn.disabled = true; btn.innerText = "STORE CLOSED";
+                st.innerText = "OFFLINE"; st.style.color = "#ef4444";
+            } else {
+                btn.disabled = false; btn.innerText = "PAY NOW";
+                st.innerText = "ONLINE"; st.style.color = "#10b981";
             }
-            if(statusText) statusText.innerText = "OFFLINE";
-        } else {
-            if(payBtn) {
-                payBtn.disabled = false;
-                payBtn.style.background = "#38bdf8"; // Warna biru dewa lu
-                payBtn.innerText = "BAYAR SEKARANG";
-            }
-            if(statusText) statusText.innerText = "ONLINE";
-        }
-    });
-};
-
-// 3. PROSES BAYAR (LANGSUNG GAS, GAK PAKE PASSWORD)
-window.prosesBayarRayy = async function() {
-    const namaUser = document.getElementById('inputNama').value;
-    const itemDipilih = document.getElementById('inputItem').value;
-    const nominal = document.getElementById('inputNominal').value;
-
-    if(!namaUser || !nominal) {
-        alert("Isi nama sama nominalnya dulu, bego!");
-        return;
-    }
-
-    // Cek apakah user ini kena BAN atau kagak
-    const banCheck = await get(ref(db, `banned_users/${HWID}`));
-    if(banCheck.exists()) {
-        alert("HP LU UDAH DI BAN DARI RAYY STORE!");
-        return;
-    }
-
-    const trxId = "RTX-" + Math.floor(Math.random() * 900000 + 100000);
-
-    // Kirim Data ke Admin Panel
-    set(ref(db, `transactions/${trxId}`), {
-        nama: namaUser,
-        item: itemDipilih,
-        jumlah: nominal,
-        status: "Pending",
-        waktu: new Date().toLocaleString(),
-        deviceId: HWID
-    }).then(() => {
-        // Kirim Log biar lu tau siapa yang lagi belanja
-        push(ref(db, 'system_logs'), {
-            user: namaUser,
-            action: `Checkout ${itemDipilih} - Rp${nominal}`,
-            deviceId: HWID,
-            time: new Date().toLocaleTimeString()
         });
 
-        // Panggil Fungsi QRIS lu di sini (contoh: bukaModalQRIS)
-        if(typeof bukaModalQRIS === 'function') {
-            bukaModalQRIS(trxId, nominal);
-        } else {
-            alert("Transaksi Berhasil Dibuat! ID: " + trxId);
-        }
-    });
-};
+        // 2. REAL-TIME BAN CHECK
+        onValue(ref(db, `banned_users/${HWID}`), (snap) => {
+            if(snap.exists()) {
+                document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:100px;'>DEVICE BANNED: " + HWID + "</h1>";
+            }
+        });
 
-// Jalankan sistem pas web dibuka
-document.addEventListener('DOMContentLoaded', initSync);
+        // 3. ORDER EXECUTION
+        window.executeOrder = async () => {
+            const name = document.getElementById('u_name').value;
+            const item = document.getElementById('u_item').value;
+            const price = document.getElementById('u_price').value;
+
+            if(!name || !price) return Swal.fire("Error", "Woi, isi dulu datanya!", "error");
+
+            const trxId = "RTX-" + Math.floor(100000 + Math.random() * 900000);
+            
+            await set(ref(db, `transactions/${trxId}`), {
+                nama: name, item: item, jumlah: price, status: "Pending",
+                waktu: new Date().toLocaleString(), hwid: HWID
+            });
+
+            push(ref(db, 'system_logs'), {
+                user: name, action: "Order " + item, deviceId: HWID, time: new Date().toLocaleTimeString()
+            });
+
+            Swal.fire({
+                title: 'Order Sent!',
+                text: 'TRX ID: ' + trxId,
+                icon: 'success',
+                confirmButtonColor: '#38bdf8'
+            });
+        };
+    </script>
+</body>
+</html>
