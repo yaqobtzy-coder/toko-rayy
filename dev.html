@@ -1,193 +1,93 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy - Master Dev Panel v5.0</title>
+    <title>DEV | ARCHITECT V4</title>
     <style>
-        :root {
-            --primary: #38bdf8; --bg: #030712; --card: #111827; --dark: #020617;
-            --text: #f8fafc; --red: #ef4444; --green: #22c55e;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body {
-            background: var(--bg); color: var(--text); min-height: 100vh;
-            display: flex; justify-content: center; padding: 20px;
-            background-image: radial-gradient(circle at center, #111827 0%, #030712 100%);
-        }
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 99999; display: flex;
-            flex-direction: column; align-items: center; justify-content: center;
-        }
-        .spinner {
-            width: 60px; height: 60px; border: 4px solid rgba(56, 189, 248, 0.1);
-            border-top: 4px solid var(--primary); border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #devAuth {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 9999; display: flex;
-            align-items: center; justify-content: center; padding: 20px;
-        }
-        .container { width: 100%; max-width: 700px; display: none; }
-        .card {
-            background: var(--card); padding: 40px; border-radius: 40px;
-            margin-bottom: 30px; border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-        }
-        input {
-            width: 100%; padding: 20px; background: var(--dark); border: 2px solid transparent;
-            color: white; border-radius: 20px; font-size: 1rem; margin-bottom: 20px;
-        }
-        input:focus { border-color: var(--primary); }
-        .btn {
-            width: 100%; padding: 20px; border: none; border-radius: 20px;
-            font-weight: 900; cursor: pointer; text-transform: uppercase; transition: 0.3s;
-        }
-        .btn-primary { background: var(--primary); color: #030712; }
-        .btn-danger { background: var(--red); color: white; }
-        .btn-success { background: var(--green); color: white; }
-        .status-box {
-            padding: 30px; border-radius: 30px; background: var(--dark);
-            text-align: center; border: 2px solid #334155; margin-bottom: 20px; font-weight: 900;
-        }
-        .status-box.online { border-color: var(--green); color: var(--green); box-shadow: 0 0 20px rgba(34, 197, 94, 0.1); }
-        .status-box.offline { border-color: var(--red); color: var(--red); box-shadow: 0 0 20px rgba(239, 68, 68, 0.1); }
-        .ban-item { background: var(--dark); padding: 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .label-text { font-size: 0.7rem; color: var(--primary); font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; display: block; }
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
+        .box { border: 1px solid #0f0; padding: 20px; border-radius: 10px; margin-bottom: 20px; background: rgba(0,255,0,0.02); }
+        input { background: #000; border: 1px solid #0f0; color: #0f0; padding: 12px; width: 100%; margin: 5px 0; }
+        button { background: #0f0; color: #000; border: none; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .btn-red { background: #f00; color: #fff; }
+        #log-list { height: 250px; overflow-y: auto; font-size: 0.7rem; border: 1px solid #222; padding: 10px; }
     </style>
 </head>
 <body>
-
-    <div id="loader"><div class="spinner"></div><h3 style="color:var(--primary)">RAYY SECURE SYSTEM...</h3></div>
-
-    <div id="devAuth">
-        <div class="card" style="width:400px; text-align:center;">
-            <h2>DEV LOGIN</h2>
-            <input type="text" id="devUser" placeholder="Username">
-            <input type="password" id="devPass" placeholder="Password">
-            <button class="btn btn-primary" onclick="checkDevAuth()">ACCESS SYSTEM</button>
-        </div>
+    <div id="login-zone" style="text-align:center; padding-top:100px;">
+        <h1>[ SYSTEM AUTHENTICATION ]</h1>
+        <input type="password" id="key" placeholder="ENTER ACCESS KEY" style="width:280px;">
+        <button onclick="unlock()" style="width:280px;">VERIFY IDENTITY</button>
     </div>
 
-    <div class="container" id="mainPanel">
-        <h1 style="text-align:center; margin-bottom:30px;">MASTER <span style="color:var(--primary)">CONTROL</span></h1>
-
-        <div class="card">
-            <span class="label-text">Status Toko (Auto-Synced)</span>
-            <div id="statusIndicator" class="status-box">MEMUAT...</div>
-            <button class="btn btn-primary" id="btnManual" onclick="togglePower()">FORCE SWITCH MANUAL</button>
-            <p style="font-size:0.7rem; opacity:0.5; margin-top:10px; text-align:center;">Sistem akan otomatis mengubah status berdasarkan jadwal.</p>
-        </div>
-
-        <div class="card">
-            <span class="label-text">Jadwal Operasional</span>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                <input type="time" id="openTime">
-                <input type="time" id="closeTime">
+    <div id="dev-ui" style="display:none;">
+        <h1 style="color:#fff;">MASTER <span style="color:#0f0;">CONTROL</span></h1>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div class="box">
+                <h3>USER SECURITY</h3>
+                <input type="text" id="t-user" placeholder="Username to Ban/Unban">
+                <button onclick="ban()" class="btn-red">BAN USER</button>
+                <button onclick="unban()">UNBAN USER</button>
             </div>
-            <button class="btn btn-success" onclick="saveJadwalDev()">UPDATE JADWAL & AKTIFKAN AUTO</button>
+            <div class="box">
+                <h3>KILL SWITCH</h3>
+                <div id="stat" style="padding:10px; text-align:center; margin-bottom:10px;">LOADING...</div>
+                <button onclick="toggleSrv()" style="background:#fff; color:#000;">TOGGLE ONLINE/OFFLINE</button>
+                <input type="text" id="t-hwid" placeholder="Admin HWID" style="margin-top:15px;">
+                <button onclick="addAdm()">GRANT ADMIN ACCESS</button>
+            </div>
         </div>
-
-        <div class="card">
-            <span class="label-text">Ban Admin System</span>
-            <input type="text" id="banTarget" placeholder="Username Admin">
-            <button class="btn btn-danger" onclick="executeBan()">BLOKIR ADMIN</button>
-            <div id="listBanned" style="margin-top:20px;"></div>
+        <div class="box">
+            <h3>SYSTEM DEEP LOGS</h3>
+            <div id="log-list"></div>
+            <button onclick="clearLogs()" style="background:#333; color:#fff; width:auto; padding:5px 15px; font-size:0.7rem;">CLEAR</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
 
-        const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        window.onload = () => setTimeout(() => document.getElementById('loader').style.display='none', 2000);
-
-        window.checkDevAuth = function() {
-            if(document.getElementById('devUser').value === "rayy_dev" && document.getElementById('devPass').value === "085794") {
-                document.getElementById('devAuth').style.display='none';
-                document.getElementById('mainPanel').style.display='block';
-                initDevLogic();
-            } else { alert("Ditolak!"); }
+        // BIOMETRIC
+        async function verifyBio() {
+            try {
+                const c = await navigator.credentials.create({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), rp: { name: "RayyDev" }, user: { id: new Uint8Array(16), name: "admin", displayName: "Rayy" }, pubKeyCredParams: [{alg: -7, type: "public-key"}], authenticatorSelection: {authenticatorAttachment: "platform"} } });
+                return !!c;
+            } catch (e) { return false; }
         }
 
-        function initDevLogic() {
-            // Sinkronisasi Status dan Jadwal
-            onValue(ref(db, 'settings'), (snap) => {
-                const s = snap.val();
-                if(!s) return;
-                
-                const box = document.getElementById('statusIndicator');
-                if(s.toko_locked) {
-                    box.innerText = "STATUS: CLOSED (OFFLINE)";
-                    box.className = "status-box offline";
-                } else {
-                    box.innerText = "STATUS: OPEN (ONLINE)";
-                    box.className = "status-box online";
-                }
+        window.unlock = async () => {
+            if(document.getElementById('key').value === "085794") {
+                if(await verifyBio()) {
+                    document.getElementById('login-zone').style.display = 'none';
+                    document.getElementById('dev-ui').style.display = 'block';
+                } else { alert("Verifikasi Gagal!"); }
+            } else { alert("Key Salah!"); }
+        };
 
-                if(s.jadwal) {
-                    document.getElementById('openTime').value = s.jadwal.buka;
-                    document.getElementById('closeTime').value = s.jadwal.tutup;
-                    // JALANKAN AUTO SINKRON SETIAP DETIK
-                    runAutoLogic(s.jadwal.buka, s.jadwal.tutup, s.toko_locked);
-                }
+        // FUNCTIONS
+        window.ban = () => set(ref(db, 'banned_users/'+document.getElementById('t-user').value), {status:'BANNED'});
+        window.unban = () => remove(ref(db, 'banned_users/'+document.getElementById('t-user').value));
+        window.addAdm = () => set(ref(db, 'authorized_admins/'+document.getElementById('t-hwid').value), {role:'ADMIN'});
+        window.toggleSrv = async () => {
+            const sRef = ref(db, 'settings/toko_locked');
+            const s = await get(sRef);
+            set(sRef, !s.val());
+        };
+        window.clearLogs = () => remove(ref(db, 'system_logs'));
+
+        // SYNC STATUS & LOGS
+        onValue(ref(db, 'settings/toko_locked'), snap => {
+            const s = document.getElementById('stat');
+            s.innerText = snap.val() ? "OFFLINE" : "ONLINE";
+            s.style.background = snap.val() ? "red" : "#0f0";
+            s.style.color = snap.val() ? "#fff" : "#000";
+        });
+        onValue(ref(db, 'system_logs'), snap => {
+            const box = document.getElementById('log-list'); box.innerHTML = "";
+            const d = snap.val(); if(d) Object.keys(d).reverse().forEach(k => {
+                box.innerHTML += `<div>[${d[k].time}] <b>${d[k].action}</b>: ${d[k].detail} <br><small style="color:#555">${d[k].device}</small></div><hr style="border:#111">`;
             });
-
-            // List Banned
-            onValue(ref(db, 'banned_users'), (snap) => {
-                const list = document.getElementById('listBanned');
-                list.innerHTML = "";
-                const val = snap.val();
-                if(val) Object.keys(val).forEach(u => {
-                    list.innerHTML += `<div class="ban-item"><span>${u}</span><button class="btn-danger" style="padding:5px 15px; border-radius:10px;" onclick="unban('${u}')">UNBAN</button></div>`;
-                });
-            });
-        }
-
-        function runAutoLogic(buka, tutup, currentLocked) {
-            setInterval(() => {
-                const now = new Date();
-                const current = (now.getHours() * 60) + now.getMinutes();
-                const [hB, mB] = buka.split(':').map(Number);
-                const [hT, mT] = tutup.split(':').map(Number);
-                const tBuka = (hB * 60) + mB;
-                const tTutup = (hT * 60) + mT;
-
-                let shouldLock;
-                if (current < tBuka || current > tTutup) { shouldLock = true; } else { shouldLock = false; }
-
-                // JIKA STATUS DI DB BEDA DENGAN JADWAL, UPDATE OTOMATIS TANPA KLIK
-                if (shouldLock !== currentLocked) {
-                    update(ref(db, 'settings'), { toko_locked: shouldLock });
-                }
-            }, 1000);
-        }
-
-        window.togglePower = () => {
-            onValue(ref(db, 'settings/toko_locked'), (s) => {
-                update(ref(db, 'settings'), { toko_locked: !s.val() });
-            }, {onlyOnce: true});
-        }
-
-        window.saveJadwalDev = () => {
-            const b = document.getElementById('openTime').value;
-            const t = document.getElementById('closeTime').value;
-            update(ref(db, 'settings/jadwal'), { buka:b, tutup:t, auto:true }).then(() => alert("Jadwal Disimpan!"));
-        }
-
-        window.executeBan = () => {
-            const u = document.getElementById('banTarget').value;
-            if(u) set(ref(db, 'banned_users/'+u), { status:'banned' });
-        }
-
-        window.unban = (u) => remove(ref(db, 'banned_users/'+u));
+        });
     </script>
 </body>
 </html>
