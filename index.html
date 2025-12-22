@@ -1,218 +1,151 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAYY DEV | SUPREME ARCHITECT v10.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root { --p: #38bdf8; --bg: #020617; --c: #0f172a; --r: #ef4444; --g: #10b981; --a: #1e293b; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family: 'JetBrains Mono', monospace; scrollbar-width: thin; scrollbar-color: var(--p) var(--bg); }
-        body { background: var(--bg); color: #fff; padding: 40px; overflow-x: hidden; background-image: radial-gradient(circle at 2px 2px, rgba(56, 189, 248, 0.05) 1px, transparent 0); background-size: 40px 40px; }
+/* RAYY STORE DEWA ENGINE v11.0 - CORE BRAIN
+   FEATURES: HWID STEALTH, AUTO-BAN RADAR, DYNAMIC POWER SYNC, ANALYTICS PACKET
+   DATE: 2025-12-21 | ACCESS: 085794
+*/
 
-        /* MASTER GRID SYSTEM */
-        .master-container { display: grid; grid-template-columns: 1.8fr 1fr; gap: 40px; max-width: 1800px; margin: 0 auto; animation: slideUp 1s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue, set, push, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        .module-card { background: var(--c); border-radius: 40px; padding: 45px; border: 1px solid rgba(56,189,248,0.1); box-shadow: 0 40px 100px rgba(0,0,0,0.7); position: relative; overflow: hidden; }
-        .module-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent, var(--p), transparent); }
+// --- CONFIGURATION ---
+const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-        /* LIVE NEURAL FEED */
-        .terminal-box { background: #000; border-radius: 30px; padding: 35px; height: 600px; overflow-y: auto; border: 1px solid #1e293b; position: relative; box-shadow: inset 0 0 30px rgba(0,0,0,1); }
-        .terminal-box::after { content: "LIVE_ENCRYPTED_FEED"; position: absolute; top: 15px; right: 25px; font-size: 0.6rem; color: var(--p); opacity: 0.5; letter-spacing: 2px; }
-        .log-entry { font-size: 0.8rem; margin-bottom: 20px; border-left: 3px solid var(--p); padding-left: 20px; animation: glitch 0.3s ease-out; }
-        @keyframes glitch { 0% { opacity: 0; transform: translateX(-10px); } 100% { opacity: 1; transform: translateX(0); } }
-        .log-entry b { color: var(--p); text-shadow: 0 0 10px var(--p); }
-        .hwid-tag { color: #f59e0b; font-size: 0.7rem; background: rgba(245,158,11,0.1); padding: 5px 12px; border-radius: 10px; margin-top: 10px; display: inline-block; border: 1px solid rgba(245,158,11,0.2); }
+// --- CORE FUNCTIONS ---
 
-        /* INPUT & BUTTON DEWA */
-        h2 { font-size: 1.1rem; letter-spacing: 6px; color: var(--p); margin-bottom: 35px; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; }
-        .cyber-input { width: 100%; padding: 24px; background: #020617; border: 2px solid #1e293b; color: #fff; border-radius: 25px; margin-bottom: 20px; font-size: 1rem; transition: 0.4s; }
-        .cyber-input:focus { border-color: var(--p); box-shadow: 0 0 40px rgba(56,189,248,0.15); transform: scale(1.02); }
+// 1. DEEP FINGERPRINTING (HWID) - Mendeteksi ID Unik HP User
+const generateHWID = () => {
+    const gl = document.createElement('canvas').getContext('webgl');
+    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+    const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Unknown";
+    const id = btoa(navigator.userAgent + renderer + screen.width + navigator.language).substring(0, 20);
+    return "RY-" + id.toUpperCase();
+};
+const HWID = generateHWID();
 
-        .btn-master { width: 100%; padding: 25px; border: none; border-radius: 25px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 4px; transition: 0.5s; font-size: 0.9rem; }
-        .btn-cyan { background: var(--p); color: #000; box-shadow: 0 20px 50px rgba(56, 189, 248, 0.3); }
-        .btn-red { background: var(--r); color: #fff; box-shadow: 0 20px 50px rgba(239, 68, 68, 0.2); }
-        .btn-green { background: var(--g); color: #fff; box-shadow: 0 20px 50px rgba(16, 185, 129, 0.2); }
-        .btn-master:hover { transform: translateY(-8px); filter: brightness(1.2); }
-        .btn-master:active { transform: scale(0.95); }
-
-        /* AUTOMATED SCHEDULE UI */
-        .schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
-        .time-box { background: var(--a); padding: 20px; border-radius: 20px; text-align: center; }
-        .time-box label { font-size: 0.6rem; color: var(--p); display: block; margin-bottom: 10px; font-weight: 800; }
-        .time-box input { background: transparent; border: none; color: #fff; font-size: 1.5rem; font-weight: 800; width: 100%; text-align: center; }
-
-        /* AUTH OVERLAY */
-        #masterLock { position: fixed; inset: 0; background: var(--bg); z-index: 100000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(50px); }
-        .lock-card { background: var(--c); padding: 60px; border-radius: 50px; text-align: center; width: 100%; max-width: 500px; border: 1px solid var(--p); }
-    </style>
-</head>
-<body>
-
-    <div id="masterLock">
-        <div class="lock-card">
-            <h1 style="font-size: 2.5rem; font-weight: 900; letter-spacing: -2px; margin-bottom: 15px;">ARCHITECT <span style="color:var(--p)">LOGIN</span></h1>
-            <p style="font-size: 0.7rem; opacity: 0.4; letter-spacing: 5px; margin-bottom: 40px;">SECURE ACCESS ONLY [cite: 2025-12-21]</p>
-            <input type="password" id="mKey" class="cyber-input" placeholder="ACCESS KEY: 085794" style="text-align: center;">
-            <button class="btn-master btn-cyan" onclick="initArchitect()">Unlock Console</button>
-        </div>
-    </div>
-
-    <div id="rootPanel" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 60px;">
-            <div>
-                <h1 style="font-size: 4rem; font-weight: 900; letter-spacing: -4px;">RAYY<span style="color:var(--p)">TITAN</span></h1>
-                <p style="font-size: 0.8rem; letter-spacing: 12px; opacity: 0.5;">CORE ARCHITECTURE v10.0</p>
-            </div>
-            <div class="module-card" style="padding: 20px 40px; border-radius: 20px;">
-                <h4 style="font-size: 0.7rem; color: var(--p);">SYSTEM_TIME</h4>
-                <div id="digitalClock" style="font-size: 2rem; font-weight: 900;">00:00:00</div>
-            </div>
-        </div>
-
-        <div class="master-container">
-            <div class="module-card">
-                <h2>Intelligence Stream & Device Logs [cite: 2025-12-21]</h2>
-                <div id="terminalStream" class="terminal-box">
-                    <p style="color:var(--p)">[SYSTEM] WAITING FOR PACKET INJECTION...</p>
+// 2. NEURAL BAN RADAR (Menendang User Secara Real-Time)
+const startBanRadar = (username) => {
+    if(!username) return;
+    onValue(ref(db, `banned_users/${username}`), (snap) => {
+        if(snap.exists()) {
+            document.body.innerHTML = `
+                <div style="height:100vh; background:#000; color:red; display:flex; align-items:center; justify-content:center; flex-direction:column; font-family:monospace; text-align:center; padding:20px;">
+                    <h1 style="font-size:3rem;">ACCESS TERMINATED</h1>
+                    <p style="letter-spacing:5px;">HWID: ${HWID}</p>
+                    <p style="margin-top:20px; color:#fff;">Perangkat anda telah diblokir secara permanen dari server Rayy Store.</p>
                 </div>
-                
-                <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;">
-                    <div class="time-box" style="border: 1px solid var(--g);">
-                        <label>DB SYNC</label>
-                        <div style="color:var(--g); font-weight: 900;">STABLE</div>
-                    </div>
-                    <div class="time-box" style="border: 1px solid var(--p);">
-                        <label>NETWORK</label>
-                        <div style="color:var(--p); font-weight: 900;">ENCRYPTED</div>
-                    </div>
-                    <div class="time-box" style="border: 1px solid var(--r);">
-                        <label>THREATS</label>
-                        <div style="color:var(--r); font-weight: 900;">0 DETECTED</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="side-controls">
-                <div class="module-card" style="margin-bottom: 30px;">
-                    <h2>Automated Schedule</h2>
-                    <div class="schedule-grid">
-                        <div class="time-box">
-                            <label>OPEN TIME (WIB)</label>
-                            <input type="time" id="openTime" value="13:26">
-                        </div>
-                        <div class="time-box">
-                            <label>CLOSE TIME (WIB)</label>
-                            <input type="time" id="closeTime" value="13:27">
-                        </div>
-                    </div>
-                    <button class="btn-master btn-green" onclick="saveSchedule()">Apply New Schedule</button>
-                </div>
-
-                <div class="module-card" style="margin-bottom: 30px;">
-                    <h2>Node Deployment</h2>
-                    <input type="text" id="nodeUser" class="cyber-input" placeholder="Admin Name">
-                    <input type="text" id="nodePass" class="cyber-input" placeholder="Secret Password">
-                    <button class="btn-master btn-cyan" onclick="deployAdmin()">Authorize New Admin</button>
-                </div>
-
-                <div class="module-card" style="margin-bottom: 30px;">
-                    <h2>Ban User [cite: 2025-12-21]</h2>
-                    <input type="text" id="targetId" class="cyber-input" placeholder="User ID / HWID">
-                    <button class="btn-master btn-red" onclick="banishUser()">Terminate Access</button>
-                </div>
-
-                <div class="module-card" style="text-align: center;">
-                    <h2>Server Power Control</h2>
-                    <button class="btn-master" id="pwrBtn" style="background: #f59e0b; color: #000;" onclick="toggleSystem()">FORCE POWER SWITCH</button>
-                    <p style="margin-top: 15px; font-size: 0.6rem; opacity: 0.4;">Klik untuk mengabaikan jadwal secara paksa.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // ACCESS KEY VERIFICATION [cite: 2025-12-21]
-        window.initArchitect = () => {
-            if(document.getElementById('mKey').value === "085794") {
-                document.getElementById('masterLock').style.display = 'none';
-                document.getElementById('rootPanel').style.display = 'block';
-                startNeuralCore();
-            } else { alert("VOID: WRONG ACCESS KEY"); }
-        };
-
-        function startNeuralCore() {
-            // Live Device Logs [cite: 2025-12-21]
-            onValue(ref(db, 'system_logs'), (snap) => {
-                const stream = document.getElementById('terminalStream');
-                stream.innerHTML = "";
-                const data = snap.val();
-                if(data) {
-                    Object.values(data).reverse().forEach(log => {
-                        stream.innerHTML += `
-                            <div class="log-entry">
-                                <span style="color:var(--p)">[${log.time}]</span> <b>${log.user}</b>: ${log.action}
-                                <br><span class="hwid-tag">FINGERPRINT_ID: ${log.deviceId}</span>
-                            </div>
-                        `;
-                    });
-                }
-            });
-
-            // Schedule Sync
-            onValue(ref(db, 'settings/schedule'), (snap) => {
-                const s = snap.val();
-                if(s) {
-                    document.getElementById('openTime').value = s.open;
-                    document.getElementById('closeTime').value = s.close;
-                }
-            });
-
-            // Power Sync
-            onValue(ref(db, 'settings/toko_locked'), (snap) => {
-                const btn = document.getElementById('pwrBtn');
-                btn.innerText = snap.val() ? "SYSTEM: OFFLINE / OPEN" : "SYSTEM: ONLINE / CLOSED";
-                btn.style.background = snap.val() ? "var(--g)" : "#f59e0b";
-            });
-
-            // Clock Engine
-            setInterval(() => {
-                const d = new Date();
-                document.getElementById('digitalClock').innerText = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0') + ":" + d.getSeconds().toString().padStart(2,'0');
-            }, 1000);
+            `;
+            setTimeout(() => window.location.href = "https://google.com", 3000);
         }
+    });
+};
 
-        // --- COMMANDS ---
-        window.saveSchedule = () => {
-            const o = document.getElementById('openTime').value;
-            const c = document.getElementById('closeTime').value;
-            set(ref(db, 'settings/schedule'), { open: o, close: c }).then(() => alert("SCHEDULE DEPLOYED."));
-        };
+// 3. AUTOMATED SCHEDULE & POWER ENGINE (Sinkron dengan Dev Panel)
+const syncPowerSystem = () => {
+    const payBtn = document.getElementById('btnBayar'); // Pastikan ID ini ada di tombol bayar lu
+    
+    // Check Schedule & Global Lock
+    onValue(ref(db, 'settings'), (snap) => {
+        const data = snap.val();
+        if(!data) return;
 
-        window.deployAdmin = () => {
-            const u = document.getElementById('nodeUser').value;
-            const p = document.getElementById('nodePass').value;
-            if(u && p) set(ref(db, 'sys_extra_admins/' + u), { pass: p }).then(() => alert("ADMIN DEPLOYED."));
-        };
+        const now = new Date();
+        const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        
+        const { open, close } = data.schedule;
+        const isLocked = data.toko_locked;
+        
+        // Logic: Jika di-lock manual OR di luar jam operasional
+        const isOutOfTime = (currentTime < open || currentTime > close);
+        
+        if(isLocked || isOutOfTime) {
+            if(payBtn) {
+                payBtn.disabled = true;
+                payBtn.style.background = "#1e293b";
+                payBtn.style.color = "#475569";
+                payBtn.style.cursor = "not-allowed";
+                payBtn.innerText = isLocked ? "SERVER UNDER MAINTENANCE" : `CLOSED (OPEN AT ${open})`;
+            }
+        } else {
+            if(payBtn) {
+                payBtn.disabled = false;
+                payBtn.style.background = "var(--primary)";
+                payBtn.style.color = "#000";
+                payBtn.style.cursor = "pointer";
+                payBtn.innerText = "BAYAR SEKARANG";
+            }
+        }
+    });
+};
 
-        window.banishUser = () => {
-            const t = document.getElementById('targetId').value;
-            if(t) set(ref(db, 'banned_users/' + t), { status: "TERMINATED", time: new Date().toLocaleString() }).then(() => alert("USER TERMINATED."));
-        };
+// 4. TRANSACTION INJECTION WITH STEALTH LOGGING
+window.prosesBayarRayy = async function() {
+    const nama = document.getElementById('userName').value;
+    const item = document.getElementById('itemName').value;
+    const harga = document.getElementById('itemPrice').value;
 
-        window.toggleSystem = () => {
-            onValue(ref(db, 'settings/toko_locked'), (snap) => {
-                update(ref(db, 'settings'), { toko_locked: !snap.val() });
-            }, { onlyOnce: true });
-        };
-    </script>
-</body>
-</html>
+    if(!nama || !item) {
+        Swal.fire("Goblok!", "Isi dulu datanya yang bener!", "error");
+        return;
+    }
+
+    // Security Check: HWID Ban
+    const hwidCheck = await get(ref(db, `banned_users/${HWID}`));
+    if(hwidCheck.exists()) {
+        alert("PERANGKAT ANDA DIBLOKIR!");
+        return;
+    }
+
+    const trxId = "RTX-" + Math.floor(100000 + Math.random() * 900000);
+
+    // Push Transaksi
+    set(ref(db, `transactions/${trxId}`), {
+        nama: nama,
+        item: item,
+        jumlah: harga,
+        status: "Pending",
+        waktu: new Date().toLocaleString(),
+        hwid: HWID,
+        ip: "HIDDEN_BY_RAYY"
+    }).then(() => {
+        // Send Stealth Log to Dev Panel
+        push(ref(db, 'system_logs'), {
+            user: nama,
+            action: `Mencoba membeli ${item} senilai Rp${harga}`,
+            deviceId: HWID,
+            time: new Date().toLocaleTimeString()
+        });
+
+        // Trigger Notification on Admin Panel
+        update(ref(db, 'settings/last_notif'), {
+            msg: `Order baru dari ${nama}`,
+            time: Date.now()
+        });
+
+        showQrisModal(trxId, harga); // Panggil fungsi modal lu
+    });
+};
+
+// --- INITIALIZING DEWA SYSTEM ---
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("%c RAYY STORE v11.0 ", "background: #38bdf8; color: #000; font-weight: bold; font-size: 20px;");
+    console.log(`DEWA_HWID_CONNECTED: ${HWID}`);
+    
+    syncPowerSystem();
+    
+    // Auto-Tracker untuk input nama (Ban Radar)
+    const nameInput = document.getElementById('userName');
+    if(nameInput) {
+        nameInput.addEventListener('blur', () => {
+            startBanRadar(nameInput.value);
+        });
+    }
+    
+    // Packet Logger (Mendeteksi siapa yang buka web lu)
+    push(ref(db, 'system_logs'), {
+        user: "GUEST_USER",
+        action: "Membuka Halaman Utama",
+        deviceId: HWID,
+        time: new Date().toLocaleTimeString()
+    });
+});
