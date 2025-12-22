@@ -1,77 +1,98 @@
-/* RAYY STORE DEWA ENGINE v12.0 
-   SECURITY: AUTO-HWID VALIDATION (NO PASSWORD)
-   FEATURES: INSTANT CHECKOUT, AUTO-BAN, LIVE SYNC
+/* RAYY STORE ENGINE v14.0 - NO PASSWORD EDITION
+   LOGIC: PURE TRANSACTIONAL & AUTO-SCHEDULE
 */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, set, push, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue, set, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+// --- KONEKSI DATABASE ---
 const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// FINGERPRINT TANPA RIBET
-const getDevice = () => {
-    return "DEVICE-" + btoa(navigator.userAgent).substring(10, 25).toUpperCase();
-};
-const MY_DEVICE = getDevice();
+// 1. GENERATE HWID (Identitas HP User - Buat jaga-jaga kalo mau di-ban)
+const HWID = "RY-" + btoa(navigator.userAgent + screen.width).substring(10, 25).toUpperCase();
 
-// SYSTEM AUTO-RADAR
-const syncSystem = () => {
-    const payBtn = document.getElementById('btnBayar');
+// 2. SISTEM AUTO-CLOSE (Sinkron sama Dev Panel lu)
+const initSync = () => {
+    const payBtn = document.getElementById('btnBayar'); // Pastikan ID tombol di HTML lu 'btnBayar'
+    const statusText = document.getElementById('serverStatus');
+
     onValue(ref(db, 'settings'), (snap) => {
         const data = snap.val();
         if(!data) return;
+
         const now = new Date();
-        const curTime = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+        const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
         const { open, close } = data.schedule;
         const isLocked = data.toko_locked;
-        
-        if(isLocked || (curTime < open || curTime > close)) {
+
+        // Logic Buka/Tutup Otomatis
+        const isClosed = (currentTime < open || currentTime > close);
+
+        if(isLocked || isClosed) {
             if(payBtn) {
                 payBtn.disabled = true;
-                payBtn.innerText = "STORE CLOSED / UNDER MAINTENANCE";
-                payBtn.style.filter = "grayscale(1)";
+                payBtn.style.background = "#334155";
+                payBtn.innerText = isLocked ? "SERVER MAINTENANCE" : "STORE CLOSED";
             }
+            if(statusText) statusText.innerText = "OFFLINE";
         } else {
             if(payBtn) {
                 payBtn.disabled = false;
+                payBtn.style.background = "#38bdf8"; // Warna biru dewa lu
                 payBtn.innerText = "BAYAR SEKARANG";
-                payBtn.style.filter = "none";
             }
+            if(statusText) statusText.innerText = "ONLINE";
         }
     });
 };
 
-// INSTANT CHECKOUT (GAK PAKE PASSWORD)
+// 3. PROSES BAYAR (LANGSUNG GAS, GAK PAKE PASSWORD)
 window.prosesBayarRayy = async function() {
-    const nama = document.getElementById('userName').value;
-    const nominal = document.getElementById('itemPrice').value;
+    const namaUser = document.getElementById('inputNama').value;
+    const itemDipilih = document.getElementById('inputItem').value;
+    const nominal = document.getElementById('inputNominal').value;
 
-    if(!nama || !nominal) return Swal.fire("Woi!", "Isi nama sama nominalnya!", "warning");
+    if(!namaUser || !nominal) {
+        alert("Isi nama sama nominalnya dulu, bego!");
+        return;
+    }
 
-    // CEK BAN OTOMATIS
-    const check = await get(ref(db, `banned_users/${MY_DEVICE}`));
-    if(check.exists()) return alert("DEVICE LU UDAH DI BAN!");
+    // Cek apakah user ini kena BAN atau kagak
+    const banCheck = await get(ref(db, `banned_users/${HWID}`));
+    if(banCheck.exists()) {
+        alert("HP LU UDAH DI BAN DARI RAYY STORE!");
+        return;
+    }
 
-    const trxId = "RTX-" + Math.floor(Math.random() * 888888);
+    const trxId = "RTX-" + Math.floor(Math.random() * 900000 + 100000);
 
+    // Kirim Data ke Admin Panel
     set(ref(db, `transactions/${trxId}`), {
-        nama: nama,
+        nama: namaUser,
+        item: itemDipilih,
         jumlah: nominal,
         status: "Pending",
         waktu: new Date().toLocaleString(),
-        deviceId: MY_DEVICE
+        deviceId: HWID
     }).then(() => {
+        // Kirim Log biar lu tau siapa yang lagi belanja
         push(ref(db, 'system_logs'), {
-            user: nama,
-            action: `Checkout Rp${nominal}`,
-            deviceId: MY_DEVICE,
+            user: namaUser,
+            action: `Checkout ${itemDipilih} - Rp${nominal}`,
+            deviceId: HWID,
             time: new Date().toLocaleTimeString()
         });
-        
-        // Panggil Fungsi QRIS Lu di sini
-        bukaModalQRIS(trxId, nominal);
+
+        // Panggil Fungsi QRIS lu di sini (contoh: bukaModalQRIS)
+        if(typeof bukaModalQRIS === 'function') {
+            bukaModalQRIS(trxId, nominal);
+        } else {
+            alert("Transaksi Berhasil Dibuat! ID: " + trxId);
+        }
     });
 };
 
-document.addEventListener('DOMContentLoaded', syncSystem);
+// Jalankan sistem pas web dibuka
+document.addEventListener('DOMContentLoaded', initSync);
