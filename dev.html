@@ -3,100 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Dev - Intelligence & Security</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+    <title>RAYY DEV | ARCHITECT COMMAND v10.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --p: #38bdf8;
-            --bg: #0b1120;
-            --c: #141b2d;
-            --d: #0f172a;
-            --r: #ef4444;
-            --g: #22c55e;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; }
-        body { background: var(--bg); color: #fff; padding: 20px; overflow-x: hidden; }
+        :root { --p: #38bdf8; --bg: #020617; --c: #0f172a; --r: #ef4444; --g: #10b981; --a: #1e293b; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'JetBrains Mono', monospace; }
+        body { background: var(--bg); color: #fff; padding: 40px; overflow-x: hidden; }
 
-        .glass {
-            background: var(--c); border-radius: 30px; padding: 30px;
-            border: 1px solid rgba(56,189,248,0.1); margin-bottom: 25px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
+        /* MASTER ARCHITECTURE */
+        .layout-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 40px; max-width: 1600px; margin: 0 auto; }
+        .module-box { background: var(--c); border-radius: 40px; padding: 40px; border: 1px solid rgba(56,189,248,0.1); box-shadow: 0 40px 80px rgba(0,0,0,0.6); position: relative; }
+        
+        /* THE NEURAL LOGS */
+        .neural-stream { background: #000; border-radius: 25px; padding: 30px; height: 550px; overflow-y: auto; border: 1px solid #1e293b; position: relative; }
+        .neural-stream::after { content: "LIVE_DEVICE_FEED"; position: absolute; top: 15px; right: 25px; font-size: 0.65rem; color: var(--p); opacity: 0.6; font-weight: 800; }
+        .log-packet { font-size: 0.8rem; margin-bottom: 18px; border-left: 3px solid var(--p); padding-left: 20px; transition: 0.3s; }
+        .log-packet b { color: var(--p); text-transform: uppercase; }
+        .dev-fingerprint { color: #f59e0b; font-size: 0.7rem; background: rgba(245,158,11,0.1); padding: 4px 10px; border-radius: 8px; margin-top: 8px; display: inline-block; border: 1px solid rgba(245,158,11,0.2); }
 
-        /* MONITORING BOX */
-        .monitor-box {
-            background: #000; border-radius: 20px; padding: 20px;
-            height: 300px; overflow-y: auto; border: 1px solid #1e293b;
-        }
-        .log-line {
-            font-size: 0.7rem; border-left: 2px solid var(--p);
-            padding-left: 12px; margin-bottom: 12px; color: #94a3b8;
-        }
-        .log-line b { color: var(--p); }
-        .device-info { color: #f59e0b; font-size: 0.6rem; display: block; margin-top: 4px; }
+        /* CONTROL SYSTEM */
+        h2 { font-size: 1rem; letter-spacing: 5px; color: var(--p); margin-bottom: 30px; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid var(--a); padding-bottom: 15px; }
+        .input-neural { width: 100%; padding: 22px; background: #020617; border: 2px solid #1e293b; color: #fff; border-radius: 20px; margin-bottom: 15px; font-size: 0.9rem; transition: 0.3s; }
+        .input-neural:focus { border-color: var(--p); box-shadow: 0 0 20px rgba(56,189,248,0.1); }
 
-        /* FORM STYLING */
-        h2 { font-size: 0.8rem; letter-spacing: 3px; color: var(--p); margin-bottom: 20px; text-transform: uppercase; }
-        input {
-            width: 100%; padding: 15px; background: var(--d); border: 1px solid #1e293b;
-            color: #fff; border-radius: 12px; margin-bottom: 12px; font-size: 0.85rem;
-        }
-        .btn-m {
-            width: 100%; padding: 18px; border: none; border-radius: 12px;
-            font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s;
-        }
-        .btn-p { background: var(--p); color: #000; }
-        .btn-r { background: var(--r); color: #fff; }
-        .btn-g { background: var(--g); color: #fff; }
+        .btn-core { width: 100%; padding: 22px; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 3px; transition: 0.4s; font-size: 0.85rem; }
+        .btn-cyan { background: var(--p); color: #000; box-shadow: 0 10px 30px rgba(56, 189, 248, 0.3); }
+        .btn-danger { background: var(--r); color: #fff; }
+        .btn-success { background: var(--g); color: #fff; }
+        .btn-core:hover { transform: translateY(-5px); filter: brightness(1.1); }
 
-        #devAuth {
-            position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg);
-            z-index: 9999; display: flex; align-items: center; justify-content: center;
-        }
+        /* DEVICE LOCK OVERLAY */
+        #masterAuth { position: fixed; inset: 0; background: var(--bg); z-index: 100000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
     </style>
 </head>
 <body>
 
-    <div id="devAuth">
-        <div class="glass" style="width: 100%; max-width: 360px; text-align: center;">
-            <h1 style="font-size:1.5rem; margin-bottom:20px;">MASTER <span style="color:var(--p);">KEY</span></h1>
-            <input type="password" id="masterPin" placeholder="PIN CODE">
-            <button class="btn-m btn-p" onclick="unlockDev()">Akses Panel</button>
+    <div id="masterAuth">
+        <div class="module-box" style="width: 100%; max-width: 450px; text-align: center;">
+            <h1 style="font-size: 2rem; margin-bottom: 40px; letter-spacing: -2px; font-weight: 800;">MASTER <span style="color:var(--p)">ARCHITECT</span></h1>
+            <input type="password" id="accessCode" class="input-neural" placeholder="ENTER MASTER KEY" style="text-align:center;">
+            <button class="btn-core btn-cyan" onclick="verifyArchitect()">Initialize System</button>
+            <p style="font-size: 0.6rem; opacity: 0.3; margin-top: 25px;">RESTRICTED TO OWNER DEVICE ONLY [cite: 2025-12-21]</p>
         </div>
     </div>
 
-    <div id="devDashboard" style="display: none; max-width: 900px; margin: 0 auto;">
-        <h1 style="text-align: center; font-weight: 800; margin-bottom: 40px; font-size: 2rem;">
-            RAYY <span style="color:var(--p);">INTELLIGENCE</span>
-        </h1>
-
-        <div class="glass">
-            <h2>Live System Monitoring (Scanning Device)</h2>
-            <div id="logMonitor" class="monitor-box">
-                <p style="opacity:0.2;">Menghubungkan ke server...</p>
-            </div>
+    <div id="architectRoot" style="display: none; animation: fadeIn 1s ease;">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h1 style="font-size: 3.5rem; font-weight: 800; letter-spacing: -3px; margin-bottom: 10px;">TITAN <span style="color:var(--p)">CORE</span></h1>
+            <p style="font-size: 0.7rem; letter-spacing: 10px; opacity: 0.4;">GLOBAL CONTROL INTERFACE</p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-            <div class="glass">
-                <h2>Kelola Admin Extra</h2>
-                <input type="text" id="newAdminU" placeholder="Username Baru">
-                <input type="text" id="newAdminP" placeholder="Password Baru">
-                <button class="btn-m btn-g" onclick="tambahAdmin()">Daftarkan Admin</button>
-                <div id="daftarAdmin" style="margin-top: 20px; font-size: 0.8rem;"></div>
+        <div class="layout-grid">
+            <div class="module-box">
+                <h2>Real-time Intelligence Feed</h2>
+                <div id="neuralLog" class="neural-stream">
+                    <p style="color:var(--p)">[SYSTEM] BOOTING ARCHITECT PROTOCOLS...</p>
+                </div>
+                
+                <div style="margin-top: 35px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="module-box" style="padding: 25px; text-align: center; background: rgba(56, 189, 248, 0.05);">
+                        <h4 style="font-size: 0.65rem; color: var(--p); margin-bottom: 10px;">CORE UPTIME</h4>
+                        <div id="coreTimer" style="font-size: 1.5rem; font-weight: 800;">00:00:00</div>
+                    </div>
+                    <div class="module-box" style="padding: 25px; text-align: center; background: rgba(16, 185, 129, 0.05);">
+                        <h4 style="font-size: 0.65rem; color: var(--g); margin-bottom: 10px;">SYNC STATUS</h4>
+                        <div style="font-size: 1.5rem; font-weight: 800;">ENCRYPTED</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="glass">
-                <h2>Banishment System (Ban User)</h2>
-                <input type="text" id="banTarget" placeholder="Username Target">
-                <button class="btn-m btn-r" onclick="eksekusiBan()">Blokir Akses</button>
-                <p style="font-size:0.6rem; opacity:0.3; margin-top:15px;">User yang diblokir tidak akan bisa menekan tombol bayar di index.</p>
-            </div>
-        </div>
+            <div class="module-sidebar">
+                <div class="module-box" style="margin-bottom: 30px;">
+                    <h2>Node Management</h2>
+                    <input type="text" id="nodeU" class="input-neural" placeholder="Node Username">
+                    <input type="text" id="nodeP" class="input-neural" placeholder="Set Access Key">
+                    <button class="btn-core btn-success" onclick="deployNode()">Deploy New Node</button>
+                    
+                    <div id="activeNodes" style="margin-top: 30px;">
+                        </div>
+                </div>
 
-        <div class="glass" style="text-align: center;">
-            <h2>Force Power Switch (Emergency)</h2>
-            <button class="btn-m" style="background: #f59e0b; color: #000;" onclick="toggleServer()">Buka / Tutup Server Manual</button>
+                <div class="module-box" style="margin-bottom: 30px;">
+                    <h2>Target Neutralization</h2>
+                    <input type="text" id="banUser" class="input-neural" placeholder="Target UID">
+                    <button class="btn-core btn-danger" onclick="terminateUser()">Terminate Access</button>
+                </div>
+
+                <div class="module-box">
+                    <h2>Master Override</h2>
+                    <button class="btn-core" id="powerSwitch" style="background: #f59e0b; color: #000;" onclick="systemOverride()">TOGGLE GLOBAL POWER</button>
+                    <p id="pwrStatus" style="font-size:0.6rem; text-align:center; margin-top:10px; opacity:0.4;">POWER: NOMINAL</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -108,77 +106,84 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Login Dev
-        window.unlockDev = function() {
-            if(document.getElementById('masterPin').value === "085794") {
-                document.getElementById('devAuth').style.display = 'none';
-                document.getElementById('devDashboard').style.display = 'block';
-                jalankanDashboard();
-            } else {
-                alert("PIN SALAH!");
-            }
+        // SECURE INITIALIZATION [cite: 2025-12-21]
+        window.verifyArchitect = function() {
+            if(document.getElementById('accessCode').value === "085794") {
+                document.getElementById('masterAuth').style.display = 'none';
+                document.getElementById('architectRoot').style.display = 'block';
+                initNeuralCore();
+            } else { alert("CRITICAL ERROR: UNAUTHORIZED ATTEMPT."); }
         };
 
-        function jalankanDashboard() {
-            // Monitor Log Login & Device ID
+        function initNeuralCore() {
+            // Neural Stream Monitoring [cite: 2025-12-21]
             onValue(ref(db, 'system_logs'), (snap) => {
-                const box = document.getElementById('logMonitor');
-                box.innerHTML = "";
+                const logBox = document.getElementById('neuralLog');
+                logBox.innerHTML = "";
                 const data = snap.val();
                 if(data) {
                     Object.values(data).reverse().forEach(log => {
-                        box.innerHTML += `
-                            <div class="log-line">
-                                [${log.time}] <b>${log.user}</b>: ${log.action}
-                                <span class="device-info">FINGERPRINT ID: ${log.deviceId}</span>
+                        logBox.innerHTML += `
+                            <div class="log-packet">
+                                <span style="color:var(--p)">[${log.time}]</span> <b>${log.user}</b>: ${log.action}
+                                <br><span class="dev-fingerprint">HWID: ${log.deviceId}</span>
                             </div>
                         `;
                     });
                 }
             });
 
-            // List Admin Aktif
+            // Node Monitor [cite: 2025-12-21]
             onValue(ref(db, 'sys_extra_admins'), (snap) => {
-                const list = document.getElementById('daftarAdmin');
-                list.innerHTML = "";
+                const list = document.getElementById('activeNodes');
+                list.innerHTML = "<h4 style='font-size:0.7rem; opacity:0.3; margin-bottom:15px;'>ACTIVE NODES:</h4>";
                 const data = snap.val();
                 if(data) {
                     Object.keys(data).forEach(u => {
                         list.innerHTML += `
-                            <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin-bottom:5px; display:flex; justify-content:space-between;">
-                                <span>👤 ${u}</span>
-                                <span onclick="hapusAdmin('${u}')" style="color:var(--r); cursor:pointer; font-weight:800;">HAPUS</span>
+                            <div style="display:flex; justify-content:space-between; padding:20px; background:var(--a); border-radius:15px; margin-top:12px; border:1px solid rgba(255,255,255,0.05);">
+                                <span>ID: ${u}</span>
+                                <span onclick="wipeNode('${u}')" style="color:var(--r); cursor:pointer; font-weight:800;">WIPE</span>
                             </div>
                         `;
                     });
                 }
             });
+
+            // Power Switch Monitor [cite: 2025-12-21]
+            onValue(ref(db, 'settings/toko_locked'), (snap) => {
+                const btn = document.getElementById('powerSwitch');
+                const stat = document.getElementById('pwrStatus');
+                const isLocked = snap.val();
+                btn.innerText = isLocked ? "INITIALIZE GLOBAL POWER" : "TERMINATE GLOBAL POWER";
+                btn.style.background = isLocked ? "var(--g)" : "#f59e0b";
+                stat.innerText = isLocked ? "POWER: DISCONNECTED" : "POWER: NOMINAL";
+            });
+
+            // Uptime Engine
+            setInterval(() => {
+                const d = new Date();
+                document.getElementById('coreTimer').innerText = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0') + ":" + d.getSeconds().toString().padStart(2,'0');
+            }, 1000);
         }
 
-        window.tambahAdmin = function() {
-            const u = document.getElementById('newAdminU').value;
-            const p = document.getElementById('newAdminP').value;
-            if(u && p) {
-                set(ref(db, 'sys_extra_admins/' + u), { pass: p }).then(() => alert("Admin Ditambah!"));
-            }
+        // MASTER ACTIONS [cite: 2025-12-21]
+        window.deployNode = () => {
+            const u = document.getElementById('nodeU').value;
+            const p = document.getElementById('nodeP').value;
+            if(u && p) set(ref(db, 'sys_extra_admins/' + u), { pass: p, ts: new Date().toLocaleString() }).then(() => alert("NODE DEPLOYED."));
         };
 
-        window.hapusAdmin = function(u) {
-            if(confirm("Hapus akses admin " + u + "?")) remove(ref(db, 'sys_extra_admins/' + u));
+        window.wipeNode = (u) => { if(confirm("DESTRUCT NODE "+u+"?")) remove(ref(db, 'sys_extra_admins/' + u)); };
+
+        window.terminateUser = () => {
+            const t = document.getElementById('banUser').value;
+            if(t) set(ref(db, 'banned_users/' + t), { status: "TERMINATED", ts: new Date().toLocaleString() }).then(() => alert("USER TERMINATED."));
         };
 
-        window.eksekusiBan = function() {
-            const t = document.getElementById('banTarget').value;
-            if(t) {
-                set(ref(db, 'banned_users/' + t), { status: "banned", date: new Date().toLocaleString() })
-                .then(() => alert(t + " Berhasil Diban!"));
-            }
-        };
-
-        window.toggleServer = function() {
+        window.systemOverride = () => {
             onValue(ref(db, 'settings/toko_locked'), (snap) => {
-                const cur = snap.val();
-                update(ref(db, 'settings'), { toko_locked: !cur });
+                update(ref(db, 'settings'), { toko_locked: !snap.val() });
             }, { onlyOnce: true });
         };
     </script>
