@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Payment - Official Premium System</title>
+    <title>Rayy Store - Official Payment System</title>
     
     <style>
         :root {
@@ -14,243 +14,91 @@
             --dark: #0f172a;
             --text: #f8fafc;
             --red: #ef4444;
-            --transition-smooth: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* RESET & BASE */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
+        /* RESET STYLE */
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow: hidden; 
             background-image: radial-gradient(circle at top right, #1e293b 0%, #0b1120 100%);
         }
 
-        /* --- ANIMASI NOTIF TOAST --- */
+        /* --- NOTIFIKASI TOAST --- */
         #customToast {
-            position: fixed;
-            top: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            background: var(--primary);
-            color: #000;
-            padding: 18px;
-            border-radius: 22px;
-            text-align: center;
-            font-weight: 900;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            z-index: 10005;
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; background: var(--primary); color: #000;
+            padding: 18px; border-radius: 20px; text-align: center; font-weight: 900;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 10005;
             transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
-        #customToast.show {
-            top: 30px;
+        #customToast.show { top: 30px; }
+
+        /* --- SPLASH SCREEN --- */
+        #splash { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg); z-index: 9999; display: flex; 
+            flex-direction: column; align-items: center; justify-content: center; 
+            transition: 1s ease-in-out; 
+        }
+        .logo-box { 
+            width: 100px; height: 100px; background: var(--primary); border-radius: 30px; 
+            display: flex; align-items: center; justify-content: center; font-size: 3.5rem; 
+            font-weight: 900; color: #000; box-shadow: 0 0 30px var(--primary-glow);
+            animation: pulse 2s infinite; 
+        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+        /* --- CONTAINER UTAMA --- */
+        .container { 
+            width: 100%; max-width: 460px; padding: 30px; 
+            opacity: 0; transform: translateY(30px); transition: 1s; 
+        }
+        .container.visible { opacity: 1; transform: translateY(0); }
+
+        .card { 
+            background: var(--card); border-radius: 40px; padding: 45px 35px; 
+            border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.3);
         }
 
-        /* --- SPLASH SCREEN ANIMATION --- */
-        #splash {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: 1s ease-in-out;
+        .input-group { margin-bottom: 25px; }
+        .input-group label { 
+            display: block; font-size: 0.75rem; font-weight: 800; color: var(--primary); 
+            margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase; margin-left: 5px;
         }
 
-        .logo-box {
-            width: 110px;
-            height: 110px;
-            background: var(--primary);
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            font-weight: 900;
-            color: #000;
-            box-shadow: 0 0 40px var(--primary-glow);
-            animation: pulseSplash 2s infinite;
+        input { 
+            width: 100%; padding: 20px; background: var(--dark); border: 2px solid transparent; 
+            color: white; border-radius: 20px; font-size: 1rem; font-weight: 600; transition: 0.3s; 
         }
+        input:focus { border-color: var(--primary); background: #0b1120; }
 
-        @keyframes pulseSplash {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--primary-glow); }
-            50% { transform: scale(1.1); box-shadow: 0 0 50px var(--primary-glow); }
+        .btn-pay { 
+            width: 100%; padding: 22px; border: none; border-radius: 22px; 
+            background: var(--primary); color: #000; font-weight: 900; 
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 10px 20px var(--primary-glow); transition: 0.3s;
         }
+        .btn-pay:hover { transform: translateY(-3px); filter: brightness(1.1); }
 
-        .loader-bar {
-            width: 150px;
-            height: 4px;
-            background: rgba(255,255,255,0.1);
-            margin-top: 30px;
-            border-radius: 10px;
-            overflow: hidden;
+        /* --- OVERLAY TUTUP --- */
+        #statusOverlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg); z-index: 10000; display: none; 
+            align-items: center; justify-content: center; padding: 25px; 
         }
-
-        .loader-fill {
-            width: 0%;
-            height: 100%;
-            background: var(--primary);
-            animation: fillProgress 2s forwards;
-        }
-
-        @keyframes fillProgress {
-            to { width: 100%; }
-        }
-
-        /* --- MAIN CONTAINER --- */
-        .container {
-            width: 100%;
-            max-width: 480px;
-            padding: 30px;
-            opacity: 0;
-            transform: translateY(40px);
-            transition: 1.2s cubic-bezier(0.22, 1, 0.36, 1);
-            z-index: 10;
-        }
-
-        .container.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .card {
-            background: var(--card);
-            border-radius: 45px;
-            padding: 45px 35px;
-            border: 1px solid rgba(255,255,255,0.06);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
-            position: relative;
-        }
-
-        .input-group {
-            margin-bottom: 30px;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 900;
-            color: var(--primary);
-            margin-bottom: 12px;
-            letter-spacing: 2.5px;
-            margin-left: 10px;
-            text-transform: uppercase;
-        }
-
-        input {
-            width: 100%;
-            padding: 20px 25px;
-            background: var(--dark);
-            border: 2px solid transparent;
-            color: white;
-            border-radius: 22px;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: var(--transition-smooth);
-        }
-
-        input:focus {
-            border-color: var(--primary);
-            background: #0b1120;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
-        }
-
-        .btn-pay {
-            width: 100%;
-            padding: 22px;
-            border: none;
-            border-radius: 22px;
-            background: var(--primary);
-            color: #000;
-            font-weight: 900;
-            font-size: 1.1rem;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: var(--transition-smooth);
-            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.2);
-            margin-top: 10px;
-        }
-
-        .btn-pay:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px var(--primary-glow);
-        }
-
-        .btn-pay:active {
-            transform: scale(0.96);
-        }
-
-        /* --- OVERLAY SERVER OFFLINE --- */
-        .overlay-offline {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: var(--bg);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-            text-align: center;
-            animation: fadeInOverlay 0.5s ease;
-        }
-
-        @keyframes fadeInOverlay {
-            from { opacity: 0; } to { opacity: 1; }
-        }
-
-        .box-msg {
-            border: 2px solid var(--red);
-            padding: 60px 40px;
-            border-radius: 50px;
-            background: rgba(239,68,68,0.04);
-            max-width: 450px;
-            width: 100%;
-            box-shadow: 0 0 50px rgba(239, 68, 68, 0.1);
-        }
-
-        .box-msg h1 {
-            color: var(--red);
-            font-size: 2.8rem;
-            font-weight: 900;
-            margin-bottom: 25px;
-            letter-spacing: -1px;
-            text-transform: uppercase;
-        }
-
-        .box-msg p {
-            font-size: 1.1rem;
-            line-height: 1.7;
-            color: #cbd5e1;
-        }
-
-        .footer-info {
-            margin-top: 30px;
-            font-size: 0.8rem;
-            opacity: 0.3;
-            letter-spacing: 1px;
+        .box-msg { 
+            border: 2px solid var(--red); padding: 50px 30px; border-radius: 45px; 
+            background: rgba(239,68,68,0.05); text-align: center; max-width: 420px;
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.1);
         }
     </style>
 </head>
@@ -260,34 +108,30 @@
 
     <div id="splash">
         <div class="logo-box">R</div>
-        <div class="loader-bar"><div class="loader-fill"></div></div>
-        <p style="margin-top: 20px; font-size: 0.7rem; letter-spacing: 3px; opacity: 0.5;">LOADING SYSTEM...</p>
+        <p style="margin-top:20px; letter-spacing:5px; font-size:0.7rem; opacity:0.5;">LOADING RAYY SYSTEM</p>
+    </div>
+
+    <div id="statusOverlay">
+        <div class="box-msg" id="overlayContent">
+            </div>
     </div>
 
     <div class="container" id="main-content">
-        <div style="text-align: center; margin-bottom: 40px;">
-            <h1 style="font-weight: 900; font-size: 2.4rem; letter-spacing: -1px;">RAYY <span style="color:var(--primary);">STORE</span></h1>
-            <p style="font-size: 0.8rem; opacity: 0.4; letter-spacing: 4px; text-transform: uppercase;">Official Payment Gate</p>
+        <div style="text-align:center; margin-bottom:30px;">
+            <h1 style="font-weight:900; font-size: 2.2rem;">RAYY <span style="color:var(--primary);">STORE</span></h1>
+            <p style="font-size:0.6rem; letter-spacing:4px; opacity:0.3; text-transform:uppercase;">Official Payment Gate</p>
         </div>
 
         <div class="card">
             <div class="input-group">
                 <label>IDENTITAS PEMBELI</label>
-                <input type="text" id="username" placeholder="Masukkan Nama / ID Akun">
+                <input type="text" id="username" placeholder="Nama / ID Akun">
             </div>
-            
             <div class="input-group">
-                <label>NOMINAL TRANSAKSI (RP)</label>
+                <label>NOMINAL (RP)</label>
                 <input type="number" id="amount" placeholder="Contoh: 10000">
             </div>
-
-            <button class="btn-pay" id="btnPay" onclick="prosesPembayaran()">
-                BAYAR SEKARANG
-            </button>
-            
-            <p style="text-align: center; margin-top: 25px; font-size: 0.7rem; opacity: 0.3;">
-                &bull; Protected by Rayy Secure System &bull;
-            </p>
+            <button class="btn-pay" id="btnProses" onclick="prosesPembayaran()">BAYAR SEKARANG</button>
         </div>
     </div>
 
@@ -295,12 +139,10 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Konfigurasi Database
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // 1. FUNGSI NOTIFIKASI CUSTOM
         function myNotif(msg) {
             const t = document.getElementById('customToast');
             t.innerText = msg;
@@ -308,101 +150,76 @@
             setTimeout(() => { t.classList.remove('show'); }, 3000);
         }
 
-        // 2. LOGIKA CEK STATUS SERVER (MANUAL + JADWAL OTOMATIS)
-        onValue(ref(db, 'settings'), (snapshot) => {
-            const settings = snapshot.val();
-            if(!settings) return;
+        // --- MONITOR STATUS SERVER REAL-TIME ---
+        onValue(ref(db, 'settings'), (snap) => {
+            const s = snap.val();
+            if(!s) return;
 
-            // Ambil Waktu Real-time Device
-            const skrg = new Date();
-            const totalMenitSkrg = (skrg.getHours() * 60) + skrg.getMinutes();
+            const checkLock = () => {
+                const now = new Date();
+                const totalMenit = (now.getHours() * 60) + now.getMinutes();
+                const [hB, mB] = s.jadwal.buka.split(':').map(Number);
+                const [hT, mT] = s.jadwal.tutup.split(':').map(Number);
+                const tBuka = (hB * 60) + mB;
+                const tTutup = (hT * 60) + mT;
 
-            let lockStatus = false;
-            let msgOffline = "";
+                let isClosed = false;
+                let alesan = "";
 
-            // A. CEK JADWAL OTOMATIS TERLEBIH DAHULU
-            if(settings.jadwal && settings.jadwal.auto) {
-                const [jamBuka, minBuka] = settings.jadwal.buka.split(':').map(Number);
-                const [jamTutup, minTutup] = settings.jadwal.tutup.split(':').map(Number);
-                
-                const totalMenitBuka = (jamBuka * 60) + minBuka;
-                const totalMenitTutup = (jamTutup * 60) + minTutup;
-
-                if (totalMenitSkrg < totalMenitBuka || totalMenitSkrg > totalMenitTutup) {
-                    lockStatus = true;
-                    msgOffline = `Server tutup otomatis pukul ${settings.jadwal.tutup} WIB. Akan dibuka kembali pukul ${settings.jadwal.buka} WIB.`;
+                if(s.toko_locked === true) {
+                    isClosed = true;
+                    alesan = "Server tutup pukul 21:00 WIB akan di buka lagi pukul 09:00 WIB, yang terlanjur bayar akan di proses besok hari.";
+                } else if (totalMenit < tBuka || totalMenit > tTutup) {
+                    isClosed = true;
+                    alesan = `Server tutup otomatis pukul ${s.jadwal.tutup} WIB. Akan dibuka kembali pukul ${s.jadwal.buka} WIB.`;
                 }
-            }
 
-            // B. CEK TOMBOL MANUAL (PRIORITAS UTAMA)
-            if (settings.toko_locked === true) {
-                lockStatus = true;
-                msgOffline = "Sistem sedang dinonaktifkan sementara oleh Developer Rayy.";
-            }
-
-            // C. EKSEKUSI LAYAR OFFLINE
-            if (lockStatus) {
-                document.body.innerHTML = `
-                <div class="overlay-offline">
-                    <div class="box-msg">
-                        <h1>SERVER OFFLINE</h1>
-                        <p>${msgOffline}<br><br>Yang terlanjur melakukan pembayaran saat server offline akan tetap diproses pada jam operasional berikutnya.</p>
-                        <div class="footer-info">RAYY STORE SYSTEM V4.0</div>
-                    </div>
-                </div>`;
-            }
+                const overlay = document.getElementById('statusOverlay');
+                const content = document.getElementById('overlayContent');
+                if(isClosed) {
+                    overlay.style.display = "flex";
+                    content.innerHTML = `<h1 style="color:#ef4444; font-size:2.5rem; margin-bottom:20px; font-weight:900;">SERVER TUTUP</h1><p style="line-height:1.7;">${alesan}</p>`;
+                } else {
+                    overlay.style.display = "none";
+                }
+            };
+            setInterval(checkLock, 1000);
+            checkLock();
         });
 
-        // 3. FUNGSI PROSES PEMBAYARAN
         window.prosesPembayaran = function() {
             const user = document.getElementById('username').value.trim();
             const nominal = document.getElementById('amount').value;
-            const btn = document.getElementById('btnPay');
+            const btn = document.getElementById('btnProses');
 
-            if(!user || !nominal) return myNotif("⚠️ HARAP ISI SEMUA DATA!");
-            if(nominal < 1000) return myNotif("⚠️ MINIMAL PEMBAYARAN RP 1.000");
-
-            // Matikan tombol sementara (Anti-Spam)
+            if(!user || !nominal) return myNotif("ISI DATA DULU BOS!");
+            
             btn.disabled = true;
-            btn.innerText = "SEDANG MEMPROSES...";
+            btn.innerText = "SEDANG DIPROSES...";
 
-            // Cek Status Banned
             onValue(ref(db, 'banned_users/' + user), (snap) => {
                 if (snap.exists()) {
-                    myNotif("❌ AKUN ANDA TELAH DIBLOKIR!");
+                    myNotif("⚠️ AKUN ANDA TELAH DIBLOKIR!");
                     btn.disabled = false;
                     btn.innerText = "BAYAR SEKARANG";
                 } else {
-                    // Push Data Transaksi
                     push(ref(db, 'transactions'), {
-                        nama: user,
-                        jumlah: nominal,
-                        waktu: new Date().toLocaleString('id-ID'),
-                        status: "Pending"
+                        nama: user, jumlah: nominal, waktu: new Date().toLocaleString(), status: "Pending"
                     }).then(() => {
-                        // Redirect ke Pakasir
                         window.location.href = `https://app.pakasir.com/pay/rayy-store/${nominal}?order_id=RY-${Date.now()}`;
-                    }).catch(() => {
-                        myNotif("❌ GAGAL TERHUBUNG KE SERVER!");
-                        btn.disabled = false;
-                        btn.innerText = "BAYAR SEKARANG";
                     });
                 }
             }, { onlyOnce: true });
         }
 
-        // 4. SPLASH SCREEN DURATION
-        window.onload = () => {
-            setTimeout(() => {
-                const splash = document.getElementById('splash');
-                const content = document.getElementById('main-content');
-                
-                splash.style.opacity = '0';
+        window.onload = () => { 
+            setTimeout(() => { 
+                document.getElementById('splash').style.opacity = '0'; 
                 setTimeout(() => {
-                    splash.style.display = 'none';
-                    content.classList.add('visible');
+                    document.getElementById('splash').style.display = 'none'; 
+                    document.getElementById('main-content').classList.add('visible'); 
                 }, 1000);
-            }, 2500);
+            }, 2500); 
         };
     </script>
 </body>
