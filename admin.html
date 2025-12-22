@@ -3,182 +3,573 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Monitoring System v3.0</title>
+    <title>Rayy Store - Ultra Admin Monitoring System v5.0</title>
     
     <style>
         :root {
             --primary: #38bdf8;
-            --bg: #0b1120;
-            --card: #1e293b;
-            --dark: #0f172a;
+            --primary-glow: rgba(56, 189, 248, 0.4);
+            --bg: #030712;
+            --card: #111827;
+            --dark: #020617;
             --text: #f8fafc;
             --red: #ef4444;
             --green: #22c55e;
+            --orange: #f59e0b;
+            --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-
-        .container { width: 100%; max-width: 550px; }
-
-        /* --- LOGIN CARD --- */
-        #loginSection { 
-            background: var(--card); padding: 50px 35px; border-radius: 40px; 
-            text-align: center; border: 1px solid rgba(255,255,255,0.05); 
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5); 
+        /* --- GLOBAL RESET --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        input { 
-            width: 100%; padding: 20px; background: var(--dark); border: 2px solid transparent; 
-            color: white; border-radius: 20px; font-size: 1rem; margin-bottom: 20px; text-align: center;
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: radial-gradient(circle at top right, #1e293b 0%, #030712 100%);
+            overflow-x: hidden;
         }
-        input:focus { border-color: var(--primary); }
 
-        .btn-main { 
-            width: 100%; padding: 20px; border: none; border-radius: 20px; 
-            background: var(--primary); color: #0b1120; font-weight: 900; 
-            text-transform: uppercase; cursor: pointer; transition: 0.3s;
+        /* --- LOADING OVERLAY --- */
+        #adminLoader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: 0.8s ease;
         }
 
-        /* --- MONITOR DASHBOARD --- */
-        #monitorArea { display: none; width: 100%; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        
-        .item-card { 
-            background: var(--card); padding: 25px; border-radius: 30px; 
-            margin-bottom: 15px; border-left: 8px solid var(--primary); 
-            position: relative; animation: fadeIn 0.5s ease;
+        .loader-circle {
+            width: 70px;
+            height: 70px;
+            border: 4px solid rgba(56, 189, 248, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .btn-done { 
-            width: 100%; margin-top: 15px; padding: 12px; border: none; 
-            border-radius: 15px; background: var(--green); color: white; 
-            font-weight: 800; cursor: pointer; 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .btn-done:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
 
-        .overlay-full { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: var(--bg); z-index: 10000; display: flex; 
-            align-items: center; justify-content: center; text-align: center; padding: 30px;
+        /* --- LOGIN PANEL --- */
+        .login-wrapper {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            z-index: 100;
         }
+
+        .login-card {
+            background: var(--card);
+            padding: 60px 45px;
+            border-radius: 50px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+            animation: slideUp 0.8s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-card h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            font-weight: 900;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+
+        .login-card p {
+            font-size: 0.75rem;
+            opacity: 0.4;
+            margin-bottom: 40px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .input-box {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 24px;
+            background: var(--dark);
+            border: 2px solid transparent;
+            color: white;
+            border-radius: 25px;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .input-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.15);
+            background: #0b1120;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 24px;
+            border: none;
+            border-radius: 25px;
+            background: var(--primary);
+            color: #020617;
+            font-weight: 900;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: var(--transition);
+            box-shadow: 0 15px 30px rgba(56, 189, 248, 0.2);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px var(--primary-glow);
+        }
+
+        /* --- MONITORING DASHBOARD --- */
+        #monitorArea {
+            display: none;
+            width: 100%;
+            max-width: 700px;
+            padding: 40px 20px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: #000;
+        }
+
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--red);
+            color: var(--red);
+            padding: 12px 25px;
+            border-radius: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: var(--red);
+            color: white;
+        }
+
+        /* --- TRANSACTION CARDS --- */
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 100px;
+        }
+
+        .tr-card {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            transition: var(--transition);
+            border-left: 10px solid var(--primary);
+        }
+
+        .tr-card:hover {
+            transform: scale(1.02);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        .tr-card.success { border-left-color: var(--green); }
+        .tr-card.pending { border-left-color: var(--orange); }
+
+        .tr-status {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            padding: 8px 18px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .badge-pending { background: rgba(245, 158, 11, 0.1); color: var(--orange); border: 1px solid var(--orange); }
+        .badge-success { background: rgba(34, 197, 94, 0.1); color: var(--green); border: 1px solid var(--green); }
+
+        .tr-name { font-size: 1.4rem; font-weight: 900; margin-bottom: 5px; }
+        .tr-amount { font-size: 1.8rem; color: var(--primary); font-weight: 900; margin-bottom: 15px; }
+        .tr-time { font-size: 0.75rem; opacity: 0.3; font-weight: 600; }
+
+        .btn-action {
+            width: 100%;
+            margin-top: 25px;
+            padding: 18px;
+            border: none;
+            border-radius: 20px;
+            background: var(--green);
+            color: white;
+            font-weight: 900;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.3s;
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.2);
+        }
+
+        .btn-action:disabled {
+            background: #334155;
+            color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* --- SECURITY OVERLAY --- */
+        .security-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .security-box {
+            border: 2px solid var(--red);
+            padding: 60px 40px;
+            border-radius: 50px;
+            background: rgba(239, 68, 68, 0.05);
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 0 60px rgba(239, 68, 68, 0.2);
+        }
+
+        .security-box h1 {
+            color: var(--red);
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .btn-wa {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 20px 40px;
+            background: var(--primary);
+            color: #000;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        /* --- NOTIFICATION TOAST --- */
+        #adminToast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: #000;
+            padding: 20px 40px;
+            border-radius: 25px;
+            font-weight: 900;
+            z-index: 10001;
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        #adminToast.active { bottom: 40px; }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        
-        <div id="loginSection">
-            <h2 style="margin-bottom:10px; color:var(--primary); font-weight:900;">ADMIN PANEL</h2>
-            <p style="opacity:0.4; font-size:0.8rem; margin-bottom:30px;">RAYY STORE MONITORING</p>
-            <input type="text" id="adminUser" placeholder="Username">
-            <input type="password" id="adminPass" placeholder="Password Master">
-            <button class="btn-main" onclick="handleLogin()">MASUK DASHBOARD</button>
-        </div>
-
-        <div id="monitorArea">
-            <div class="header">
-                <h2>MONITORING</h2>
-                <button onclick="location.reload()" style="background:transparent; color:var(--red); border:none; font-weight:900;">LOGOUT</button>
-            </div>
-            <div id="listTransaksi"></div>
-        </div>
-
+    <div id="adminLoader">
+        <div class="loader-circle"></div>
+        <h2 style="margin-top: 25px; letter-spacing: 5px; color: var(--primary); font-weight: 900;">AUTHORIZED ONLY</h2>
     </div>
+
+    <div id="loginArea" class="login-wrapper">
+        <div class="login-card">
+            <h2>ADMIN LOGIN</h2>
+            <p>Rayy Store Cloud Monitoring</p>
+            
+            <div class="input-box">
+                <input type="text" id="adminUser" placeholder="ADMIN USERNAME">
+            </div>
+            <div class="input-box">
+                <input type="password" id="adminPass" placeholder="ADMIN PASSWORD">
+            </div>
+            
+            <button class="btn-login" onclick="attemptLogin()">UNLOCK DASHBOARD</button>
+            <p style="margin-top: 25px; margin-bottom: 0; opacity: 0.2;">V5.0.2 - SECURE ENCRYPTION</p>
+        </div>
+    </div>
+
+    <div id="monitorArea">
+        <div class="header-nav">
+            <div class="admin-info">
+                <div class="avatar" id="avatarName">A</div>
+                <div>
+                    <h3 id="displayAdminName" style="font-weight: 900;">ADMIN NAME</h3>
+                    <p style="font-size: 0.65rem; color: var(--primary); font-weight: 800; letter-spacing: 1px;">SISTEM MONITORING AKTIF</p>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="location.reload()">LOGOUT</button>
+        </div>
+
+        <div id="historyContainer" class="transaction-list">
+            <div style="text-align: center; padding: 50px; opacity: 0.3;">MENGHUBUNGKAN KE SERVER...</div>
+        </div>
+    </div>
+
+    <div id="adminToast">ADA TRANSAKSI BARU!</div>
+
+    <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // CONFIG DATABASE
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let activeAdmin = "";
-        let isOwner = false;
+        const MASTER_KEY = "085794";
+        const OWNER_WA = "628131172093";
+        let currentAdmin = "";
+        let isMaster = false;
+        let lastCount = -1;
 
-        // --- SINKRONISASI TUTUP SERVER & BAN UNTUK ADMIN ---
-        function startSecurityMonitor(username) {
+        // A. FUNGSI LOADER
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('adminLoader').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('adminLoader').style.display = 'none';
+                }, 800);
+            }, 2000);
+        };
+
+        // B. TOAST & SOUND ALERT
+        function triggerAlert(msg) {
+            const toast = document.getElementById('adminToast');
+            const sound = document.getElementById('alertSound');
+            toast.innerText = msg;
+            toast.classList.add('active');
+            sound.play().catch(e => console.log("Audio play blocked"));
+            setTimeout(() => { toast.classList.remove('active'); }, 4000);
+        }
+
+        // C. SCREEN BLOCKER (TUTUP SERVER / BAN)
+        function triggerSecurityLock(type, name = "") {
+            let title = "ACCESS DENIED";
+            let msg = "Terjadi kesalahan keamanan.";
+            let showWa = false;
+
+            if(type === 'BAN') {
+                title = "AKUN DIBLOKIR";
+                msg = `Maaf ${name}, akun admin anda telah dibekukan oleh sistem karena melanggar aturan atau instruksi owner.`;
+                showWa = true;
+            } else if(type === 'CLOSED') {
+                title = "SERVER TUTUP";
+                msg = "Sistem monitoring tidak dapat diakses diluar jam operasional toko.";
+            }
+
+            document.body.innerHTML = `
+                <div class="security-overlay">
+                    <div class="security-box">
+                        <h1>${title}</h1>
+                        <p style="color:white; line-height:1.8; opacity:0.8;">${msg}</p>
+                        ${showWa ? `<a href="https://wa.me/${OWNER_WA}?text=Halo+Owner,+akun+admin+saya+(${name})+terkena+ban+tanpa+alasan" class="btn-wa">HUBUNGI OWNER</a>` : ''}
+                        <button onclick="location.reload()" style="margin-top:20px; background:transparent; border:none; color:var(--primary); cursor:pointer; display:block; width:100%;">Coba Lagi</button>
+                    </div>
+                </div>`;
+        }
+
+        // D. SISTEM KEAMANAN HEARTBEAT (REALTIME)
+        function startSecurityHeartbeat(adminName) {
+            if(isMaster) return; // Master/Owner Kebal Logika Tutup & Ban
+
+            // 1. Monitor Status Ban
+            onValue(ref(db, 'banned_users/' + adminName), (snap) => {
+                if(snap.exists()) triggerSecurityLock('BAN', adminName);
+            });
+
+            // 2. Monitor Status Tutup Server
             onValue(ref(db, 'settings'), (snap) => {
                 const s = snap.val();
                 if(!s) return;
 
-                const check = () => {
-                    // Owner (085794) Kebal Tutup Server
-                    if(isOwner) return;
-
-                    const now = new Date();
-                    const cur = (now.getHours() * 60) + now.getMinutes();
+                const checkTime = () => {
+                    const skrg = new Date();
+                    const totalMenit = (skrg.getHours() * 60) + skrg.getMinutes();
                     const [hB, mB] = s.jadwal.buka.split(':').map(Number);
                     const [hT, mT] = s.jadwal.tutup.split(':').map(Number);
-                    
-                    let serverMati = false;
-                    if(s.toko_locked === true || cur < (hB*60+mB) || cur > (hT*60+mT)) serverMati = true;
+                    const tBuka = (hB * 60) + mB;
+                    const tTutup = (hT * 60) + mT;
 
-                    if(serverMati) {
-                        document.body.innerHTML = `<div class="overlay-full"><div style="border:2px solid #ef4444; padding:50px; border-radius:40px;"><h1 style="color:#ef4444;">SERVER TUTUP</h1><p style="margin-top:20px;">Admin tidak dapat mengakses dashboard saat server offline.</p></div></div>`;
+                    if(s.toko_locked === true || totalMenit < tBuka || totalMenit > tTutup) {
+                        triggerSecurityLock('CLOSED');
                     }
                 };
-                setInterval(check, 1000);
+                setInterval(checkTime, 1000);
+                checkTime();
             });
-
-            // Cek Real-time jika akun di-ban saat lagi buka web
-            if(!isOwner) {
-                onValue(ref(db, 'banned_users/' + username), (snap) => {
-                    if(snap.exists()) {
-                        document.body.innerHTML = `<div class="overlay-full"><div style="border:2px solid #ef4444; padding:50px; border-radius:40px;"><h1 style="color:#ef4444;">AKUN DIBLOKIR</h1><p style="margin-top:20px;">Anda telah diblokir dari sistem admin.</p><br><a href="https://wa.me/628131172093" style="color:var(--primary); font-weight:900; text-decoration:none;">HUBUNGI OWNER</a></div></div>`;
-                    }
-                });
-            }
         }
 
-        window.handleLogin = function() {
+        // E. PROSES LOGIN
+        window.attemptLogin = function() {
             const u = document.getElementById('adminUser').value.trim();
             const p = document.getElementById('adminPass').value.trim();
 
-            if(p === "085794") {
-                isOwner = true;
-                initDashboard(u);
+            if(!u || !p) return alert("DATA TIDAK LENGKAP!");
+
+            if(p === MASTER_KEY) {
+                isMaster = true;
+                currentAdmin = "OWNER RAYY";
+                initDashboard(currentAdmin);
             } else {
+                // Cek Database sys_extra_admins
                 onValue(ref(db, 'sys_extra_admins/' + u), (snap) => {
                     const data = snap.val();
                     if(data && data.pass === p) {
-                        initDashboard(u);
-                        startSecurityMonitor(u);
-                    } else { alert("Akses Ditolak!"); }
+                        // Cek dulu apakah dia sedang di-ban
+                        onValue(ref(db, 'banned_users/' + u), (banSnap) => {
+                            if(banSnap.exists()) {
+                                triggerSecurityLock('BAN', u);
+                            } else {
+                                currentAdmin = u;
+                                initDashboard(u);
+                                startSecurityHeartbeat(u);
+                            }
+                        }, { onlyOnce: true });
+                    } else {
+                        alert("ID ADMIN ATAU PASSWORD SALAH!");
+                    }
                 }, { onlyOnce: true });
             }
-        }
+        };
 
+        // F. DASHBOARD INITIALIZATION
         function initDashboard(name) {
-            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('loginArea').style.display = 'none';
             document.getElementById('monitorArea').style.display = 'block';
+            document.getElementById('displayAdminName').innerText = name;
+            document.getElementById('avatarName').innerText = name.charAt(0).toUpperCase();
 
+            // LISTEN KE TRANSAKSI
             onValue(ref(db, 'transactions'), (snap) => {
-                const list = document.getElementById('listTransaksi');
-                list.innerHTML = "";
+                const container = document.getElementById('historyContainer');
+                container.innerHTML = "";
                 const data = snap.val();
+
                 if(data) {
-                    Object.keys(data).reverse().forEach(id => {
-                        const t = data[id];
-                        const done = t.status === "Success";
-                        list.innerHTML += `
-                            <div class="item-card" style="border-left-color: ${done ? '#22c55e' : '#38bdf8'}">
-                                <span style="position:absolute; top:20px; right:25px; font-size:0.7rem; font-weight:900; color:${done ? '#22c55e' : '#f59e0b'}">${t.status}</span>
-                                <h3 style="margin-bottom:5px;">${t.nama}</h3>
-                                <p style="color:var(--primary); font-weight:900; font-size:1.1rem;">Rp ${Number(t.jumlah).toLocaleString()}</p>
-                                <p style="font-size:0.7rem; opacity:0.4; margin-top:10px;">${t.waktu}</p>
-                                <button class="btn-done" ${done ? 'disabled' : ''} onclick="confirmTr('${id}')">${done ? '✓ SUKSES' : 'KONFIRMASI SELESAI'}</button>
-                            </div>`;
+                    const keys = Object.keys(data).reverse();
+                    
+                    // Notifikasi jika ada data baru masuk
+                    if(lastCount !== -1 && keys.length > lastCount) {
+                        triggerAlert("ADA TRANSAKSI MASUK!");
+                    }
+                    lastCount = keys.length;
+
+                    keys.forEach(id => {
+                        const tr = data[id];
+                        const isDone = tr.status === "Success";
+                        
+                        container.innerHTML += `
+                            <div class="tr-card ${isDone ? 'success' : 'pending'}">
+                                <div class="tr-status ${isDone ? 'badge-success' : 'badge-pending'}">
+                                    ${tr.status || 'WAITING'}
+                                </div>
+                                <div style="padding-right: 60px;">
+                                    <p class="tr-time">${tr.waktu}</p>
+                                    <h3 class="tr-name">${tr.nama}</h3>
+                                    <p class="tr-amount">Rp ${Number(tr.jumlah).toLocaleString()}</p>
+                                    <p style="font-size:0.65rem; opacity:0.3;">Order ID: ${id}</p>
+                                </div>
+                                <button class="btn-action" ${isDone ? 'disabled' : ''} onclick="confirmPayment('${id}')">
+                                    ${isDone ? '✓ TRANSAKSI SUDAH SELESAI' : 'KONFIRMASI PEMBAYARAN'}
+                                </button>
+                            </div>
+                        `;
                     });
+                } else {
+                    container.innerHTML = `<div style="text-align:center; padding:100px 0; opacity:0.2;">BELUM ADA TRANSAKSI HARI INI</div>`;
                 }
             });
         }
 
-        window.confirmTr = function(id) {
-            update(ref(db, 'transactions/' + id), { status: "Success" });
-        }
+        // G. KONFIRMASI PEMBAYARAN
+        window.confirmPayment = function(id) {
+            if(confirm("Pastikan uang sudah masuk di mutasi! Konfirmasi sekarang?")) {
+                const targetRef = ref(db, 'transactions/' + id);
+                update(targetRef, {
+                    status: "Success",
+                    confirmed_by: currentAdmin,
+                    confirmed_at: new Date().toLocaleString()
+                }).then(() => {
+                    console.log("Transaction synced.");
+                });
+            }
+        };
+
     </script>
 </body>
 </html>
