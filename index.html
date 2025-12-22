@@ -3,99 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAYMENT | RAYYSTORE</title>
+    <title>RAYY STORE</title>
     <style>
-        :root { --primary: #0a0d16; --accent: #00ff00; --red: #ff4d4d; --wa: #25d366; --wa-dark: #075e54; }
+        :root { --accent: #00d2ff; --bg: #05070a; --card: #0d121b; }
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--primary); color: white; overflow-x: hidden; }
+        body { background: var(--bg); color: #fff; overflow: hidden; }
 
-        .container { padding: 20px; max-width: 400px; margin: auto; text-align: center; }
-        .card { background: #161b22; border: 1px solid #30363d; padding: 25px; border-radius: 20px; margin-top: 50px; }
-        input { width: 100%; padding: 15px; margin-bottom: 15px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 10px; outline: none; }
-        .btn-pay { width: 100%; padding: 15px; background: var(--accent); color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        /* LOADING SCREEN */
+        #loader { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; transition: 0.8s ease; }
+        .logo-r { font-size: 80px; font-weight: 900; color: var(--accent); text-shadow: 0 0 30px var(--accent); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.5; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0.5; transform: scale(0.9); } }
 
-        /* FIX CSS CHAT */
-        #chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
-        #chat-btn { width: 60px; height: 60px; background: var(--wa); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        #chat-box { width: 320px; height: 450px; background: #e5ddd5; position: absolute; bottom: 75px; right: 0; border-radius: 15px; display: none; flex-direction: column; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.5); border: 1px solid #ccc; }
-        #chat-header { background: var(--wa-dark); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        .msg { padding: 8px 12px; border-radius: 8px; max-width: 80%; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
-        .msg.user { background: #dcf8c6; align-self: flex-end; color: #000; border-bottom-right-radius: 0; }
-        .msg.admin { background: #fff; align-self: flex-start; color: #000; border-bottom-left-radius: 0; }
-        #chat-input-area { background: #f0f0f0; padding: 10px; display: flex; gap: 8px; border-top: 1px solid #ddd; }
-        #chat-input-area input { flex: 1; border: none; padding: 10px 15px; border-radius: 20px; background: white; color: black; margin: 0; font-size: 0.9rem; }
+        /* NOTIF ANIMATION */
+        .notif { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--accent); padding: 15px 25px; border-radius: 12px; z-index: 10000; transition: 0.5s ease; box-shadow: 0 10px 30px rgba(0,210,255,0.3); }
+        .notif.show { top: 20px; }
+
+        .container { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .card { background: var(--card); border: 1px solid #1f2937; padding: 30px; border-radius: 25px; width: 100%; max-width: 360px; text-align: center; }
+        input { width: 100%; padding: 15px; margin-bottom: 15px; background: #161d29; border: 1px solid #1f2937; color: #fff; border-radius: 12px; outline: none; }
+        .btn-pay { width: 100%; padding: 15px; background: var(--accent); color: #000; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
+    <div id="loader"><div class="logo-r">R</div></div>
+    <div id="notif-box" class="notif">Transaksi Berhasil!</div>
+
     <div class="container">
-        <h1 style="margin-top:20px;">RAYY<span style="color:var(--accent)">STORE</span></h1>
         <div class="card">
-            <input type="text" id="user" placeholder="Nama / ID Pembeli" oninput="syncName()">
-            <input type="number" id="amt" placeholder="Nominal (Contoh: 22000)">
-            <button class="btn-pay" onclick="pay()">BAYAR SEKARANG</button>
+            <h1>RAYY <span style="color:var(--accent)">STORE</span></h1>
+            <input type="text" id="buyer-name" placeholder="Masukkan Nama/ID">
+            <input type="number" id="amount" placeholder="Nominal Top Up">
+            <button class="btn-pay" onclick="handlePay()">BAYAR SEKARANG</button>
         </div>
     </div>
 
-    <div id="chat-widget">
-        <div id="chat-box">
-            <div id="chat-header"><span>Admin RayyStore</span> <span onclick="toggleChat()" style="cursor:pointer">&times;</span></div>
-            <div id="chat-messages"></div>
-            <div id="chat-input-area">
-                <input type="text" id="m-input" placeholder="Ketik pesan...">
-                <button onclick="sendMsg()" style="border:none; background:none; color:var(--wa-dark); font-weight:bold; cursor:pointer;">SEND</button>
-            </div>
-        </div>
-        <div id="chat-btn" onclick="toggleChat()">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="35">
-        </div>
-    </div>
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => { 
+                document.getElementById('loader').style.opacity = '0';
+                setTimeout(() => { document.getElementById('loader').style.display = 'none'; document.body.style.overflow = 'auto'; }, 800);
+            }, 2000);
+        });
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
-
-        let currentUser = "Pembeli";
-        window.syncName = () => { currentUser = document.getElementById('user').value || "Pembeli"; loadChat(currentUser); };
-        
-        window.toggleChat = () => {
-            const b = document.getElementById('chat-box');
-            b.style.display = b.style.display === 'flex' ? 'none' : 'flex';
-            if(b.style.display === 'flex') loadChat(currentUser);
-        };
-
-        function loadChat(name) {
-            onValue(ref(db, `live_chats/${name}`), (snap) => {
-                const msgsDiv = document.getElementById('chat-messages');
-                msgsDiv.innerHTML = "";
-                snap.forEach(c => {
-                    const m = c.val();
-                    const div = document.createElement('div');
-                    div.className = `msg ${m.sender}`;
-                    div.innerText = m.text;
-                    msgsDiv.appendChild(div);
-                });
-                msgsDiv.scrollTop = msgsDiv.scrollHeight;
-            });
+        function showNotif(txt) {
+            const n = document.getElementById('notif-box');
+            n.innerText = txt; n.classList.add('show');
+            setTimeout(() => { n.classList.remove('show'); }, 3000);
         }
 
-        window.sendMsg = () => {
-            const i = document.getElementById('m-input');
-            if(!i.value) return;
-            push(ref(db, `live_chats/${currentUser}`), { sender: 'user', text: i.value });
-            i.value = "";
-        };
-
-        window.pay = () => {
-            const u = document.getElementById('user').value;
-            const a = document.getElementById('amt').value;
-            if(!u || !a) return alert("Lengkapi data!");
-            const oid = `RAYY-${Date.now().toString().slice(-5)}`;
-            window.location.href = `https://app.pakasir.com/pay/rayy-store/${a}?order_id=${oid}`;
-        };
+        function handlePay() {
+            showNotif("Menghubungkan ke Server...");
+            // Logic pembayaran Pakasir lu masuk sini
+        }
     </script>
 </body>
 </html>
