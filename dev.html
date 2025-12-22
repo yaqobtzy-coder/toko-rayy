@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DEV PANEL | RAYY</title>
+    <title>DEV PANEL | ARCHITECT</title>
     <style>
-        :root { --neon: #00ff00; --bg: #0a0d16; --red: #ff4d4d; --wa: #075e54; }
+        :root { --neon: #00ff00; --bg: #0a0d16; --red: #ff4d4d; --wa-dark: #075e54; }
         * { margin:0; padding:0; box-sizing:border-box; font-family: monospace; }
         body { background: var(--bg); color: #fff; padding: 15px; }
         .box { background: #161b22; border: 1px solid #30363d; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
         input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 8px; margin-bottom: 8px; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-green { background: var(--neon); color: #000; }
         .btn-red { background: var(--red); color: #fff; }
-        #admin-chat-list { height: 100px; overflow-y: auto; background: #000; padding: 10px; border-radius: 8px; }
-        .chat-win { height: 250px; background: #e5ddd5; border-radius: 10px; display: none; flex-direction: column; overflow: hidden; margin-top: 10px; }
-        .msgs { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
-        .m { padding: 8px; border-radius: 5px; max-width: 80%; color: #000; font-size: 0.8rem; }
+
+        /* FIX CSS CHAT DI DEV */
+        #admin-chat-list { height: 120px; overflow-y: auto; background: #000; padding: 10px; border: 1px solid #333; margin-bottom: 10px; }
+        .chat-row { padding: 8px; border-bottom: 1px solid #222; cursor: pointer; font-size: 0.8rem; color: var(--neon); }
+        .chat-win { height: 350px; background: #e5ddd5; border-radius: 10px; display: none; flex-direction: column; overflow: hidden; }
+        .msgs { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
+        .m { padding: 8px; border-radius: 5px; max-width: 80%; font-size: 0.8rem; color: #000; }
         .m.admin { background: #dcf8c6; align-self: flex-end; }
         .m.user { background: #fff; align-self: flex-start; }
         #login-zone { position:fixed; inset:0; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; }
@@ -25,48 +28,43 @@
 <body>
 
     <div id="login-zone">
-        <h2 style="color:var(--neon); margin-bottom:20px;">[ DEV AUTH ]</h2>
-        <input type="password" id="k" placeholder="ACCESS KEY" style="text-align:center;">
-        <button onclick="unlock()" class="btn btn-green">UNLOCK</button>
+        <h2 style="color:var(--neon); margin-bottom:20px;">[ SYSTEM LOGIN ]</h2>
+        <input type="text" id="l-user" placeholder="Username" style="max-width:300px;">
+        <input type="password" id="l-pass" placeholder="Password" style="max-width:300px;">
+        <button onclick="doLogin()" class="btn btn-green" style="max-width:300px;">LOGIN</button>
     </div>
 
     <div id="dev-ui" style="display:none;">
-        <div class="box">
-            <h3>MASTER KILL SWITCH</h3>
-            <div id="st" style="padding:10px; text-align:center; border-radius:5px; font-weight:bold;">...</div>
-            <button class="btn btn-green" onclick="tog()">SWITCH STATUS</button>
-        </div>
-
-        <div class="box">
-            <h3>SET JADWAL AUTO</h3>
-            <div style="display:flex; gap:5px;"><input type="time" id="b"> <input type="time" id="t"></div>
-            <button class="btn btn-green" onclick="setJ()">SAVE JADWAL</button>
-        </div>
+        <h2 style="margin-bottom:15px; font-size:1.1rem;">ARCHITECT <span style="color:var(--neon)">DASHBOARD</span></h2>
 
         <div class="box">
             <h3>LIVE CHAT MONITOR</h3>
             <div id="admin-chat-list"></div>
             <div class="chat-win" id="cw">
-                <div style="background:var(--wa); padding:8px; font-size:0.7rem;" id="tn">Chat</div>
+                <div style="background:var(--wa-dark); padding:10px; font-size:0.8rem; display:flex; justify-content:space-between;">
+                    <span id="target-n">Chat</span>
+                    <span onclick="document.getElementById('cw').style.display='none'" style="cursor:pointer">CLOSE</span>
+                </div>
                 <div class="msgs" id="ms"></div>
-                <div style="padding:5px; background:#eee; display:flex;">
-                    <input type="text" id="rm" style="margin:0; color:#000;">
-                    <button onclick="rep()" style="background:var(--wa); color:#fff; border:none; padding:10px;">SEND</button>
+                <div style="padding:10px; background:#f0f0f0; display:flex; gap:5px;">
+                    <input type="text" id="rep-m" style="margin:0; color:#000; background:#fff;">
+                    <button onclick="sendRep()" style="background:var(--wa-dark); color:white; border:none; padding:10px; border-radius:5px;">SEND</button>
                 </div>
             </div>
         </div>
 
         <div class="box">
             <h3>USER RESTRICTION</h3>
-            <input type="text" id="ub" placeholder="Nama User">
-            <button class="btn btn-red" onclick="bn()">BAN USER</button>
-            <div id="lb" style="margin-top:10px; font-size:0.8rem;"></div>
+            <input type="text" id="target-b" placeholder="Nama User">
+            <button class="btn btn-red" onclick="doBan()">BAN USER</button>
+            <div id="lb" style="margin-top:10px; font-size:0.8rem; color:var(--red);"></div>
         </div>
 
         <div class="box">
-            <h3>ADMIN HWID AUTH</h3>
-            <input type="text" id="hw" placeholder="HWID">
-            <button class="btn btn-green" onclick="adA()">ADD ADMIN</button>
+            <h3>TAMBAH ADMIN BARU</h3>
+            <input type="text" id="new-u" placeholder="Username Baru">
+            <input type="password" id="new-p" placeholder="Password Baru">
+            <button class="btn btn-green" onclick="addAdminAccount()">CREATE ADMIN</button>
         </div>
     </div>
 
@@ -76,35 +74,80 @@
 
         const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
 
-        window.unlock = () => { if(document.getElementById('k').value === "085794") { document.getElementById('login-zone').style.display='none'; document.getElementById('dev-ui').style.display='block'; } };
-        
-        // KILL SWITCH
-        window.tog = async () => { const r = ref(db, 'settings/toko_locked'); const s = await get(r); set(r, !s.val()); };
-        onValue(ref(db, 'settings/toko_locked'), snap => {
-            const l = snap.val(); const e = document.getElementById('st');
-            e.innerText = l ? "OFFLINE" : "ONLINE"; e.style.background = l ? "var(--red)" : "var(--neon)";
-        });
+        // LOGIN SYSTEM
+        window.doLogin = async () => {
+            const u = document.getElementById('l-user').value;
+            const p = document.getElementById('l-pass').value;
+            
+            // Default Master Login
+            if(u === "admin" && p === "085794") {
+                showUI(); return;
+            }
 
-        // JADWAL
-        window.setJ = () => { set(ref(db, 'settings/jadwal'), { buka: document.getElementById('b').value, tutup: document.getElementById('t').value, auto: true }); };
+            const snap = await get(ref(db, 'admin_accounts/' + u));
+            if(snap.exists() && snap.val().password === p) {
+                showUI();
+            } else {
+                alert("Salah Akun!");
+            }
+        };
 
-        // CHAT
-        let ac = "";
+        function showUI() {
+            document.getElementById('login-zone').style.display = 'none';
+            document.getElementById('dev-ui').style.display = 'block';
+        }
+
+        // CHAT SYSTEM
+        let activeC = "";
         onValue(ref(db, 'live_chats'), snap => {
-            const l = document.getElementById('admin-chat-list'); l.innerHTML = "";
-            snap.forEach(c => { const d = document.createElement('div'); d.innerText = c.key; d.onclick = () => { ac = c.key; document.getElementById('cw').style.display='flex'; document.getElementById('tn').innerText = ac; loadM(ac); }; l.appendChild(d); });
+            const list = document.getElementById('admin-chat-list'); list.innerHTML = "";
+            snap.forEach(c => {
+                const d = document.createElement('div');
+                d.className = "chat-row";
+                d.innerText = `> ${c.key}`;
+                d.onclick = () => { 
+                    activeC = c.key; 
+                    document.getElementById('cw').style.display='flex'; 
+                    document.getElementById('target-n').innerText = activeC;
+                    loadM(activeC); 
+                };
+                list.appendChild(d);
+            });
         });
-        function loadM(u) { onValue(ref(db, `live_chats/${u}`), snap => { const s = document.getElementById('ms'); s.innerHTML = ""; snap.forEach(m => { const d = m.val(); s.innerHTML += `<div class="m ${d.sender}">${d.text}</div>`; }); s.scrollTop = s.scrollHeight; }); }
-        window.rep = () => { push(ref(db, `live_chats/${ac}`), { sender: 'admin', text: document.getElementById('rm').value }); document.getElementById('rm').value = ""; };
 
-        // BAN
-        window.bn = () => { set(ref(db, 'banned_users/'+document.getElementById('ub').value), { status: 'BANNED' }); };
+        function loadM(u) {
+            onValue(ref(db, `live_chats/${u}`), snap => {
+                const s = document.getElementById('ms'); s.innerHTML = "";
+                snap.forEach(m => {
+                    const d = m.val();
+                    const div = document.createElement('div');
+                    div.className = `m ${d.sender}`;
+                    div.innerText = d.text;
+                    s.appendChild(div);
+                });
+                s.scrollTop = s.scrollHeight;
+            });
+        }
+
+        window.sendRep = () => {
+            const txt = document.getElementById('rep-m');
+            if(!txt.value || !activeC) return;
+            push(ref(db, `live_chats/${activeC}`), { sender: 'admin', text: txt.value });
+            txt.value = "";
+        };
+
+        // BANNED & ADMIN
+        window.doBan = () => { set(ref(db, 'banned_users/'+document.getElementById('target-b').value), { status: 'BANNED' }); };
         onValue(ref(db, 'banned_users'), snap => {
-            const b = document.getElementById('lb'); b.innerHTML = "LIST: ";
-            snap.forEach(c => { b.innerHTML += `${c.key} <span onclick="un('${c.key}')" style="color:var(--red)">[X]</span>, `; });
+            const b = document.getElementById('lb'); b.innerHTML = "BANNED: ";
+            snap.forEach(c => { b.innerHTML += `${c.key} [X], `; });
         });
-        window.un = (u) => remove(ref(db, 'banned_users/'+u));
-        window.adA = () => { set(ref(db, 'authorized_admins/'+document.getElementById('hw').value), { role: 'ADMIN' }); };
+        window.addAdminAccount = () => {
+            const u = document.getElementById('new-u').value;
+            const p = document.getElementById('new-p').value;
+            if(u && p) set(ref(db, 'admin_accounts/' + u), { password: p });
+            alert("Admin Berhasil Ditambah!");
+        };
     </script>
 </body>
 </html>
