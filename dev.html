@@ -3,122 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DEV | ARCHITECT</title>
+    <title>DEV PANEL | RAYY ARCHITECT</title>
     <style>
-        :root { --neon: #00ff00; --bg: #000; --red: #ff4d4d; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family:monospace; }
-        body { background: var(--bg); color: var(--neon); padding-bottom: 50px; }
+        :root { --neon: #00ff00; --bg: #0b0f19; --red: #ff4d4d; --wa: #075e54; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: #fff; padding: 15px; }
 
-        /* LOGIN FIX (GAK GEPENG) */
-        #login-zone { position:fixed; inset:0; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; }
-        .login-card { width:100%; max-width:320px; text-align:center; }
-        .login-input { width:100%; padding:18px; background:#111; border:1px solid var(--neon); color:var(--neon); margin-bottom:15px; border-radius:10px; text-align:center; font-size:1rem; }
-        .login-btn { width:100%; padding:18px; background:var(--neon); color:#000; border:none; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem; }
-
-        /* UI PANEL */
-        #dev-ui { padding:20px; display:none; }
-        .box { border:1px solid #222; padding:20px; border-radius:12px; margin-bottom:15px; background:rgba(0,255,0,0.01); }
-        h3 { font-size:0.8rem; margin-bottom:10px; color:#fff; }
-        .action-btn { width:100%; padding:14px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; margin-top:10px; }
+        .box { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        h3 { font-size: 0.9rem; color: var(--neon); margin-bottom: 15px; letter-spacing: 1px; }
         
-        /* CHAT MONITOR */
-        #admin-chat-list { height:200px; overflow-y:auto; background:#050505; border:1px solid #111; padding:10px; }
-        .chat-item { padding:10px; border-bottom:1px solid #111; cursor:pointer; font-size:0.8rem; }
-        .chat-item:active { background:#111; }
+        /* CHAT STYLE WA DI DEV */
+        #admin-chat-list { height: 150px; overflow-y: auto; background: #0d1117; border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+        .chat-row { padding: 10px; border-bottom: 1px solid #21262d; cursor: pointer; display: flex; justify-content: space-between; }
+        .chat-window { height: 300px; background: #e5ddd5; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; margin-top: 10px; }
+        .chat-msgs { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .m-dev { padding: 8px 12px; border-radius: 8px; max-width: 80%; font-size: 0.85rem; color: #000; }
+        .m-dev.admin { background: #dcf8c6; align-self: flex-end; }
+        .m-dev.user { background: #fff; align-self: flex-start; }
+
+        /* INPUTS & BUTTONS */
+        input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 8px; margin-bottom: 10px; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-green { background: var(--neon); color: #000; }
+        .btn-red { background: var(--red); color: #fff; }
+
+        /* LIST BANNED */
+        .ban-item { display: flex; justify-content: space-between; padding: 8px; background: #0d1117; border-radius: 5px; margin-bottom: 5px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <div id="login-zone">
-        <div class="login-card">
-            <h2 style="margin-bottom:30px;">[ ARCHITECT AUTH ]</h2>
-            <input type="password" id="key" class="login-input" placeholder="ACCESS KEY">
-            <button onclick="unlock()" class="login-btn">ENTER SYSTEM</button>
+    <h2 style="text-align:center; margin-bottom:20px;">SYSTEM <span style="color:var(--neon)">DASHBOARD</span></h2>
+
+    <div class="box">
+        <h3>PENGATURAN JAM OPERASIONAL</h3>
+        <div style="display:flex; gap:10px;">
+            <input type="time" id="jam-buka">
+            <input type="time" id="jam-tutup">
+        </div>
+        <button class="btn btn-green" onclick="saveJadwal()">SIMPAN JADWAL</button>
+        <p style="font-size:0.7rem; margin-top:10px; opacity:0.5;">*Server otomatis OFFLINE di luar jam ini jika AUTO aktif.</p>
+    </div>
+
+    <div class="box">
+        <h3>WHATSAPP LIVE CHAT</h3>
+        <div id="admin-chat-list"></div>
+        <div class="chat-window" id="win-chat" style="display:none;">
+            <div style="background:var(--wa); padding:10px; font-weight:bold;" id="chat-target-name">Membalas...</div>
+            <div class="chat-msgs" id="chat-screen"></div>
+            <div style="padding:10px; background:#f0f0f0; display:flex; gap:5px;">
+                <input type="text" id="rep-txt" placeholder="Balas..." style="margin:0; color:#000; background:#fff;">
+                <button onclick="reply()" style="padding:10px; background:var(--wa); color:white; border:none; border-radius:5px;">KIRIM</button>
+            </div>
         </div>
     </div>
 
-    <div id="dev-ui">
-        <h1 style="color:white; margin-bottom:20px;">SYSTEM <span style="color:var(--neon);">CONTROL</span></h1>
-        
-        <div class="box">
-            <h3>MASTER KILL SWITCH</h3>
-            <div id="stat" style="padding:15px; text-align:center; border-radius:6px; font-weight:bold;">CHECKING...</div>
-            <button onclick="toggleSrv()" class="action-btn" style="background:#fff;">SWITCH ONLINE/OFFLINE</button>
-        </div>
-
-        <div class="box">
-            <h3>LIVE CHAT (BALAS PESAN)</h3>
-            <div id="admin-chat-list"></div>
-            <div id="reply-area" style="display:none; margin-top:10px;">
-                <input type="text" id="reply-input" placeholder="Tulis balasan..." style="width:100%; padding:12px; background:#111; border:1px solid #333; color:white; border-radius:5px;">
-                <button onclick="replyMsg()" class="action-btn" style="background:var(--neon); color:#000;">KIRIM BALASAN</button>
-            </div>
-        </div>
-
-        <div class="box">
-            <h3>USER RESTRICTION</h3>
-            <input type="text" id="t-user" placeholder="Target Username" style="width:100%; padding:12px; background:#111; border:1px solid #333; color:white;">
-            <button onclick="ban()" class="action-btn" style="background:var(--red); color:white;">BAN USER</button>
-        </div>
+    <div class="box">
+        <h3>USER RESTRICTION</h3>
+        <input type="text" id="inp-ban" placeholder="Username Pembeli">
+        <button class="btn btn-red" onclick="prosesBan()">BAN USER</button>
+        <h4 style="margin: 15px 0 10px; font-size:0.8rem;">DAFTAR TERBLOKIR:</h4>
+        <div id="list-banned"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get, push, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
 
-        window.unlock = () => {
-            if(document.getElementById('key').value === "085794") {
-                document.getElementById('login-zone').style.display = 'none';
-                document.getElementById('dev-ui').style.display = 'block';
-            } else { alert("WRONG KEY!"); }
+        // 1. JADWAL OTOMATIS
+        window.saveJadwal = () => {
+            const b = document.getElementById('jam-buka').value;
+            const t = document.getElementById('jam-tutup').value;
+            if(b && t) set(ref(db, 'settings/jadwal'), { buka: b, tutup: t, auto: true });
+            alert("Jadwal Disimpan!");
         };
 
-        // KONTROL SERVER
-        window.toggleSrv = async () => {
-            const r = ref(db, 'settings/toko_locked');
-            const s = await get(r);
-            set(r, !s.val());
-        };
-
-        onValue(ref(db, 'settings/toko_locked'), snap => {
-            const locked = snap.val();
-            const s = document.getElementById('stat');
-            s.innerText = locked ? "OFFLINE (LOCKED)" : "ONLINE (LIVE)";
-            s.style.background = locked ? "var(--red)" : "var(--neon)";
-            s.style.color = locked ? "white" : "black";
-        });
-
-        // KONTROL CHAT
-        let targetUid = "";
+        // 2. CHAT LOGIC
+        let activeUser = "";
         onValue(ref(db, 'live_chats'), snap => {
             const list = document.getElementById('admin-chat-list'); list.innerHTML = "";
-            const data = snap.val();
-            if(data) {
-                Object.keys(data).forEach(uid => {
-                    const last = Object.values(data[uid]).pop();
-                    const div = document.createElement('div');
-                    div.className = "chat-item";
-                    div.innerHTML = `<b style="color:var(--neon)">${uid}</b>: ${last.text}`;
-                    div.onclick = () => { targetUid = uid; document.getElementById('reply-area').style.display='block'; alert("Membalas: "+uid); };
-                    list.appendChild(div);
-                });
-            }
+            snap.forEach(child => {
+                const div = document.createElement('div');
+                div.className = "chat-row";
+                div.innerHTML = `<span>${child.key}</span> <small>Click to chat</small>`;
+                div.onclick = () => openChat(child.key);
+                list.appendChild(div);
+            });
         });
 
-        window.replyMsg = () => {
-            const input = document.getElementById('reply-input');
-            if(!input.value || !targetUid) return;
-            push(ref(db, `live_chats/${targetUid}`), {
-                sender: 'admin',
-                text: input.value,
-                time: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})
+        function openChat(uid) {
+            activeUser = uid;
+            document.getElementById('win-chat').style.display = "flex";
+            document.getElementById('chat-target-name').innerText = "Chatting with: " + uid;
+            onValue(ref(db, `live_chats/${uid}`), snap => {
+                const screen = document.getElementById('chat-screen'); screen.innerHTML = "";
+                snap.forEach(msg => {
+                    const m = msg.val();
+                    screen.innerHTML += `<div class="m-dev ${m.sender}">${m.text}</div>`;
+                });
+                screen.scrollTop = screen.scrollHeight;
             });
-            input.value = "";
+        }
+
+        window.reply = () => {
+            const txt = document.getElementById('rep-txt');
+            if(!txt.value || !activeUser) return;
+            push(ref(db, `live_chats/${activeUser}`), { sender: 'admin', text: txt.value, time: new Date().toLocaleTimeString() });
+            txt.value = "";
         };
 
-        window.ban = () => { /* Logic Ban Sama Seperti Dulu */ };
+        // 3. BAN & LIST UNBAN
+        window.prosesBan = () => {
+            const u = document.getElementById('inp-ban').value;
+            if(u) set(ref(db, 'banned_users/'+u), { status: 'BANNED' });
+        };
+
+        onValue(ref(db, 'banned_users'), snap => {
+            const box = document.getElementById('list-banned'); box.innerHTML = "";
+            snap.forEach(child => {
+                box.innerHTML += `<div class="ban-item"><span>${child.key}</span> <button onclick="unban('${child.key}')" style="background:none; border:none; color:var(--red); cursor:pointer;">UNBAN</button></div>`;
+            });
+        });
+
+        window.unban = (u) => { if(confirm("Buka blokir "+u+"?")) remove(ref(db, 'banned_users/'+u)); };
     </script>
 </body>
 </html>
