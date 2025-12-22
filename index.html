@@ -7,13 +7,15 @@
     <style>
         :root { --primary: #0a0d16; --accent: #00ff00; --red: #ff4d4d; --wa: #25d366; }
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--primary); color: white; }
+        body { background: var(--primary); color: white; overflow-x: hidden; }
 
         /* UI PEMBAYARAN */
         .container { padding: 20px; max-width: 400px; margin: auto; text-align: center; }
-        .card { background: #161b22; border: 1px solid #30363d; padding: 25px; border-radius: 20px; margin-top: 50px; }
-        input { width: 100%; padding: 15px; margin: 10px 0; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 10px; }
-        .btn-pay { width: 100%; padding: 15px; background: var(--accent); color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .card { background: #161b22; border: 1px solid #30363d; padding: 25px; border-radius: 20px; margin-top: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        label { display: block; text-align: left; font-size: 0.8rem; color: #8b949e; margin: 10px 0 5px 5px; }
+        input { width: 100%; padding: 15px; margin-bottom: 15px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 10px; outline: none; }
+        input:focus { border-color: var(--accent); }
+        .btn-pay { width: 100%; padding: 15px; background: var(--accent); color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; }
 
         /* CHAT WIDGET WA STYLE */
         #chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
@@ -21,26 +23,31 @@
         #chat-box { width: 320px; height: 450px; background: #e5ddd5; position: absolute; bottom: 75px; right: 0; border-radius: 15px; display: none; flex-direction: column; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
         #chat-header { background: #075e54; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px 14px; border-radius: 10px; max-width: 85%; font-size: 0.9rem; line-height: 1.4; shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .msg.user { background: #dcf8c6; align-self: flex-end; color: #303030; }
-        .msg.admin { background: white; align-self: flex-start; color: #303030; }
-        #chat-input-area { background: #f0f0f0; padding: 12px; display: flex; gap: 8px; align-items: center; }
-        #chat-input-area input { flex: 1; border: none; padding: 10px 15px; border-radius: 25px; background: white; color: black; margin: 0; }
         
+        /* BUBBLE CHAT */
+        .msg { padding: 10px 14px; border-radius: 10px; max-width: 85%; font-size: 0.9rem; line-height: 1.4; position: relative; }
+        .msg.user { background: #dcf8c6; align-self: flex-end; color: #303030; border-bottom-right-radius: 0; }
+        .msg.admin { background: white; align-self: flex-start; color: #303030; border-bottom-left-radius: 0; }
+        
+        #chat-input-area { background: #f0f0f0; padding: 12px; display: flex; gap: 8px; align-items: center; }
+        #chat-input-area input { flex: 1; border: none; padding: 10px 15px; border-radius: 25px; background: white; color: black; margin: 0; font-size: 0.9rem; }
+        .send-btn { border: none; background: none; color: #075e54; font-weight: bold; cursor: pointer; }
+
         /* OVERLAY OFFLINE */
-        .offline-screen { position: fixed; inset: 0; background: var(--primary); z-index: 9999; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .offline-screen { position: fixed; inset: 0; background: var(--primary); z-index: 9999; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        .off-box { border: 2px solid var(--red); padding: 40px; border-radius: 25px; background: rgba(255,77,77,0.05); }
     </style>
 </head>
 <body>
 
     <div class="container" id="main-ui">
-        <h1 style="margin-top:20px;">RAYY<span style="color:var(--accent)">STORE</span></h1>
+        <h1 style="margin-top:20px; letter-spacing: 2px;">RAYY<span style="color:var(--accent)">STORE</span></h1>
         <div class="card">
-            <label>IDENTITAS PEMBELI</label>
-            <input type="text" id="user" placeholder="Nama / ID Akun">
-            <label>NOMINAL (RP)</label>
+            <label>IDENTITAS PEMBELI (Sesuai Chat)</label>
+            <input type="text" id="user" placeholder="Masukkan Nama Anda..." oninput="syncName()">
+            <label>NOMINAL TOP UP (RP)</label>
             <input type="number" id="amt" placeholder="Contoh: 10000">
-            <button class="btn-pay" onclick="pay()">BAYAR SEKARANG</button>
+            <button class="btn-pay" onclick="pay()">KONFIRMASI PEMBAYARAN</button>
         </div>
     </div>
 
@@ -48,19 +55,22 @@
         <div id="chat-box">
             <div id="chat-header">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="width:30px; height:30px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#075e54">R</div>
-                    <span>Admin RayyStore</span>
+                    <div style="width:35px; height:35px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#075e54; font-weight:bold;">R</div>
+                    <div>
+                        <p style="font-size:0.9rem; margin:0;">Admin RayyStore</p>
+                        <p style="font-size:0.6rem; opacity:0.8; font-weight:normal;">Online</p>
+                    </div>
                 </div>
-                <span onclick="toggleChat()" style="cursor:pointer; font-size:20px;">×</span>
+                <span onclick="toggleChat()" style="cursor:pointer; font-size:24px;">&times;</span>
             </div>
-            <div id="chat-messages"></div>
+            <div id="chat-messages" id="msgs-container"></div>
             <div id="chat-input-area">
                 <input type="text" id="m-input" placeholder="Ketik pesan...">
-                <button onclick="sendMsg()" style="border:none; background:none; color:#075e54; font-weight:bold; font-size:14px;">KIRIM</button>
+                <button onclick="sendMsg()" class="send-btn">KIRIM</button>
             </div>
         </div>
         <div id="chat-btn" onclick="toggleChat()">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="30">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="35">
         </div>
     </div>
 
@@ -68,48 +78,103 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const app = initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" });
+        // Konfigurasi Database
+        const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
+        const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        
-        // Buat ID User unik untuk Chat
-        let myId = localStorage.getItem('chat_uid') || "USER_" + Math.floor(Math.random() * 9000);
-        localStorage.setItem('chat_uid', myId);
 
-        // 1. CEK STATUS ONLINE/OFFLINE (ANTI-BENTROK)
+        // 1. LOGIKA STATUS SERVER (ANTI-OFFLINE BYPASS)
         onValue(ref(db, 'settings'), (snap) => {
             const s = snap.val();
             if(!s) return;
+            
             const now = new Date();
             const mNow = now.getHours() * 60 + now.getMinutes();
             let isOff = false;
             let msg = "";
 
+            // Prioritas Manual Lock
             if(s.toko_locked === true) {
-                isOff = true; msg = "SERVER SEDANG MAINTENANCE";
-            } else if(s.jadwal?.auto === true) {
+                isOff = true;
+                msg = "SERVER SEDANG MAINTENANCE";
+            } 
+            // Jadwal Otomatis
+            else if(s.jadwal && s.jadwal.auto === true) {
                 const [hB, mB] = s.jadwal.buka.split(':').map(Number);
                 const [hT, mT] = s.jadwal.tutup.split(':').map(Number);
-                if (mNow < (hB*60+mB) || mNow > (hT*60+mT)) {
-                    isOff = true; msg = `TOKO TUTUP. BUKA JAM ${s.jadwal.buka}`;
+                const menitBuka = hB * 60 + mB;
+                const menitTutup = hT * 60 + mT;
+
+                if (mNow < menitBuka || mNow > menitTutup) {
+                    isOff = true;
+                    msg = `TOKO TUTUP. BUKA JAM ${s.jadwal.buka} WIB`;
                 }
             }
 
             if(isOff) {
-                document.body.innerHTML = `<div class="offline-screen"><div><h1 style="color:var(--red); font-size:3rem;">OFFLINE</h1><p style="opacity:0.6;">${msg}</p></div></div>`;
-            } else if(window.wasOffline) { location.reload(); }
-            window.wasOffline = isOff;
+                document.body.innerHTML = `
+                    <div class="offline-screen">
+                        <div class="off-box">
+                            <h1 style="color:var(--red); font-size:3.5rem; margin-bottom:10px;">OFFLINE</h1>
+                            <p style="opacity:0.7; letter-spacing:1px;">${msg}</p>
+                        </div>
+                    </div>`;
+                window.isLocked = true;
+            } else if(window.isLocked) {
+                location.reload();
+            }
         });
 
-        // 2. FUNGSI CHAT
+        // 2. LOGIKA CHAT & SINKRON NAMA
+        let currentChatUser = "Pembeli_Anonim";
+        let chatListener = null;
+
         window.toggleChat = () => {
             const box = document.getElementById('chat-box');
             box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
+            if(box.style.display === 'flex') {
+                document.getElementById('m-input').focus();
+                syncName(); // Load chat saat dibuka
+            }
         };
+
+        window.syncName = () => {
+            const nameInput = document.getElementById('user').value.trim();
+            const newName = nameInput || "Pembeli_Anonim";
+            
+            if(newName !== currentChatUser) {
+                currentChatUser = newName;
+                loadChat(currentChatUser);
+            }
+        };
+
+        function loadChat(name) {
+            const msgsDiv = document.getElementById('chat-messages');
+            // Matikan listener lama jika ada
+            const chatRef = ref(db, `live_chats/${name}`);
+            onValue(chatRef, (snap) => {
+                msgsDiv.innerHTML = "";
+                const data = snap.val();
+                if(data) {
+                    Object.values(data).forEach(m => {
+                        const div = document.createElement('div');
+                        div.className = `msg ${m.sender}`;
+                        div.innerHTML = `${m.text}<br><small style="font-size:0.6rem; opacity:0.5; float:right; margin-top:4px;">${m.time}</small>`;
+                        msgsDiv.appendChild(div);
+                    });
+                    msgsDiv.scrollTop = msgsDiv.scrollHeight;
+                }
+            });
+        }
 
         window.sendMsg = () => {
             const input = document.getElementById('m-input');
             if(!input.value) return;
-            push(ref(db, `live_chats/${myId}`), {
+
+            const name = document.getElementById('user').value.trim() || "Pembeli_Anonim";
+            const chatRef = ref(db, `live_chats/${name}`);
+            
+            push(chatRef, {
                 sender: 'user',
                 text: input.value,
                 time: new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})
@@ -117,22 +182,14 @@
             input.value = "";
         };
 
-        onValue(ref(db, `live_chats/${myId}`), (snap) => {
-            const msgsDiv = document.getElementById('chat-messages');
-            msgsDiv.innerHTML = "";
-            const data = snap.val();
-            if(data) {
-                Object.values(data).forEach(m => {
-                    const div = document.createElement('div');
-                    div.className = `msg ${m.sender}`;
-                    div.innerHTML = `${m.text}<br><small style="font-size:0.6rem; opacity:0.5; float:right; margin-top:4px;">${m.time}</small>`;
-                    msgsDiv.appendChild(div);
-                });
-                msgsDiv.scrollTop = msgsDiv.scrollHeight;
-            }
-        });
+        window.pay = () => {
+            const u = document.getElementById('user').value;
+            if(!u) return alert("Masukkan Nama Identitas!");
+            alert("Memproses Pembayaran untuk: " + u);
+        };
 
-        window.pay = () => { alert("Redirecting to Pakasir..."); };
+        // Init chat pertama kali
+        loadChat(currentChatUser);
     </script>
 </body>
 </html>
