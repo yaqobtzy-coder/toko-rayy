@@ -3,143 +3,474 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Dev Panel - Auto Schedule v3.0</title>
+    <title>Rayy Developer Panel - Ultimate Control v3.0</title>
+    
     <style>
         :root {
             --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.4);
             --bg: #0b1120;
             --card: #1e293b;
             --dark: #0f172a;
             --text: #f8fafc;
             --red: #ef4444;
             --green: #22c55e;
+            --orange: #f59e0b;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: var(--text); padding: 20px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 600px; }
-        .card { background: var(--card); padding: 30px; border-radius: 30px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05); }
-        h2 { color: var(--primary); margin-bottom: 20px; font-weight: 900; text-align: center; }
-        .grid-settings { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .status-box { padding: 20px; border-radius: 20px; background: var(--dark); text-align: center; border: 2px solid transparent; transition: 0.3s; }
-        .status-on { border-color: var(--green); color: var(--green); }
-        .status-off { border-color: var(--red); color: var(--red); }
-        input, select { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--dark); color: white; margin-top: 10px; }
-        .btn { width: 100%; padding: 15px; border-radius: 15px; border: none; font-weight: 900; cursor: pointer; margin-top: 10px; text-transform: uppercase; transition: 0.3s; }
-        .btn-blue { background: var(--primary); color: #0b1120; }
-        .btn-red { background: var(--red); color: white; }
-        .btn-green { background: var(--green); color: white; }
-        .list-item { background: var(--dark); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            background-image: radial-gradient(circle at top right, #1e293b 0%, #0b1120 100%);
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- HEADER STYLING --- */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            margin-top: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--primary);
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .header p {
+            font-size: 0.8rem;
+            opacity: 0.5;
+            letter-spacing: 4px;
+            margin-top: 5px;
+        }
+
+        /* --- CARD STYLING --- */
+        .card {
+            background: var(--card);
+            padding: 35px;
+            border-radius: 40px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+        }
+
+        /* --- TOGGLE SWITCH AREA --- */
+        .status-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--dark);
+            padding: 25px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .status-display.active {
+            border-color: var(--green);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.1);
+        }
+
+        .status-display.locked {
+            border-color: var(--red);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
+        }
+
+        .status-info b {
+            font-size: 1.1rem;
+            display: block;
+        }
+
+        .status-info span {
+            font-size: 0.75rem;
+            opacity: 0.5;
+        }
+
+        /* --- INPUT STYLING --- */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            margin-left: 10px;
+            opacity: 0.6;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 18px 25px;
+            background: var(--dark);
+            border: 2px solid transparent;
+            color: white;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            background: #0b1120;
+        }
+
+        /* --- BUTTON STYLING --- */
+        .btn {
+            width: 100%;
+            padding: 20px;
+            border: none;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary { background: var(--primary); color: #0b1120; }
+        .btn-danger { background: var(--red); color: white; }
+        .btn-success { background: var(--green); color: white; }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active { transform: translateY(0); }
+
+        /* --- JADWAL AREA --- */
+        .flex-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .flex-row > div { flex: 1; }
+
+        /* --- LIST STYLING --- */
+        .data-list {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .list-item {
+            background: var(--dark);
+            padding: 15px 20px;
+            border-radius: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .list-item span { font-weight: 700; font-size: 0.9rem; }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--red);
+            border: 1px solid var(--red);
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-delete:hover { background: var(--red); color: white; }
+
+        /* SCROLLBAR CUSTOM */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--card); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>DEV CONTROL PANEL</h2>
-
-    <div class="card">
-        <p style="text-align:center; opacity:0.6; font-size:0.8rem; margin-bottom:15px;">KONTROL MANUAL SERVER</p>
-        <div class="grid-settings">
-            <div id="statusManual" class="status-box">MEMUAT...</div>
-            <button class="btn btn-blue" onclick="toggleServer()">SWITCH MANUAL</button>
+    <div class="container">
+        
+        <div class="header">
+            <h1>DEV PANEL</h1>
+            <p>SYSTEM CONTROL CENTER</p>
         </div>
-    </div>
 
-    <div class="card">
-        <p style="text-align:center; opacity:0.6; font-size:0.8rem; margin-bottom:15px;">JADWAL BUKA/TUTUP OTOMATIS</p>
-        <div style="display:flex; gap:10px;">
-            <div style="flex:1;">
-                <label style="font-size:0.7rem;">JAM BUKA</label>
-                <input type="time" id="openTime">
+        <div class="card">
+            <h3><span>⚡</span> SERVER STATUS</h3>
+            <div id="statusCard" class="status-display">
+                <div class="status-info">
+                    <b id="txtStatus">MEMUAT DATA...</b>
+                    <span id="txtSubStatus">Sinkronisasi Database...</span>
+                </div>
+                <div id="indicator" style="width: 15px; height: 15px; border-radius: 50%; background: #ccc;"></div>
             </div>
-            <div style="flex:1;">
-                <label style="font-size:0.7rem;">JAM TUTUP</label>
-                <input type="time" id="closeTime">
+            <button class="btn btn-primary" onclick="handleToggleServer()">
+                SWITCH MANUAL POWER
+            </button>
+        </div>
+
+        <div class="card">
+            <h3><span>🕒</span> AUTO SCHEDULE</h3>
+            <p style="font-size: 0.75rem; opacity: 0.5; margin-bottom: 20px; margin-top: -15px;">
+                Atur waktu operasional server secara otomatis (24 Jam).
+            </p>
+            
+            <div class="flex-row">
+                <div class="input-group">
+                    <label>Jam Buka Server</label>
+                    <input type="time" id="timeOpen">
+                </div>
+                <div class="input-group">
+                    <label>Jam Tutup Server</label>
+                    <input type="time" id="timeClose">
+                </div>
             </div>
+            
+            <button class="btn btn-success" onclick="handleSaveJadwal()">
+                SIMPAN KONFIGURASI JADWAL
+            </button>
         </div>
-        <button class="btn btn-green" onclick="saveJadwal()">SIMPAN JADWAL OTOMATIS</button>
-    </div>
 
-    <div class="card">
-        <h3>MANAJEMEN AKSES</h3>
-        <input type="text" id="targetUser" placeholder="Username (Untuk Admin/Ban)">
-        <input type="text" id="targetPass" placeholder="Password (Hanya untuk Admin)">
-        <div style="display:flex; gap:10px;">
-            <button class="btn btn-blue" onclick="addAdmin()" style="font-size:0.7rem;">TAMBAH ADMIN</button>
-            <button class="btn btn-red" onclick="banUser()" style="font-size:0.7rem;">BAN USER/ADMIN</button>
+        <div class="card">
+            <h3><span>👤</span> ADMIN MANAGEMENT</h3>
+            <div class="input-group">
+                <label>Username Baru</label>
+                <input type="text" id="adminUser" placeholder="Masukkan Nama Admin">
+            </div>
+            <div class="input-group">
+                <label>Password Akses</label>
+                <input type="text" id="adminPass" placeholder="Masukkan Password Admin">
+            </div>
+            <button class="btn btn-primary" onclick="handleAddAdmin()">
+                DAFTARKAN ADMIN BARU
+            </button>
         </div>
+
+        <div class="card">
+            <h3><span>🚫</span> BANNED USERS</h3>
+            <div class="input-group">
+                <label>Nama Target Ban</label>
+                <input type="text" id="banTarget" placeholder="Username yang akan diblokir">
+            </div>
+            <button class="btn btn-danger" onclick="handleBanUser()">
+                BLOKIR USER SEKARANG
+            </button>
+
+            <div class="data-list" id="banListArea">
+                </div>
+        </div>
+
+        <p style="text-align: center; opacity: 0.3; font-size: 0.7rem; margin-bottom: 40px;">
+            Rayy Security System v3.0 &bull; 2025 Licensed
+        </p>
+
     </div>
 
-    <div class="card">
-        <p style="opacity:0.5; font-size:0.8rem;">DAFTAR BANNED USER</p>
-        <div id="banList" style="margin-top:10px;"></div>
-    </div>
-</div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, update, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, onValue, update, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        // CONFIG DATABASE
+        const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-    const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+        // --- 1. MONITORING REAL-TIME SETTINGS ---
+        const settingsRef = ref(db, 'settings');
+        onValue(settingsRef, (snapshot) => {
+            const data = snapshot.val();
+            if(!data) return;
 
-    // 1. MONITOR STATUS MANUAL & JADWAL
-    onValue(ref(db, 'settings'), (snap) => {
-        const data = snap.val();
-        const statBox = document.getElementById('statusManual');
-        if(data.toko_locked) {
-            statBox.innerHTML = "STATUS: CLOSED";
-            statBox.className = "status-box status-off";
-        } else {
-            statBox.innerHTML = "STATUS: OPEN";
-            statBox.className = "status-box status-on";
-        }
-        if(data.jadwal) {
-            document.getElementById('openTime').value = data.jadwal.buka;
-            document.getElementById('closeTime').value = data.jadwal.tutup;
-        }
-    });
+            const card = document.getElementById('statusCard');
+            const txt = document.getElementById('txtStatus');
+            const sub = document.getElementById('txtSubStatus');
+            const ind = document.getElementById('indicator');
 
-    // 2. TOGGLE MANUAL
-    window.toggleServer = function() {
-        onValue(ref(db, 'settings/toko_locked'), (snap) => {
-            update(ref(db, 'settings'), { toko_locked: !snap.val() });
-        }, { onlyOnce: true });
-    }
+            if(data.toko_locked === true) {
+                card.className = "status-display locked";
+                txt.innerText = "SERVER: OFFLINE (CLOSED)";
+                txt.style.color = "var(--red)";
+                sub.innerText = "Akses pembeli sedang dikunci secara manual.";
+                ind.style.background = "var(--red)";
+                ind.style.boxShadow = "0 0 10px var(--red)";
+            } else {
+                card.className = "status-display active";
+                txt.innerText = "SERVER: ONLINE (OPEN)";
+                txt.style.color = "var(--green)";
+                sub.innerText = "Sistem berjalan normal dan menerima transaksi.";
+                ind.style.background = "var(--green)";
+                ind.style.boxShadow = "0 0 10px var(--green)";
+            }
 
-    // 3. SAVE JADWAL
-    window.saveJadwal = function() {
-        const buka = document.getElementById('openTime').value;
-        const tutup = document.getElementById('closeTime').value;
-        if(!buka || !tutup) return alert("Isi Jam!");
-        update(ref(db, 'settings/jadwal'), { buka, tutup, auto: true }).then(() => alert("Jadwal Disimpan!"));
-    }
-
-    // 4. ADD ADMIN
-    window.addAdmin = function() {
-        const user = document.getElementById('targetUser').value;
-        const pass = document.getElementById('targetPass').value;
-        if(!user || !pass) return alert("Isi data!");
-        set(ref(db, 'sys_extra_admins/' + user), { user, pass }).then(() => alert("Admin Ditambah!"));
-    }
-
-    // 5. BAN USER
-    window.banUser = function() {
-        const user = document.getElementById('targetUser').value;
-        if(!user) return alert("Isi Nama!");
-        set(ref(db, 'banned_users/' + user), { status: "banned" }).then(() => alert("User Di-Ban!"));
-    }
-
-    // 6. TAMPILKAN DAFTAR BAN
-    onValue(ref(db, 'banned_users'), (snap) => {
-        const list = document.getElementById('banList');
-        list.innerHTML = "";
-        snap.forEach(child => {
-            list.innerHTML += `<div class="list-item"><span>${child.key}</span><button onclick="unban('${child.key}')" style="color:red; background:none; border:none; cursor:pointer;">HAPUS</button></div>`;
+            // Load Jadwal ke Input
+            if(data.jadwal) {
+                document.getElementById('timeOpen').value = data.jadwal.buka;
+                document.getElementById('timeClose').value = data.jadwal.tutup;
+            }
         });
-    });
 
-    window.unban = (id) => { remove(ref(db, 'banned_users/' + id)); }
-</script>
+        // --- 2. FUNGSI TOGGLE POWER ---
+        window.handleToggleServer = function() {
+            onValue(ref(db, 'settings/toko_locked'), (snap) => {
+                const currentStatus = snap.val();
+                update(ref(db, 'settings'), {
+                    toko_locked: !currentStatus
+                }).then(() => {
+                    console.log("Server status toggled.");
+                });
+            }, { onlyOnce: true });
+        }
+
+        // --- 3. FUNGSI SIMPAN JADWAL ---
+        window.handleSaveJadwal = function() {
+            const buka = document.getElementById('timeOpen').value;
+            const tutup = document.getElementById('timeClose').value;
+
+            if(!buka || !tutup) {
+                alert("Silahkan tentukan jam buka dan tutup terlebih dahulu!");
+                return;
+            }
+
+            update(ref(db, 'settings/jadwal'), {
+                buka: buka,
+                tutup: tutup,
+                auto: true
+            }).then(() => {
+                alert("Konfigurasi Jadwal Otomatis Berhasil Disimpan!");
+            }).catch((err) => {
+                alert("Gagal menyimpan: " + err);
+            });
+        }
+
+        // --- 4. FUNGSI TAMBAH ADMIN ---
+        window.handleAddAdmin = function() {
+            const user = document.getElementById('adminUser').value.trim();
+            const pass = document.getElementById('adminPass').value.trim();
+
+            if(!user || !pass) {
+                alert("Isi nama admin dan password!");
+                return;
+            }
+
+            set(ref(db, 'sys_extra_admins/' + user), {
+                user: user,
+                pass: pass,
+                created: new Date().toLocaleString()
+            }).then(() => {
+                alert("Admin " + user + " Berhasil Didaftarkan!");
+                document.getElementById('adminUser').value = "";
+                document.getElementById('adminPass').value = "";
+            });
+        }
+
+        // --- 5. FUNGSI BAN USER ---
+        window.handleBanUser = function() {
+            const target = document.getElementById('banTarget').value.trim();
+
+            if(!target) {
+                alert("Masukkan nama user yang ingin di-ban!");
+                return;
+            }
+
+            if(target === "Owner Rayy") {
+                alert("Tidak bisa memblokir akun Owner!");
+                return;
+            }
+
+            set(ref(db, 'banned_users/' + target), {
+                status: "banned",
+                date: new Date().toLocaleString()
+            }).then(() => {
+                alert("User " + target + " Telah Diblokir Permanen!");
+                document.getElementById('banTarget').value = "";
+            });
+        }
+
+        // --- 6. MONITOR DAFTAR BAN (LIST) ---
+        onValue(ref(db, 'banned_users'), (snapshot) => {
+            const listArea = document.getElementById('banListArea');
+            listArea.innerHTML = "";
+            const data = snapshot.val();
+
+            if(data) {
+                Object.keys(data).forEach(username => {
+                    const item = document.createElement('div');
+                    item.className = "list-item";
+                    item.innerHTML = `
+                        <span>${username}</span>
+                        <button class="btn-delete" onclick="handleUnban('${username}')">HAPUS BAN</button>
+                    `;
+                    listArea.appendChild(item);
+                });
+            } else {
+                listArea.innerHTML = "<p style='text-align:center; opacity:0.3; font-size:0.8rem;'>Tidak ada user yang diblokir.</p>";
+            }
+        });
+
+        // --- 7. FUNGSI UNBAN ---
+        window.handleUnban = function(username) {
+            if(confirm("Buka blokir untuk " + username + "?")) {
+                remove(ref(db, 'banned_users/' + username));
+            }
+        }
+
+    </script>
 </body>
 </html>
