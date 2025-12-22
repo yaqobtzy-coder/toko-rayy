@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RAYY STORE | TITAN ADMIN PANEL v10.0</title>
+    <title>RAYY STORE | TITAN ADMIN CONTROL v10.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -23,61 +23,63 @@
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
 
-        /* --- ADVANCED BACKGROUND --- */
+        /* ADVANCED BACKGROUND ENGINE */
         .bg-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at 50% -20%, #1e293b 0%, #030712 80%); }
         .grid-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-image: linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px); background-size: 30px 30px; }
 
-        /* --- AUTHENTICATION (DEWA STYLE) --- */
-        #authSection { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .auth-box { width: 100%; max-width: 420px; background: var(--card); border-radius: 40px; padding: 50px 40px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 40px 100px rgba(0,0,0,0.8); text-align: center; position: relative; overflow: hidden; }
-        .auth-box::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(90deg, transparent, var(--primary), transparent); }
-        .auth-box h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
-        .auth-box p { color: var(--text-dim); font-size: 0.8rem; margin-bottom: 40px; letter-spacing: 2px; }
+        /* AUTHENTICATION LAYER */
+        #authSection { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; transition: 0.8s cubic-bezier(0.7, 0, 0.3, 1); }
+        .auth-box { width: 100%; max-width: 420px; background: var(--card); border-radius: 40px; padding: 60px 40px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 40px 100px rgba(0,0,0,0.8); text-align: center; position: relative; overflow: hidden; }
+        .auth-box::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent, var(--primary), transparent); }
+        .auth-box h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -2px; margin-bottom: 10px; }
+        .auth-box p { color: var(--text-dim); font-size: 0.75rem; margin-bottom: 40px; letter-spacing: 3px; font-weight: 600; }
 
-        .input-wrap { position: relative; margin-bottom: 20px; }
-        .input-wrap input { width: 100%; padding: 20px 25px; background: var(--dark); border: 2px solid var(--accent); border-radius: 20px; color: #fff; font-size: 1rem; transition: 0.4s; }
-        .input-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 20px rgba(56,189,248,0.1); transform: translateY(-2px); }
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group input { width: 100%; padding: 22px 25px; background: var(--dark); border: 2px solid var(--accent); border-radius: 20px; color: #fff; font-size: 1rem; transition: 0.4s; font-weight: 600; }
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 30px rgba(56,189,248,0.15); transform: translateY(-2px); }
 
-        .btn-auth { width: 100%; padding: 22px; background: var(--primary); color: #000; border: none; border-radius: 20px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; box-shadow: 0 10px 30px var(--primary-glow); }
-        .btn-auth:hover { transform: scale(1.02); filter: brightness(1.1); }
+        .btn-auth { width: 100%; padding: 22px; background: var(--primary); color: #000; border: none; border-radius: 20px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.4s; box-shadow: 0 15px 40px var(--primary-glow); }
+        .btn-auth:hover { transform: translateY(-3px); filter: brightness(1.1); }
 
-        /* --- MAIN DASHBOARD --- */
-        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 40px 20px; display: none; }
+        /* DASHBOARD LAYOUT */
+        .container { width: 100%; max-width: 1400px; margin: 0 auto; padding: 50px 30px; display: none; opacity: 0; transform: translateY(30px); transition: 1s ease; }
+        .container.visible { display: block; opacity: 1; transform: translateY(0); }
         
-        /* Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .stat-card { background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.05); position: relative; }
-        .stat-card h4 { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
-        .stat-card .val { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+        /* ANALYTICS CARDS */
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 50px; }
+        .stat-card { background: var(--card); padding: 35px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.05); position: relative; overflow: hidden; transition: 0.4s; }
+        .stat-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .stat-card h4 { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; font-weight: 800; }
+        .stat-card .value { font-size: 2.2rem; font-weight: 900; color: var(--primary); font-family: 'JetBrains Mono'; }
 
-        /* Transaction List */
-        .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .section-title h2 { font-size: 1.5rem; font-weight: 800; }
+        /* TRANSACTION MONITOR */
+        .trx-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .trx-header h2 { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; }
         
-        .trx-container { display: grid; gap: 15px; }
-        .trx-item { background: var(--card); padding: 25px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; transition: 0.3s; animation: reveal 0.5s ease forwards; }
-        @keyframes reveal { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .trx-item:hover { background: var(--accent); border-color: var(--primary); }
-
-        .info-main h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 5px; }
-        .info-main p { font-size: 0.75rem; color: var(--text-dim); font-family: 'JetBrains Mono'; }
+        .trx-list { display: grid; gap: 20px; }
+        .trx-card { background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; transition: 0.3s; position: relative; }
+        .trx-card::after { content: ""; position: absolute; left: 0; top: 20%; height: 60%; width: 5px; background: var(--primary); border-radius: 0 5px 5px 0; }
         
-        .price-tag { font-size: 1.2rem; font-weight: 800; color: var(--primary); margin: 0 20px; }
+        .trx-info h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
+        .trx-info p { font-size: 0.8rem; color: var(--text-dim); font-family: 'JetBrains Mono'; }
         
-        .status-pill { padding: 8px 15px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; }
-        .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--gold); }
-        .status-success { background: rgba(16, 185, 129, 0.1); color: var(--green); }
+        .trx-price { font-size: 1.5rem; font-weight: 900; color: var(--primary); margin: 0 30px; }
+        
+        .status-pill { padding: 10px 20px; border-radius: 15px; font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: inline-block; }
+        .pill-pending { background: rgba(245, 158, 11, 0.1); color: var(--gold); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .pill-success { background: rgba(16, 185, 129, 0.1); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.2); }
 
-        .btn-acc { background: var(--green); color: #fff; border: none; padding: 12px 25px; border-radius: 15px; font-weight: 700; cursor: pointer; transition: 0.3s; }
-        .btn-acc:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
+        .btn-approve { background: var(--green); color: #fff; border: none; padding: 15px 35px; border-radius: 18px; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 0.8rem; }
+        .btn-approve:hover { transform: scale(1.05); box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3); }
 
-        /* Toast */
-        #notification { position: fixed; bottom: -100px; right: 30px; background: var(--primary); color: #000; padding: 20px 40px; border-radius: 20px; font-weight: 800; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 99999; }
-        #notification.active { bottom: 30px; }
+        /* NOTIFICATION SYSTEM */
+        #notifToast { position: fixed; bottom: -100px; right: 40px; background: var(--primary); color: #000; padding: 25px 50px; border-radius: 25px; font-weight: 900; transition: 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100000; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        #notifToast.active { bottom: 40px; }
 
-        @media (max-width: 768px) {
-            .trx-item { flex-direction: column; text-align: center; gap: 15px; }
-            .btn-acc { width: 100%; }
+        @media (max-width: 992px) {
+            .trx-card { flex-direction: column; text-align: center; gap: 20px; }
+            .btn-approve { width: 100%; }
+            .trx-price { margin: 10px 0; }
         }
     </style>
 </head>
@@ -85,159 +87,164 @@
 
     <div class="bg-glow"></div>
     <div class="grid-overlay"></div>
-    <div id="notification">ORDER MASUK!</div>
+    <div id="notifToast">ORDER MASUK!</div>
 
     <div id="authSection">
         <div class="auth-box">
-            <h1>RAYY <span style="color:var(--primary)">ADMIN</span></h1>
-            <p>QUANTUM ACCESS v10.0</p>
-            <div class="input-wrap">
-                <input type="text" id="user" placeholder="Admin Username">
+            <h1>RAYY <span style="color:var(--primary)">STORE</span></h1>
+            <p>ADMIN COMMAND CENTER</p>
+            <div class="input-group">
+                <input type="text" id="admUser" placeholder="Username">
             </div>
-            <div class="input-wrap">
-                <input type="password" id="pass" placeholder="Master Password">
+            <div class="input-group">
+                <input type="password" id="admPass" placeholder="Access Key">
             </div>
-            <button class="btn-auth" onclick="verifyAdmin()">Initialize Access</button>
+            <button class="btn-auth" onclick="loginSystem()">Authenticate</button>
         </div>
     </div>
 
-    <div class="container" id="dashboard">
-        <header style="margin-bottom: 50px; display: flex; justify-content: space-between; align-items: flex-end;">
+    <div class="container" id="mainDashboard">
+        <header style="margin-bottom: 60px; display: flex; justify-content: space-between; align-items: flex-end;">
             <div>
-                <p style="color:var(--primary); font-size: 0.7rem; letter-spacing: 5px; font-weight: 800;">COMMAND CENTER</p>
-                <h1 style="font-size: 2.5rem; font-weight: 800;">DASHBOARD</h1>
+                <p style="color:var(--primary); font-size: 0.8rem; letter-spacing: 6px; font-weight: 900; text-transform: uppercase;">Central Intelligence</p>
+                <h1 style="font-size: 3rem; font-weight: 900; letter-spacing: -2px;">DASHBOARD</h1>
             </div>
-            <div id="adminTag" style="font-size: 0.7rem; background: var(--accent); padding: 10px 20px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);">
-                CONNECTED AS: <span style="color:var(--primary); font-weight: 800;">-</span>
+            <div id="userTag" style="font-size: 0.8rem; background: var(--accent); padding: 12px 25px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); font-weight: 700;">
+                OPERATOR: <span style="color:var(--primary);">OFFLINE</span>
             </div>
         </header>
 
-        <div class="stats-grid">
+        <div class="stats-container">
             <div class="stat-card">
-                <h4>Total Revenue</h4>
-                <div class="val" id="statRevenue">Rp 0</div>
+                <h4>Net Revenue</h4>
+                <div class="value" id="revVal">Rp 0</div>
             </div>
             <div class="stat-card">
-                <h4>Success Orders</h4>
-                <div class="val" id="statSuccess">0</div>
+                <h4>Verified Trx</h4>
+                <div class="value" id="successVal">0</div>
             </div>
             <div class="stat-card">
-                <h4>Pending Tasks</h4>
-                <div class="val" id="statPending" style="color:var(--gold)">0</div>
+                <h4>Pending Queue</h4>
+                <div class="value" id="pendingVal" style="color:var(--gold)">0</div>
             </div>
         </div>
 
-        <div class="section-title">
-            <h2>Live Transactions</h2>
-            <div style="font-size: 0.6rem; color: var(--text-dim);">AUTO-SYNC: ON</div>
+        <div class="trx-header">
+            <h2>Active Transmissions</h2>
+            <div style="font-size: 0.7rem; color: var(--text-dim); background: rgba(56, 189, 248, 0.1); padding: 8px 15px; border-radius: 10px; border: 1px solid var(--primary-glow);">SATELLITE SYNC: ACTIVE</div>
         </div>
 
-        <div class="trx-container" id="trxList">
+        <div class="trx-list" id="trxContainer">
             </div>
     </div>
 
-    <audio id="notifSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+    <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, update, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // MASTER CONFIGURATION
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
         let currentAdmin = "";
 
-        // --- AUTH LOGIC ---
-        window.verifyAdmin = function() {
-            const u = document.getElementById('user').value;
-            const p = document.getElementById('pass').value;
+        // AUTHENTICATION LOGIC [cite: 2025-12-21]
+        window.loginSystem = function() {
+            const u = document.getElementById('admUser').value;
+            const p = document.getElementById('admPass').value;
 
             onValue(ref(db, 'sys_extra_admins/' + u), (snap) => {
                 const data = snap.val();
                 if(data && data.pass === p) {
                     currentAdmin = u;
-                    document.getElementById('authSection').style.opacity = '0';
+                    const auth = document.getElementById('authSection');
+                    auth.style.opacity = '0';
+                    auth.style.pointerEvents = 'none';
+                    
                     setTimeout(() => {
-                        document.getElementById('authSection').style.display = 'none';
-                        document.getElementById('dashboard').style.display = 'block';
-                        document.getElementById('adminTag').querySelector('span').innerText = u.toUpperCase();
+                        const dash = document.getElementById('mainDashboard');
+                        dash.style.display = 'block';
+                        setTimeout(() => dash.classList.add('visible'), 50);
+                        document.getElementById('userTag').querySelector('span').innerText = u.toUpperCase();
                         
-                        // Device Fingerprint Logging
+                        // SECURE LOGGING [cite: 2025-12-21]
                         push(ref(db, 'system_logs'), {
                             user: u,
-                            deviceId: "DV-" + btoa(navigator.userAgent).substring(5, 15),
-                            time: new Date().toLocaleTimeString(),
-                            action: "Admin Level Access"
+                            deviceId: "SEC-X-" + btoa(navigator.userAgent).substring(10, 20),
+                            time: new Date().toLocaleString(),
+                            action: "MASTER_ACCESS_GRANTED"
                         });
 
-                        initDashboard();
-                    }, 500);
-                } else { alert("ACCESS DENIED: MALICIOUS ATTEMPT DETECTED."); }
+                        startDataStream();
+                    }, 800);
+                } else { alert("ACCESS DENIED. UNAUTHORIZED DEVICE."); }
             }, { onlyOnce: true });
         };
 
-        // --- CORE SYSTEM ---
-        function initDashboard() {
+        // REAL-TIME DATA STREAMING [cite: 2025-12-21]
+        function startDataStream() {
             onValue(ref(db, 'transactions'), (snap) => {
-                const list = document.getElementById('trxList');
-                list.innerHTML = "";
+                const container = document.getElementById('trxContainer');
+                container.innerHTML = "";
                 const data = snap.val();
                 
-                let revenue = 0;
-                let successCount = 0;
-                let pendingCount = 0;
+                let rev = 0;
+                let sCount = 0;
+                let pCount = 0;
 
                 if(data) {
-                    document.getElementById('notifSound').play();
-                    showNotif();
+                    document.getElementById('alertSound').play();
+                    triggerNotif();
                     
                     Object.keys(data).reverse().forEach(id => {
-                        const tr = data[id];
-                        if(tr.status === "Success") {
-                            revenue += Number(tr.jumlah);
-                            successCount++;
+                        const item = data[id];
+                        if(item.status === "Success") {
+                            rev += Number(item.jumlah);
+                            sCount++;
                         } else {
-                            pendingCount++;
+                            pCount++;
                         }
 
-                        const item = document.createElement('div');
-                        item.className = 'trx-item';
-                        item.innerHTML = `
-                            <div class="info-main">
-                                <span class="status-pill ${tr.status === 'Pending' ? 'status-pending' : 'status-success'}">${tr.status}</span>
-                                <h3 style="margin-top:10px;">${tr.nama}</h3>
-                                <p>ID: ${id}</p>
-                                <p>TIME: ${tr.waktu}</p>
+                        const card = document.createElement('div');
+                        card.className = 'trx-card';
+                        card.innerHTML = `
+                            <div class="trx-info">
+                                <span class="status-pill ${item.status === 'Pending' ? 'pill-pending' : 'pill-success'}">${item.status}</span>
+                                <h3>${item.nama}</h3>
+                                <p>UID: ${id}</p>
+                                <p>TS: ${item.waktu}</p>
                             </div>
-                            <div class="price-tag">Rp ${Number(tr.jumlah).toLocaleString()}</div>
-                            ${tr.status === 'Pending' ? 
-                                `<button class="btn-acc" onclick="approveOrder('${id}')">APPROVE</button>` : 
-                                `<div style="font-size:0.6rem; text-align:right;">VERIFIED BY:<br><b style="color:var(--green)">${tr.processedBy || 'MASTER'}</b></div>`
+                            <div class="trx-price">Rp ${Number(item.jumlah).toLocaleString()}</div>
+                            ${item.status === 'Pending' ? 
+                                `<button class="btn-approve" onclick="confirmTrx('${id}')">AUTHORIZE</button>` : 
+                                `<div style="text-align:right;"><p style="font-size:0.6rem; color:var(--text-dim);">VERIFIED BY</p><b style="color:var(--green); font-size:0.8rem;">${item.processedBy || 'ROOT'}</b></div>`
                             }
                         `;
-                        list.appendChild(item);
+                        container.appendChild(card);
                     });
                 }
                 
-                // Update Stats
-                document.getElementById('statRevenue').innerText = "Rp " + revenue.toLocaleString();
-                document.getElementById('statSuccess').innerText = successCount;
-                document.getElementById('statPending').innerText = pendingCount;
+                // UPDATE ANALYTICS
+                document.getElementById('revVal').innerText = "Rp " + rev.toLocaleString();
+                document.getElementById('successVal').innerText = sCount;
+                document.getElementById('pendingVal').innerText = pCount;
             });
         }
 
-        window.approveOrder = (id) => {
-            update(ref(db, 'transactions/' + id), {
+        window.confirmTrx = (id) => {
+            update(ref(ref(db, 'transactions/' + id)), {
                 status: "Success",
                 processedBy: currentAdmin
             });
         };
 
-        function showNotif() {
-            const n = document.getElementById('notification');
-            n.classList.add('active');
-            setTimeout(() => n.classList.remove('active'), 3000);
+        function triggerNotif() {
+            const toast = document.getElementById('notifToast');
+            toast.classList.add('active');
+            setTimeout(() => toast.classList.remove('active'), 3500);
         }
     </script>
 </body>
