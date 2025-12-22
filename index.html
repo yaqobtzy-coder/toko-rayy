@@ -1,151 +1,77 @@
-/* RAYY STORE DEWA ENGINE v11.0 - CORE BRAIN
-   FEATURES: HWID STEALTH, AUTO-BAN RADAR, DYNAMIC POWER SYNC, ANALYTICS PACKET
-   DATE: 2025-12-21 | ACCESS: 085794
+/* RAYY STORE DEWA ENGINE v12.0 
+   SECURITY: AUTO-HWID VALIDATION (NO PASSWORD)
+   FEATURES: INSTANT CHECKOUT, AUTO-BAN, LIVE SYNC
 */
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue, set, push, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// --- CONFIGURATION ---
 const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// --- CORE FUNCTIONS ---
-
-// 1. DEEP FINGERPRINTING (HWID) - Mendeteksi ID Unik HP User
-const generateHWID = () => {
-    const gl = document.createElement('canvas').getContext('webgl');
-    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-    const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Unknown";
-    const id = btoa(navigator.userAgent + renderer + screen.width + navigator.language).substring(0, 20);
-    return "RY-" + id.toUpperCase();
+// FINGERPRINT TANPA RIBET
+const getDevice = () => {
+    return "DEVICE-" + btoa(navigator.userAgent).substring(10, 25).toUpperCase();
 };
-const HWID = generateHWID();
+const MY_DEVICE = getDevice();
 
-// 2. NEURAL BAN RADAR (Menendang User Secara Real-Time)
-const startBanRadar = (username) => {
-    if(!username) return;
-    onValue(ref(db, `banned_users/${username}`), (snap) => {
-        if(snap.exists()) {
-            document.body.innerHTML = `
-                <div style="height:100vh; background:#000; color:red; display:flex; align-items:center; justify-content:center; flex-direction:column; font-family:monospace; text-align:center; padding:20px;">
-                    <h1 style="font-size:3rem;">ACCESS TERMINATED</h1>
-                    <p style="letter-spacing:5px;">HWID: ${HWID}</p>
-                    <p style="margin-top:20px; color:#fff;">Perangkat anda telah diblokir secara permanen dari server Rayy Store.</p>
-                </div>
-            `;
-            setTimeout(() => window.location.href = "https://google.com", 3000);
-        }
-    });
-};
-
-// 3. AUTOMATED SCHEDULE & POWER ENGINE (Sinkron dengan Dev Panel)
-const syncPowerSystem = () => {
-    const payBtn = document.getElementById('btnBayar'); // Pastikan ID ini ada di tombol bayar lu
-    
-    // Check Schedule & Global Lock
+// SYSTEM AUTO-RADAR
+const syncSystem = () => {
+    const payBtn = document.getElementById('btnBayar');
     onValue(ref(db, 'settings'), (snap) => {
         const data = snap.val();
         if(!data) return;
-
         const now = new Date();
-        const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
-        
+        const curTime = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
         const { open, close } = data.schedule;
         const isLocked = data.toko_locked;
         
-        // Logic: Jika di-lock manual OR di luar jam operasional
-        const isOutOfTime = (currentTime < open || currentTime > close);
-        
-        if(isLocked || isOutOfTime) {
+        if(isLocked || (curTime < open || curTime > close)) {
             if(payBtn) {
                 payBtn.disabled = true;
-                payBtn.style.background = "#1e293b";
-                payBtn.style.color = "#475569";
-                payBtn.style.cursor = "not-allowed";
-                payBtn.innerText = isLocked ? "SERVER UNDER MAINTENANCE" : `CLOSED (OPEN AT ${open})`;
+                payBtn.innerText = "STORE CLOSED / UNDER MAINTENANCE";
+                payBtn.style.filter = "grayscale(1)";
             }
         } else {
             if(payBtn) {
                 payBtn.disabled = false;
-                payBtn.style.background = "var(--primary)";
-                payBtn.style.color = "#000";
-                payBtn.style.cursor = "pointer";
                 payBtn.innerText = "BAYAR SEKARANG";
+                payBtn.style.filter = "none";
             }
         }
     });
 };
 
-// 4. TRANSACTION INJECTION WITH STEALTH LOGGING
+// INSTANT CHECKOUT (GAK PAKE PASSWORD)
 window.prosesBayarRayy = async function() {
     const nama = document.getElementById('userName').value;
-    const item = document.getElementById('itemName').value;
-    const harga = document.getElementById('itemPrice').value;
+    const nominal = document.getElementById('itemPrice').value;
 
-    if(!nama || !item) {
-        Swal.fire("Goblok!", "Isi dulu datanya yang bener!", "error");
-        return;
-    }
+    if(!nama || !nominal) return Swal.fire("Woi!", "Isi nama sama nominalnya!", "warning");
 
-    // Security Check: HWID Ban
-    const hwidCheck = await get(ref(db, `banned_users/${HWID}`));
-    if(hwidCheck.exists()) {
-        alert("PERANGKAT ANDA DIBLOKIR!");
-        return;
-    }
+    // CEK BAN OTOMATIS
+    const check = await get(ref(db, `banned_users/${MY_DEVICE}`));
+    if(check.exists()) return alert("DEVICE LU UDAH DI BAN!");
 
-    const trxId = "RTX-" + Math.floor(100000 + Math.random() * 900000);
+    const trxId = "RTX-" + Math.floor(Math.random() * 888888);
 
-    // Push Transaksi
     set(ref(db, `transactions/${trxId}`), {
         nama: nama,
-        item: item,
-        jumlah: harga,
+        jumlah: nominal,
         status: "Pending",
         waktu: new Date().toLocaleString(),
-        hwid: HWID,
-        ip: "HIDDEN_BY_RAYY"
+        deviceId: MY_DEVICE
     }).then(() => {
-        // Send Stealth Log to Dev Panel
         push(ref(db, 'system_logs'), {
             user: nama,
-            action: `Mencoba membeli ${item} senilai Rp${harga}`,
-            deviceId: HWID,
+            action: `Checkout Rp${nominal}`,
+            deviceId: MY_DEVICE,
             time: new Date().toLocaleTimeString()
         });
-
-        // Trigger Notification on Admin Panel
-        update(ref(db, 'settings/last_notif'), {
-            msg: `Order baru dari ${nama}`,
-            time: Date.now()
-        });
-
-        showQrisModal(trxId, harga); // Panggil fungsi modal lu
+        
+        // Panggil Fungsi QRIS Lu di sini
+        bukaModalQRIS(trxId, nominal);
     });
 };
 
-// --- INITIALIZING DEWA SYSTEM ---
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("%c RAYY STORE v11.0 ", "background: #38bdf8; color: #000; font-weight: bold; font-size: 20px;");
-    console.log(`DEWA_HWID_CONNECTED: ${HWID}`);
-    
-    syncPowerSystem();
-    
-    // Auto-Tracker untuk input nama (Ban Radar)
-    const nameInput = document.getElementById('userName');
-    if(nameInput) {
-        nameInput.addEventListener('blur', () => {
-            startBanRadar(nameInput.value);
-        });
-    }
-    
-    // Packet Logger (Mendeteksi siapa yang buka web lu)
-    push(ref(db, 'system_logs'), {
-        user: "GUEST_USER",
-        action: "Membuka Halaman Utama",
-        deviceId: HWID,
-        time: new Date().toLocaleTimeString()
-    });
-});
+document.addEventListener('DOMContentLoaded', syncSystem);
