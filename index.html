@@ -3,76 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Admin - Transaction Control</title>
+    <title>Rayy Store - Admin Control Dashboard</title>
+    
     <style>
         :root {
             --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.4);
             --bg: #0b1120;
             --card: #141b2d;
             --dark: #0f172a;
             --text: #f8fafc;
-            --green: #22c55e;
             --red: #ef4444;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
-        
-        /* AUTH BOX (STYLE MATCH) */
-        #adminLogin {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg);
-            display: flex; align-items: center; justify-content: center; z-index: 10000;
-        }
-        .login-card {
-            background: var(--card); padding: 40px; border-radius: 40px; width: 90%; max-width: 400px;
-            border: 1px solid rgba(255,255,255,0.05); text-align: center;
-        }
-        input { 
-            width: 100%; padding: 18px; background: var(--dark); border: 2px solid transparent; 
-            color: white; border-radius: 20px; margin-bottom: 15px; transition: 0.3s; 
-        }
-        input:focus { border-color: var(--primary); }
-        .btn { 
-            width: 100%; padding: 20px; border: none; border-radius: 20px; 
-            background: var(--primary); color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase;
+            --green: #22c55e;
         }
 
-        /* DASHBOARD STYLE */
-        .container { max-width: 600px; margin: 0 auto; display: none; }
-        .header { text-align: center; margin-bottom: 40px; }
-        .trx-card { 
-            background: var(--card); border-radius: 30px; padding: 25px; margin-bottom: 20px;
-            border-left: 6px solid var(--primary); transition: 0.3s; animation: slideIn 0.5s ease;
-        }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-        .trx-info h3 { font-size: 1.2rem; margin-bottom: 5px; }
-        .trx-info p { font-size: 0.8rem; opacity: 0.5; }
-        .amount { color: var(--primary); font-weight: 900; font-size: 1.3rem; margin: 15px 0; }
-        .btn-acc { background: var(--green); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; }
+        /* RESET STYLE */
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
-        .badge { padding: 5px 12px; border-radius: 8px; font-size: 0.6rem; font-weight: 900; margin-bottom: 10px; display: inline-block; }
-        .pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            min-height: 100vh; 
+            background-image: radial-gradient(circle at bottom left, #1e293b 0%, #0b1120 100%);
+            padding: 20px;
+        }
+
+        /* --- AUTH BOX (MATCH INDEX STYLE) --- */
+        #adminAuth {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 10000; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .login-card {
+            background: var(--card); border-radius: 40px; padding: 45px 35px;
+            width: 100%; max-width: 400px; border: 1px solid rgba(255,255,255,0.05);
+            text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        /* --- DASHBOARD UI --- */
+        .container {
+            width: 100%; max-width: 600px; margin: 0 auto; display: none;
+            animation: fadeIn 0.8s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header { text-align: center; margin-bottom: 40px; margin-top: 20px; }
+        .header h1 { font-weight: 900; font-size: 2rem; letter-spacing: -1px; }
+
+        .trx-card {
+            background: var(--card); border-radius: 30px; padding: 30px;
+            border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;
+            position: relative; overflow: hidden; transition: 0.3s;
+        }
+        .trx-card::before {
+            content: ""; position: absolute; left: 0; top: 0; height: 100%; width: 6px;
+            background: var(--primary);
+        }
+
+        .status-badge {
+            display: inline-block; padding: 6px 15px; border-radius: 10px;
+            font-size: 0.65rem; font-weight: 900; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 15px;
+        }
+        .pending-bg { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .success-bg { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+
+        .client-name { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
+        .trx-time { font-size: 0.75rem; opacity: 0.4; margin-bottom: 15px; }
+        .price { font-size: 1.5rem; color: var(--primary); font-weight: 900; margin-bottom: 20px; }
+
+        input {
+            width: 100%; padding: 18px; background: var(--dark); border: 2px solid transparent;
+            color: white; border-radius: 18px; font-size: 1rem; margin-bottom: 15px; transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .btn {
+            width: 100%; padding: 20px; border: none; border-radius: 20px;
+            font-weight: 900; cursor: pointer; text-transform: uppercase;
+            transition: 0.3s; font-size: 0.9rem;
+        }
+        .btn-primary { background: var(--primary); color: #000; box-shadow: 0 10px 20px var(--primary-glow); }
+        .btn-acc { background: var(--green); color: #fff; box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3); }
+        .btn:active { transform: scale(0.95); }
+
+        /* NOTIFIKASI TOAST */
+        #toast {
+            position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
+            background: var(--primary); color: #000; padding: 15px 30px;
+            border-radius: 50px; font-weight: 800; z-index: 10001; transition: 0.5s;
+        }
+        #toast.active { bottom: 30px; }
     </style>
 </head>
 <body>
 
-    <div id="adminLogin">
+    <div id="toast">Order Baru Masuk!</div>
+
+    <div id="adminAuth">
         <div class="login-card">
-            <h1 style="margin-bottom: 30px; font-weight: 900;">ADMIN <span style="color:var(--primary);">ACCESS</span></h1>
+            <h1 style="margin-bottom:10px;">ADMIN <span style="color:var(--primary);">LOGIN</span></h1>
+            <p style="font-size:0.6rem; letter-spacing:3px; opacity:0.4; margin-bottom:30px; text-transform:uppercase;">Authorized Personnel Only</p>
             <input type="text" id="admUser" placeholder="Username">
             <input type="password" id="admPass" placeholder="Password">
-            <button class="btn" onclick="authAdmin()">LOGIN SYSTEM</button>
+            <button class="btn btn-primary" onclick="masukAdmin()">VERIFIKASI AKSES</button>
         </div>
     </div>
 
-    <div class="container" id="adminPanel">
+    <div class="container" id="mainPanel">
         <div class="header">
-            <h1 style="font-weight:900;">DASHBOARD</h1>
-            <p style="font-size:0.6rem; letter-spacing:4px; opacity:0.3;">MANAJEMEN TRANSAKSI</p>
+            <h1>PAYMENT <span style="color:var(--primary);">LIST</span></h1>
+            <p style="font-size:0.6rem; letter-spacing:5px; opacity:0.3; text-transform:uppercase;">Monitoring Transaksi Real-time</p>
         </div>
-        <div id="trxList"></div>
+
+        <div id="listOrder">
+            </div>
     </div>
 
-    <audio id="notifSfx" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+    <audio id="alertSnd" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -82,58 +131,77 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let myName = "";
+        let namaAdmin = "";
 
-        window.authAdmin = () => {
+        // Fungsi Login
+        window.masukAdmin = function() {
             const u = document.getElementById('admUser').value;
             const p = document.getElementById('admPass').value;
+
             onValue(ref(db, 'sys_extra_admins/' + u), (snap) => {
                 const data = snap.val();
                 if(data && data.pass === p) {
-                    myName = u;
-                    document.getElementById('adminLogin').style.display = 'none';
-                    document.getElementById('adminPanel').style.display = 'block';
+                    namaAdmin = u;
+                    document.getElementById('adminAuth').style.display = 'none';
+                    document.getElementById('mainPanel').style.display = 'block';
                     
-                    // LOG KE DEV PANEL (SCAN DEVICE SIMPLE)
+                    // LOG DEVICE KE DEV PANEL
                     push(ref(db, 'system_logs'), {
-                        user: u, deviceId: btoa(navigator.platform).substring(0,8),
-                        time: new Date().toLocaleTimeString(), action: "Login Admin"
+                        user: u,
+                        deviceId: btoa(navigator.userAgent).substring(0, 15),
+                        time: new Date().toLocaleTimeString(),
+                        action: "Login Admin"
                     });
-                    
-                    loadTrx();
-                } else { alert("AKSES DITOLAK!"); }
-            }, {onlyOnce: true});
-        }
 
-        function loadTrx() {
+                    jalankanMonitor();
+                } else {
+                    alert("AKSES DITOLAK: Username atau Password Salah!");
+                }
+            }, { onlyOnce: true });
+        };
+
+        // Fungsi Monitor Transaksi
+        function jalankanMonitor() {
             onValue(ref(db, 'transactions'), (snap) => {
-                const list = document.getElementById('trxList');
-                list.innerHTML = "";
+                const container = document.getElementById('listOrder');
+                container.innerHTML = "";
                 const data = snap.val();
+
                 if(data) {
-                    document.getElementById('notifSfx').play();
-                    Object.keys(data).reverse().forEach(id => {
-                        const t = data[id];
-                        if(t.status === "Pending") {
-                            list.innerHTML += `
-                                <div class="trx-card">
-                                    <span class="badge pending">${t.status}</span>
-                                    <div class="trx-info">
-                                        <h3>${t.nama}</h3>
-                                        <p>${t.waktu}</p>
-                                    </div>
-                                    <div class="amount">Rp ${Number(t.jumlah).toLocaleString()}</div>
-                                    <button class="btn-acc" onclick="accTrx('${id}')">KONFIRMASI PEMBAYARAN</button>
-                                </div>
-                            `;
-                        }
+                    // Mainkan suara jika ada perubahan data (order baru)
+                    document.getElementById('alertSnd').play();
+                    
+                    Object.keys(data).reverse().forEach(key => {
+                        const tr = data[key];
+                        const isPending = tr.status === "Pending";
+
+                        container.innerHTML += `
+                            <div class="trx-card">
+                                <span class="status-badge ${isPending ? 'pending-bg' : 'success-bg'}">${tr.status}</span>
+                                <div class="client-name">${tr.nama}</div>
+                                <div class="trx-time">${tr.waktu}</div>
+                                <div class="price">Rp ${Number(tr.jumlah).toLocaleString()}</div>
+                                ${isPending ? `<button class="btn btn-acc" onclick="konfirmasi('${key}')">TERIMA PEMBAYARAN</button>` : `<div style="color:var(--green); font-weight:800; font-size:0.7rem;">Dikonfirmasi oleh: ${tr.by || 'Sistem'}</div>`}
+                            </div>
+                        `;
                     });
+                } else {
+                    container.innerHTML = "<p style='text-align:center; opacity:0.2;'>Belum ada transaksi.</p>";
                 }
             });
         }
 
-        window.accTrx = (id) => {
-            update(ref(db, 'transactions/' + id), { status: "Success", processedBy: myName });
+        // Fungsi Konfirmasi
+        window.konfirmasi = function(id) {
+            update(ref(db, 'transactions/' + id), {
+                status: "Success",
+                by: namaAdmin
+            }).then(() => {
+                const t = document.getElementById('toast');
+                t.innerText = "Berhasil Konfirmasi!";
+                t.classList.add('active');
+                setTimeout(() => t.classList.remove('active'), 2000);
+            });
         };
     </script>
 </body>
