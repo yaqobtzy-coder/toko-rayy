@@ -3,223 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Store - Official Payment System</title>
-    
+    <title>Rayy Admin - Transaction Control</title>
     <style>
         :root {
             --primary: #38bdf8;
-            --primary-glow: rgba(56, 189, 248, 0.4);
             --bg: #0b1120;
             --card: #141b2d;
             --dark: #0f172a;
             --text: #f8fafc;
+            --green: #22c55e;
             --red: #ef4444;
         }
-
-        /* RESET STYLE */
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
         
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            overflow: hidden; 
-            background-image: radial-gradient(circle at top right, #1e293b 0%, #0b1120 100%);
+        /* AUTH BOX (STYLE MATCH) */
+        #adminLogin {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg);
+            display: flex; align-items: center; justify-content: center; z-index: 10000;
         }
-
-        /* --- NOTIFIKASI TOAST --- */
-        #customToast {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 400px; background: var(--primary); color: #000;
-            padding: 18px; border-radius: 20px; text-align: center; font-weight: 900;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 10005;
-            transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            text-transform: uppercase;
+        .login-card {
+            background: var(--card); padding: 40px; border-radius: 40px; width: 90%; max-width: 400px;
+            border: 1px solid rgba(255,255,255,0.05); text-align: center;
         }
-        #customToast.show { top: 30px; }
-
-        /* --- SPLASH SCREEN --- */
-        #splash { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: var(--bg); z-index: 9999; display: flex; 
-            flex-direction: column; align-items: center; justify-content: center; 
-            transition: 1s ease-in-out; 
-        }
-        .logo-box { 
-            width: 100px; height: 100px; background: var(--primary); border-radius: 30px; 
-            display: flex; align-items: center; justify-content: center; font-size: 3.5rem; 
-            font-weight: 900; color: #000; box-shadow: 0 0 30px var(--primary-glow);
-            animation: pulse 2s infinite; 
-        }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-
-        /* --- CONTAINER UTAMA --- */
-        .container { 
-            width: 100%; max-width: 460px; padding: 30px; 
-            opacity: 0; transform: translateY(30px); transition: 1s; 
-        }
-        .container.visible { opacity: 1; transform: translateY(0); }
-
-        .card { 
-            background: var(--card); border-radius: 40px; padding: 45px 35px; 
-            border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-        }
-
-        .input-group { margin-bottom: 25px; }
-        .input-group label { 
-            display: block; font-size: 0.75rem; font-weight: 800; color: var(--primary); 
-            margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase; margin-left: 5px;
-        }
-
         input { 
-            width: 100%; padding: 20px; background: var(--dark); border: 2px solid transparent; 
-            color: white; border-radius: 20px; font-size: 1rem; font-weight: 600; transition: 0.3s; 
+            width: 100%; padding: 18px; background: var(--dark); border: 2px solid transparent; 
+            color: white; border-radius: 20px; margin-bottom: 15px; transition: 0.3s; 
         }
-        input:focus { border-color: var(--primary); background: #0b1120; }
+        input:focus { border-color: var(--primary); }
+        .btn { 
+            width: 100%; padding: 20px; border: none; border-radius: 20px; 
+            background: var(--primary); color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase;
+        }
 
-        .btn-pay { 
-            width: 100%; padding: 22px; border: none; border-radius: 22px; 
-            background: var(--primary); color: #000; font-weight: 900; 
-            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
-            box-shadow: 0 10px 20px var(--primary-glow); transition: 0.3s;
+        /* DASHBOARD STYLE */
+        .container { max-width: 600px; margin: 0 auto; display: none; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .trx-card { 
+            background: var(--card); border-radius: 30px; padding: 25px; margin-bottom: 20px;
+            border-left: 6px solid var(--primary); transition: 0.3s; animation: slideIn 0.5s ease;
         }
-        .btn-pay:hover { transform: translateY(-3px); filter: brightness(1.1); }
-
-        /* --- OVERLAY TUTUP --- */
-        #statusOverlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: var(--bg); z-index: 10000; display: none; 
-            align-items: center; justify-content: center; padding: 25px; 
-        }
-        .box-msg { 
-            border: 2px solid var(--red); padding: 50px 30px; border-radius: 45px; 
-            background: rgba(239,68,68,0.05); text-align: center; max-width: 420px;
-            box-shadow: 0 0 40px rgba(239, 68, 68, 0.1);
-        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        .trx-info h3 { font-size: 1.2rem; margin-bottom: 5px; }
+        .trx-info p { font-size: 0.8rem; opacity: 0.5; }
+        .amount { color: var(--primary); font-weight: 900; font-size: 1.3rem; margin: 15px 0; }
+        .btn-acc { background: var(--green); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; }
+        
+        .badge { padding: 5px 12px; border-radius: 8px; font-size: 0.6rem; font-weight: 900; margin-bottom: 10px; display: inline-block; }
+        .pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
     </style>
 </head>
 <body>
 
-    <div id="customToast">Pesan Notifikasi</div>
-
-    <div id="splash">
-        <div class="logo-box">R</div>
-        <p style="margin-top:20px; letter-spacing:5px; font-size:0.7rem; opacity:0.5;">LOADING RAYY SYSTEM</p>
-    </div>
-
-    <div id="statusOverlay">
-        <div class="box-msg" id="overlayContent">
-            </div>
-    </div>
-
-    <div class="container" id="main-content">
-        <div style="text-align:center; margin-bottom:30px;">
-            <h1 style="font-weight:900; font-size: 2.2rem;">RAYY <span style="color:var(--primary);">STORE</span></h1>
-            <p style="font-size:0.6rem; letter-spacing:4px; opacity:0.3; text-transform:uppercase;">Official Payment Gate</p>
-        </div>
-
-        <div class="card">
-            <div class="input-group">
-                <label>IDENTITAS PEMBELI</label>
-                <input type="text" id="username" placeholder="Nama / ID Akun">
-            </div>
-            <div class="input-group">
-                <label>NOMINAL (RP)</label>
-                <input type="number" id="amount" placeholder="Contoh: 10000">
-            </div>
-            <button class="btn-pay" id="btnProses" onclick="prosesPembayaran()">BAYAR SEKARANG</button>
+    <div id="adminLogin">
+        <div class="login-card">
+            <h1 style="margin-bottom: 30px; font-weight: 900;">ADMIN <span style="color:var(--primary);">ACCESS</span></h1>
+            <input type="text" id="admUser" placeholder="Username">
+            <input type="password" id="admPass" placeholder="Password">
+            <button class="btn" onclick="authAdmin()">LOGIN SYSTEM</button>
         </div>
     </div>
+
+    <div class="container" id="adminPanel">
+        <div class="header">
+            <h1 style="font-weight:900;">DASHBOARD</h1>
+            <p style="font-size:0.6rem; letter-spacing:4px; opacity:0.3;">MANAJEMEN TRANSAKSI</p>
+        </div>
+        <div id="trxList"></div>
+    </div>
+
+    <audio id="notifSfx" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        function myNotif(msg) {
-            const t = document.getElementById('customToast');
-            t.innerText = msg;
-            t.classList.add('show');
-            setTimeout(() => { t.classList.remove('show'); }, 3000);
+        let myName = "";
+
+        window.authAdmin = () => {
+            const u = document.getElementById('admUser').value;
+            const p = document.getElementById('admPass').value;
+            onValue(ref(db, 'sys_extra_admins/' + u), (snap) => {
+                const data = snap.val();
+                if(data && data.pass === p) {
+                    myName = u;
+                    document.getElementById('adminLogin').style.display = 'none';
+                    document.getElementById('adminPanel').style.display = 'block';
+                    
+                    // LOG KE DEV PANEL (SCAN DEVICE SIMPLE)
+                    push(ref(db, 'system_logs'), {
+                        user: u, deviceId: btoa(navigator.platform).substring(0,8),
+                        time: new Date().toLocaleTimeString(), action: "Login Admin"
+                    });
+                    
+                    loadTrx();
+                } else { alert("AKSES DITOLAK!"); }
+            }, {onlyOnce: true});
         }
 
-        // --- MONITOR STATUS SERVER REAL-TIME ---
-        onValue(ref(db, 'settings'), (snap) => {
-            const s = snap.val();
-            if(!s) return;
-
-            const checkLock = () => {
-                const now = new Date();
-                const totalMenit = (now.getHours() * 60) + now.getMinutes();
-                const [hB, mB] = s.jadwal.buka.split(':').map(Number);
-                const [hT, mT] = s.jadwal.tutup.split(':').map(Number);
-                const tBuka = (hB * 60) + mB;
-                const tTutup = (hT * 60) + mT;
-
-                let isClosed = false;
-                let alesan = "";
-
-                if(s.toko_locked === true) {
-                    isClosed = true;
-                    alesan = "Server tutup pukul 21:00 WIB akan di buka lagi pukul 09:00 WIB, yang terlanjur bayar akan di proses besok hari.";
-                } else if (totalMenit < tBuka || totalMenit > tTutup) {
-                    isClosed = true;
-                    alesan = `Server tutup otomatis pukul ${s.jadwal.tutup} WIB. Akan dibuka kembali pukul ${s.jadwal.buka} WIB.`;
-                }
-
-                const overlay = document.getElementById('statusOverlay');
-                const content = document.getElementById('overlayContent');
-                if(isClosed) {
-                    overlay.style.display = "flex";
-                    content.innerHTML = `<h1 style="color:#ef4444; font-size:2.5rem; margin-bottom:20px; font-weight:900;">SERVER TUTUP</h1><p style="line-height:1.7;">${alesan}</p>`;
-                } else {
-                    overlay.style.display = "none";
-                }
-            };
-            setInterval(checkLock, 1000);
-            checkLock();
-        });
-
-        window.prosesPembayaran = function() {
-            const user = document.getElementById('username').value.trim();
-            const nominal = document.getElementById('amount').value;
-            const btn = document.getElementById('btnProses');
-
-            if(!user || !nominal) return myNotif("ISI DATA DULU BOS!");
-            
-            btn.disabled = true;
-            btn.innerText = "SEDANG DIPROSES...";
-
-            onValue(ref(db, 'banned_users/' + user), (snap) => {
-                if (snap.exists()) {
-                    myNotif("⚠️ AKUN ANDA TELAH DIBLOKIR!");
-                    btn.disabled = false;
-                    btn.innerText = "BAYAR SEKARANG";
-                } else {
-                    push(ref(db, 'transactions'), {
-                        nama: user, jumlah: nominal, waktu: new Date().toLocaleString(), status: "Pending"
-                    }).then(() => {
-                        window.location.href = `https://app.pakasir.com/pay/rayy-store/${nominal}?order_id=RY-${Date.now()}`;
+        function loadTrx() {
+            onValue(ref(db, 'transactions'), (snap) => {
+                const list = document.getElementById('trxList');
+                list.innerHTML = "";
+                const data = snap.val();
+                if(data) {
+                    document.getElementById('notifSfx').play();
+                    Object.keys(data).reverse().forEach(id => {
+                        const t = data[id];
+                        if(t.status === "Pending") {
+                            list.innerHTML += `
+                                <div class="trx-card">
+                                    <span class="badge pending">${t.status}</span>
+                                    <div class="trx-info">
+                                        <h3>${t.nama}</h3>
+                                        <p>${t.waktu}</p>
+                                    </div>
+                                    <div class="amount">Rp ${Number(t.jumlah).toLocaleString()}</div>
+                                    <button class="btn-acc" onclick="accTrx('${id}')">KONFIRMASI PEMBAYARAN</button>
+                                </div>
+                            `;
+                        }
                     });
                 }
-            }, { onlyOnce: true });
+            });
         }
 
-        window.onload = () => { 
-            setTimeout(() => { 
-                document.getElementById('splash').style.opacity = '0'; 
-                setTimeout(() => {
-                    document.getElementById('splash').style.display = 'none'; 
-                    document.getElementById('main-content').classList.add('visible'); 
-                }, 1000);
-            }, 2500); 
+        window.accTrx = (id) => {
+            update(ref(db, 'transactions/' + id), { status: "Success", processedBy: myName });
         };
     </script>
 </body>
