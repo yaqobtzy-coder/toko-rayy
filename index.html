@@ -3,123 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAYY STORE | OFFICIAL</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+    <title>Rayy Store - Official Payment System</title>
+    
     <style>
-        :root { --p: #38bdf8; --bg: #020617; --c: rgba(15, 23, 42, 0.7); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: var(--bg); color: #fff; min-height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        :root {
+            --primary: #38bdf8;
+            --primary-glow: rgba(56, 189, 248, 0.4);
+            --bg: #0b1120;
+            --card: #141b2d;
+            --dark: #0f172a;
+            --text: #f8fafc;
+            --red: #ef4444;
+        }
+
+        /* RESET STYLE */
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
-        /* FULL BACKGROUND ANIMATION */
-        .ocean { position: fixed; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at 50% 50%, #1e293b 0%, #020617 100%); }
-        .bubble { position: absolute; width: 250px; height: 250px; background: var(--p); filter: blur(120px); border-radius: 50%; opacity: 0.15; animation: move 8s infinite alternate ease-in-out; }
-        @keyframes move { from { transform: translate(-30%, -30%); } to { transform: translate(30%, 30%); } }
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow: hidden; 
+            background-image: radial-gradient(circle at top right, #1e293b 0%, #0b1120 100%);
+        }
 
-        /* THE CARD */
-        .glass-card { background: var(--c); backdrop-filter: blur(25px); padding: 45px; border-radius: 45px; border: 1px solid rgba(255,255,255,0.1); width: 90%; max-width: 480px; box-shadow: 0 40px 100px rgba(0,0,0,0.6); animation: entrance 1s ease-out; position: relative; overflow: hidden; }
-        @keyframes entrance { from { opacity: 0; transform: scale(0.9) translateY(40px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-        .glass-card::after { content: ""; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent); animation: shine 4s infinite; }
-        @keyframes shine { to { left: 200%; } }
+        /* --- NOTIFIKASI TOAST --- */
+        #customToast {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; background: var(--primary); color: #000;
+            padding: 18px; border-radius: 20px; text-align: center; font-weight: 900;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); z-index: 10005;
+            transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            text-transform: uppercase;
+        }
+        #customToast.show { top: 30px; }
 
-        h1 { font-size: 2.8rem; font-weight: 800; text-align: center; margin-bottom: 35px; letter-spacing: -3px; }
+        /* --- SPLASH SCREEN --- */
+        #splash { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg); z-index: 9999; display: flex; 
+            flex-direction: column; align-items: center; justify-content: center; 
+            transition: 1s ease-in-out; 
+        }
+        .logo-box { 
+            width: 100px; height: 100px; background: var(--primary); border-radius: 30px; 
+            display: flex; align-items: center; justify-content: center; font-size: 3.5rem; 
+            font-weight: 900; color: #000; box-shadow: 0 0 30px var(--primary-glow);
+            animation: pulse 2s infinite; 
+        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+        /* --- CONTAINER UTAMA --- */
+        .container { 
+            width: 100%; max-width: 460px; padding: 30px; 
+            opacity: 0; transform: translateY(30px); transition: 1s; 
+        }
+        .container.visible { opacity: 1; transform: translateY(0); }
+
+        .card { 
+            background: var(--card); border-radius: 40px; padding: 45px 35px; 
+            border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
         .input-group { margin-bottom: 25px; }
-        label { display: block; font-size: 0.75rem; margin-bottom: 10px; color: var(--p); font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
-        input, select { width: 100%; padding: 20px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 22px; color: #fff; font-size: 1rem; transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        input:focus { border-color: var(--p); box-shadow: 0 0 25px rgba(56, 189, 248, 0.25); outline: none; background: rgba(0,0,0,0.6); transform: translateY(-2px); }
+        .input-group label { 
+            display: block; font-size: 0.75rem; font-weight: 800; color: var(--primary); 
+            margin-bottom: 12px; letter-spacing: 2px; text-transform: uppercase; margin-left: 5px;
+        }
 
-        .btn-order { width: 100%; padding: 22px; background: var(--p); border: none; border-radius: 22px; color: #000; font-weight: 800; cursor: pointer; transition: 0.5s; text-transform: uppercase; letter-spacing: 3px; font-size: 1rem; margin-top: 15px; }
-        .btn-order:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 20px 40px rgba(56, 189, 248, 0.4); filter: brightness(1.1); }
-        .btn-order:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
+        input { 
+            width: 100%; padding: 20px; background: var(--dark); border: 2px solid transparent; 
+            color: white; border-radius: 20px; font-size: 1rem; font-weight: 600; transition: 0.3s; 
+        }
+        input:focus { border-color: var(--primary); background: #0b1120; }
 
-        .badge-status { text-align: center; margin-bottom: 20px; font-size: 0.7rem; font-weight: 800; letter-spacing: 4px; color: #94a3b8; }
+        .btn-pay { 
+            width: 100%; padding: 22px; border: none; border-radius: 22px; 
+            background: var(--primary); color: #000; font-weight: 900; 
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 10px 20px var(--primary-glow); transition: 0.3s;
+        }
+        .btn-pay:hover { transform: translateY(-3px); filter: brightness(1.1); }
+
+        /* --- OVERLAY TUTUP --- */
+        #statusOverlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg); z-index: 10000; display: none; 
+            align-items: center; justify-content: center; padding: 25px; 
+        }
+        .box-msg { 
+            border: 2px solid var(--red); padding: 50px 30px; border-radius: 45px; 
+            background: rgba(239,68,68,0.05); text-align: center; max-width: 420px;
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.1);
+        }
     </style>
 </head>
 <body>
-    <div class="ocean"><div class="bubble"></div></div>
 
-    <div class="glass-card">
-        <div id="status" class="badge-status">SYNCING TO SATELLITE...</div>
-        <h1>RAYY<span style="color:var(--p)">STORE</span></h1>
-        
-        <div class="input-group">
-            <label>NICKNAME / ID GAME</label>
-            <input type="text" id="u_name" placeholder="RayyGans_01">
-        </div>
-        
-        <div class="input-group">
-            <label>PRODUK LAYANAN</label>
-            <select id="u_item">
-                <option value="100 Diamonds">100 DIAMONDS - Rp 15,000</option>
-                <option value="Weekly Pass">WEEKLY PASS - Rp 28,000</option>
-                <option value="1000 Diamonds">1000 DIAMONDS - Rp 140,000</option>
-            </select>
-        </div>
+    <div id="customToast">Pesan Notifikasi</div>
 
-        <div class="input-group">
-            <label>NOMINAL PEMBAYARAN</label>
-            <input type="number" id="u_price" placeholder="Input Harga Manual">
+    <div id="splash">
+        <div class="logo-box">R</div>
+        <p style="margin-top:20px; letter-spacing:5px; font-size:0.7rem; opacity:0.5;">LOADING RAYY SYSTEM</p>
+    </div>
+
+    <div id="statusOverlay">
+        <div class="box-msg" id="overlayContent">
+            </div>
+    </div>
+
+    <div class="container" id="main-content">
+        <div style="text-align:center; margin-bottom:30px;">
+            <h1 style="font-weight:900; font-size: 2.2rem;">RAYY <span style="color:var(--primary);">STORE</span></h1>
+            <p style="font-size:0.6rem; letter-spacing:4px; opacity:0.3; text-transform:uppercase;">Official Payment Gate</p>
         </div>
 
-        <button class="btn-order" id="main_btn" onclick="executeOrder()">Pay Now</button>
+        <div class="card">
+            <div class="input-group">
+                <label>IDENTITAS PEMBELI</label>
+                <input type="text" id="username" placeholder="Nama / ID Akun">
+            </div>
+            <div class="input-group">
+                <label>NOMINAL (RP)</label>
+                <input type="number" id="amount" placeholder="Contoh: 10000">
+            </div>
+            <button class="btn-pay" id="btnProses" onclick="prosesPembayaran()">BAYAR SEKARANG</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
-        const HWID = "RY-" + btoa(navigator.userAgent).substring(15, 25).toUpperCase();
+        const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        // 1. LIVE SYSTEM SYNC (POWER & SCHEDULE)
+        function myNotif(msg) {
+            const t = document.getElementById('customToast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => { t.classList.remove('show'); }, 3000);
+        }
+
+        // --- MONITOR STATUS SERVER REAL-TIME ---
         onValue(ref(db, 'settings'), (snap) => {
-            const data = snap.val();
-            const btn = document.getElementById('main_btn');
-            const st = document.getElementById('status');
-            const now = new Date();
-            const time = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+            const s = snap.val();
+            if(!s) return;
 
-            if(data.toko_locked || (time < data.schedule.open || time > data.schedule.close)) {
-                btn.disabled = true; btn.innerText = "STORE CLOSED";
-                st.innerText = "OFFLINE"; st.style.color = "#ef4444";
-            } else {
-                btn.disabled = false; btn.innerText = "PAY NOW";
-                st.innerText = "ONLINE"; st.style.color = "#10b981";
-            }
+            const checkLock = () => {
+                const now = new Date();
+                const totalMenit = (now.getHours() * 60) + now.getMinutes();
+                const [hB, mB] = s.jadwal.buka.split(':').map(Number);
+                const [hT, mT] = s.jadwal.tutup.split(':').map(Number);
+                const tBuka = (hB * 60) + mB;
+                const tTutup = (hT * 60) + mT;
+
+                let isClosed = false;
+                let alesan = "";
+
+                if(s.toko_locked === true) {
+                    isClosed = true;
+                    alesan = "Server tutup pukul 21:00 WIB akan di buka lagi pukul 09:00 WIB, yang terlanjur bayar akan di proses besok hari.";
+                } else if (totalMenit < tBuka || totalMenit > tTutup) {
+                    isClosed = true;
+                    alesan = `Server tutup otomatis pukul ${s.jadwal.tutup} WIB. Akan dibuka kembali pukul ${s.jadwal.buka} WIB.`;
+                }
+
+                const overlay = document.getElementById('statusOverlay');
+                const content = document.getElementById('overlayContent');
+                if(isClosed) {
+                    overlay.style.display = "flex";
+                    content.innerHTML = `<h1 style="color:#ef4444; font-size:2.5rem; margin-bottom:20px; font-weight:900;">SERVER TUTUP</h1><p style="line-height:1.7;">${alesan}</p>`;
+                } else {
+                    overlay.style.display = "none";
+                }
+            };
+            setInterval(checkLock, 1000);
+            checkLock();
         });
 
-        // 2. REAL-TIME BAN CHECK
-        onValue(ref(db, `banned_users/${HWID}`), (snap) => {
-            if(snap.exists()) {
-                document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:100px;'>DEVICE BANNED: " + HWID + "</h1>";
-            }
-        });
+        window.prosesPembayaran = function() {
+            const user = document.getElementById('username').value.trim();
+            const nominal = document.getElementById('amount').value;
+            const btn = document.getElementById('btnProses');
 
-        // 3. ORDER EXECUTION
-        window.executeOrder = async () => {
-            const name = document.getElementById('u_name').value;
-            const item = document.getElementById('u_item').value;
-            const price = document.getElementById('u_price').value;
-
-            if(!name || !price) return Swal.fire("Error", "Woi, isi dulu datanya!", "error");
-
-            const trxId = "RTX-" + Math.floor(100000 + Math.random() * 900000);
+            if(!user || !nominal) return myNotif("ISI DATA DULU BOS!");
             
-            await set(ref(db, `transactions/${trxId}`), {
-                nama: name, item: item, jumlah: price, status: "Pending",
-                waktu: new Date().toLocaleString(), hwid: HWID
-            });
+            btn.disabled = true;
+            btn.innerText = "SEDANG DIPROSES...";
 
-            push(ref(db, 'system_logs'), {
-                user: name, action: "Order " + item, deviceId: HWID, time: new Date().toLocaleTimeString()
-            });
+            onValue(ref(db, 'banned_users/' + user), (snap) => {
+                if (snap.exists()) {
+                    myNotif("⚠️ AKUN ANDA TELAH DIBLOKIR!");
+                    btn.disabled = false;
+                    btn.innerText = "BAYAR SEKARANG";
+                } else {
+                    push(ref(db, 'transactions'), {
+                        nama: user, jumlah: nominal, waktu: new Date().toLocaleString(), status: "Pending"
+                    }).then(() => {
+                        window.location.href = `https://app.pakasir.com/pay/rayy-store/${nominal}?order_id=RY-${Date.now()}`;
+                    });
+                }
+            }, { onlyOnce: true });
+        }
 
-            Swal.fire({
-                title: 'Order Sent!',
-                text: 'TRX ID: ' + trxId,
-                icon: 'success',
-                confirmButtonColor: '#38bdf8'
-            });
+        window.onload = () => { 
+            setTimeout(() => { 
+                document.getElementById('splash').style.opacity = '0'; 
+                setTimeout(() => {
+                    document.getElementById('splash').style.display = 'none'; 
+                    document.getElementById('main-content').classList.add('visible'); 
+                }, 1000);
+            }, 2500); 
         };
     </script>
 </body>
