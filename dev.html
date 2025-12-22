@@ -3,66 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy - Master Dev Panel v5.0 (Full Version)</title>
+    <title>Rayy - Master Dev Panel v6.0 (Device Locked)</title>
     
     <style>
         :root {
             --primary: #38bdf8;
-            --primary-glow: rgba(56, 189, 248, 0.3);
-            --bg: #030712;
-            --card: #111827;
-            --dark: #020617;
+            --primary-glow: rgba(56, 189, 248, 0.4);
+            --bg: #020617;
+            --card: #0f172a;
+            --dark: #010409;
             --text: #f8fafc;
             --red: #ef4444;
             --green: #22c55e;
             --gold: #f59e0b;
-            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* --- LOADING ANIMATION AWAL --- */
-        #loader {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: var(--bg);
-            z-index: 99999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .spinner {
-            width: 80px;
-            height: 80px;
-            border: 5px solid rgba(56, 189, 248, 0.1);
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 25px;
-            box-shadow: 0 0 30px var(--primary-glow);
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* --- AUTH SYSTEM STYLE --- */
-        #devAuth {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: var(--bg);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background-image: radial-gradient(circle at center, #111827 0%, #030712 100%);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        /* --- GLOBAL RESET & SCROLLBAR --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 
         body {
             background: var(--bg);
@@ -70,413 +31,460 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            padding: 40px 20px;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
 
-        .container {
-            width: 100%;
-            max-width: 750px;
-            display: none;
-            animation: slideUp 0.8s ease;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(50px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- CARD DESIGN --- */
-        .card {
-            background: var(--card);
-            padding: 40px;
-            border-radius: 40px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
-        }
-
-        h2 {
-            color: var(--primary);
-            font-weight: 900;
-            letter-spacing: -1px;
-            margin-bottom: 25px;
+        /* --- SECURITY SCANNER LOADER --- */
+        #securityScanner {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 100000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            text-transform: uppercase;
         }
 
-        .label-text {
-            font-size: 0.75rem;
-            color: var(--primary);
-            font-weight: 800;
+        .scan-line {
+            width: 300px;
+            height: 2px;
+            background: var(--primary);
+            box-shadow: 0 0 20px var(--primary);
+            position: absolute;
+            animation: scanMove 3s infinite;
+        }
+
+        @keyframes scanMove {
+            0% { top: 30%; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 70%; opacity: 0; }
+        }
+
+        /* --- AUTH BOX --- */
+        #devAuth {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(1, 4, 9, 0.98);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--card);
+            padding: 50px;
+            border-radius: 40px;
+            width: 100%;
+            max-width: 480px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: 0 0 100px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        .device-tag {
+            font-size: 0.6rem;
+            color: var(--gold);
             text-transform: uppercase;
             letter-spacing: 2px;
-            margin-bottom: 12px;
+            margin-bottom: 20px;
             display: block;
-            margin-left: 5px;
+            border: 1px solid var(--gold);
+            padding: 5px 10px;
+            width: fit-content;
+            border-radius: 5px;
         }
 
-        /* --- INPUT FIELD --- */
+        /* --- CONTAINER & CARDS --- */
+        .container {
+            width: 100%;
+            max-width: 850px;
+            padding: 60px 20px;
+            display: none;
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 30px;
+            transition: var(--transition);
+        }
+
+        .glass-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        /* --- INPUT & BUTTON --- */
+        .input-wrapper { margin-bottom: 25px; }
+        .input-wrapper label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--primary);
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
         input {
             width: 100%;
-            padding: 22px;
+            padding: 20px 25px;
             background: var(--dark);
-            border: 2px solid transparent;
-            color: white;
-            border-radius: 22px;
+            border: 1px solid #1e293b;
+            color: #fff;
+            border-radius: 18px;
             font-size: 1rem;
-            margin-bottom: 20px;
-            transition: var(--transition);
+            transition: 0.3s;
         }
 
         input:focus {
             border-color: var(--primary);
+            background: #000;
             box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
-            background: #030712;
         }
 
-        /* --- BUTTONS --- */
         .btn {
             width: 100%;
             padding: 22px;
             border: none;
-            border-radius: 22px;
+            border-radius: 20px;
             font-weight: 900;
-            cursor: pointer;
             text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
             transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            letter-spacing: 1px;
         }
 
-        .btn-primary { background: var(--primary); color: #030712; box-shadow: 0 10px 20px rgba(56, 189, 248, 0.2); }
-        .btn-danger { background: var(--red); color: white; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2); }
-        .btn-success { background: var(--green); color: white; box-shadow: 0 10px 20px rgba(34, 197, 94, 0.2); }
+        .btn-primary { background: var(--primary); color: #000; }
+        .btn-danger { background: var(--red); color: #fff; }
+        .btn-success { background: var(--green); color: #fff; }
 
-        .btn:hover { transform: translateY(-5px); filter: brightness(1.1); }
-        .btn:active { transform: scale(0.98); }
+        .btn:hover { filter: brightness(1.2); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 
-        /* --- SERVER STATUS AREA --- */
-        .status-box {
-            padding: 35px;
-            border-radius: 30px;
+        /* --- STATUS MONITOR --- */
+        .status-display {
+            padding: 30px;
             background: var(--dark);
+            border-radius: 25px;
             text-align: center;
-            border: 2px solid #334155;
-            margin-bottom: 25px;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             font-weight: 900;
-            transition: var(--transition);
+            margin-bottom: 25px;
+            border: 2px dashed #334155;
         }
 
-        .status-box.online {
-            border-color: var(--green);
-            color: var(--green);
-            box-shadow: inset 0 0 20px rgba(34, 197, 94, 0.05);
-        }
+        .status-active { color: var(--green); border-color: var(--green); }
+        .status-locked { color: var(--red); border-color: var(--red); }
 
-        .status-box.offline {
-            border-color: var(--red);
-            color: var(--red);
-            box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.05);
-        }
-
-        /* --- BAN LIST STYLE --- */
-        .ban-list-container {
-            margin-top: 25px;
-            max-height: 350px;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        .ban-item {
+        /* --- LISTS --- */
+        .data-item {
             background: var(--dark);
-            padding: 20px 25px;
-            border-radius: 22px;
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.03);
-            animation: fadeInItem 0.5s ease;
+            border: 1px solid rgba(255,255,255,0.02);
         }
 
-        @keyframes fadeInItem { from { opacity: 0; } to { opacity: 1; } }
-
-        .unban-btn {
-            background: rgba(239, 68, 68, 0.1);
+        /* --- ACCESS DENIED OVERLAY --- */
+        #deniedOverlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            z-index: 999999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             color: var(--red);
-            border: 1px solid var(--red);
-            padding: 10px 20px;
-            border-radius: 15px;
-            font-weight: 800;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: 0.3s;
         }
-
-        .unban-btn:hover { background: var(--red); color: white; }
-
-        /* --- GRID SYSTEM --- */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 10px;
-        }
-
-        /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
 
     </style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="spinner"></div>
-        <h3 style="color: var(--primary); letter-spacing: 6px; font-weight: 900;">SECURITY INITIALIZING</h3>
-        <p style="opacity: 0.4; margin-top: 10px; font-size: 0.8rem;">Rayy Developer System v5.0</p>
+    <div id="securityScanner">
+        <div class="scan-line"></div>
+        <h2 style="letter-spacing: 10px; font-weight: 900; color: var(--primary);">SYSTEM SCANNING</h2>
+        <p id="scanInfo" style="margin-top: 20px; opacity: 0.5; font-size: 0.8rem;">IDENTIFYING HARDWARE ID...</p>
+    </div>
+
+    <div id="deniedOverlay">
+        <h1 style="font-size: 4rem; font-weight: 900;">403</h1>
+        <h2 style="letter-spacing: 5px;">ILLEGAL DEVICE DETECTED</h2>
+        <p style="margin-top: 20px; color: #fff; opacity: 0.6; text-align: center; padding: 0 40px;">
+            Username dan Password benar, namun perangkat ini tidak terdaftar sebagai pemilik sah Rayy Developer.
+        </p>
+        <div style="margin-top: 40px; border: 1px solid var(--red); padding: 20px; border-radius: 10px;">
+            DEVICE ID: <span id="badDeviceId" style="color:#fff;"></span>
+        </div>
+        <button onclick="location.reload()" style="margin-top: 40px; background: none; border: 1px solid var(--primary); color: var(--primary); padding: 10px 30px; border-radius: 10px; cursor: pointer;">RE-AUTH</button>
     </div>
 
     <div id="devAuth">
-        <div class="card" style="width: 100%; max-width: 420px; box-shadow: 0 0 100px rgba(0,0,0,0.8);">
-            <h2>ADMINISTRATOR</h2>
-            <p style="text-align:center; opacity:0.4; font-size:0.8rem; margin-bottom:30px; letter-spacing: 1px;">SILAHKAN LOGIN UNTUK AKSES PANEL</p>
+        <div class="auth-card">
+            <span class="device-tag">Hardware Encrypted</span>
+            <h2 style="margin-bottom: 5px; font-weight: 900;">DEV PANEL</h2>
+            <p style="font-size: 0.7rem; opacity: 0.4; margin-bottom: 40px; letter-spacing: 2px;">AUTHORIZATION REQUIRED</p>
             
-            <span class="label-text">Dev Username</span>
-            <input type="text" id="devUser" placeholder="rayy_dev">
+            <div class="input-wrapper">
+                <label>CORE USERNAME</label>
+                <input type="text" id="devUser" placeholder="rayy_dev">
+            </div>
             
-            <span class="label-text">Access Key</span>
-            <input type="password" id="devPass" placeholder="******">
+            <div class="input-wrapper">
+                <label>SECURITY ACCESS KEY</label>
+                <input type="password" id="devPass" placeholder="••••••••">
+            </div>
             
-            <button class="btn btn-primary" onclick="checkDevAuth()">VERIFY IDENTITY</button>
+            <button class="btn btn-primary" onclick="verifySecureLogin()">INITIALIZE ACCESS</button>
+            
+            <div style="margin-top: 30px; font-size: 0.6rem; opacity: 0.3; text-align: center;">
+                YOUR IP: <span id="ipDisplay">FETCHING...</span>
+            </div>
         </div>
     </div>
 
     <div class="container" id="mainPanel">
-        
-        <div style="text-align: center; margin-bottom: 50px;">
-            <h1 style="font-weight: 900; font-size: 2.8rem; letter-spacing: -2px;">MASTER <span style="color: var(--primary);">DEV PANEL</span></h1>
-            <p style="opacity: 0.4; letter-spacing: 3px; font-size: 0.7rem; text-transform: uppercase;">Authenticated as Rayy Developer</p>
+        <header style="text-align: center; margin-bottom: 60px;">
+            <h1 style="font-weight: 900; font-size: 3rem; letter-spacing: -3px;">MASTER <span style="color:var(--primary)">DEV</span></h1>
+            <p style="letter-spacing: 5px; opacity: 0.3; font-size: 0.7rem;">VERSION 6.0.0 ARCHANGEL</p>
+        </header>
+
+        <div class="glass-card">
+            <label class="device-tag" style="color:var(--primary); border-color:var(--primary)">Live Server Control</label>
+            <div id="statusIndicator" class="status-display">SYNCING...</div>
+            <button class="btn btn-primary" onclick="togglePower()">FORCE POWER SWITCH</button>
+            <p style="margin-top: 15px; font-size: 0.7rem; opacity: 0.3; text-align: center;">Klik untuk mengabaikan jadwal secara paksa.</p>
         </div>
 
-        <div class="card">
-            <span class="label-text">Server Status (Auto-Sync Active)</span>
-            <div id="statusIndicator" class="status-box">SYNCING...</div>
-            <button class="btn btn-primary" id="manualSwitchBtn" onclick="togglePower()">
-                TOGGLE POWER MANUALLY
-            </button>
-            <p style="text-align: center; font-size: 0.7rem; opacity: 0.3; margin-top: 15px;">
-                Catatan: Status akan otomatis berubah jika jadwal aktif.
-            </p>
-        </div>
-
-        <div class="card">
-            <span class="label-text">Automated Scheduler (WIB)</span>
-            <div class="grid-2">
-                <div>
-                    <label style="font-size: 0.65rem; opacity: 0.5; display: block; margin-bottom: 10px;">JAM BUKA</label>
+        <div class="glass-card">
+            <label class="device-tag" style="color:var(--green); border-color:var(--green)">Automated Schedule</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                <div class="input-wrapper">
+                    <label>OPEN TIME (WIB)</label>
                     <input type="time" id="openTime">
                 </div>
-                <div>
-                    <label style="font-size: 0.65rem; opacity: 0.5; display: block; margin-bottom: 10px;">JAM TUTUP</label>
+                <div class="input-wrapper">
+                    <label>CLOSE TIME (WIB)</label>
                     <input type="time" id="closeTime">
                 </div>
             </div>
-            <button class="btn btn-success" onclick="saveJadwalDev()">
-                SAVE SCHEDULE & START AUTO
+            <button class="btn btn-success" onclick="saveJadwalDev()">APPLY NEW SCHEDULE</button>
+        </div>
+
+        <div class="glass-card">
+            <label class="device-tag" style="color:var(--gold); border-color:var(--gold)">Manage Extra Admins</label>
+            <input type="text" id="newAdminUser" placeholder="Admin Username" style="margin-top: 20px;">
+            <input type="text" id="newAdminPass" placeholder="Admin Password" style="margin-top: 15px;">
+            <button class="btn btn-primary" style="margin-top: 20px;" onclick="registerAdmin()">CREATE ACCESS</button>
+        </div>
+
+        <div class="glass-card">
+            <label class="device-tag" style="color:var(--red); border-color:var(--red)">Banishment Chamber</label>
+            <input type="text" id="banTarget" placeholder="Target Username" style="margin-top: 20px;">
+            <button class="btn btn-danger" style="margin-top: 20px;" onclick="executeBan()">EXECUTE BAN</button>
+            
+            <div id="listBanned" style="margin-top: 30px;">
+                </div>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 100px;">
+            <button onclick="resetDeviceLock()" style="background: none; border: none; color: var(--red); font-size: 0.7rem; cursor: pointer; text-decoration: underline;">
+                RESET REGISTERED DEVICE ID
             </button>
         </div>
-
-        <div class="card">
-            <span class="label-text">Admin Management</span>
-            <input type="text" id="newAdminUser" placeholder="New Admin Username">
-            <input type="text" id="newAdminPass" placeholder="New Admin Password">
-            <button class="btn btn-primary" onclick="registerAdmin()">CREATE ADMIN ACCESS</button>
-        </div>
-
-        <div class="card">
-            <span class="label-text">Security: Ban Player / Admin</span>
-            <input type="text" id="banTargetUser" placeholder="Target Username">
-            <button class="btn btn-danger" onclick="executeBan()">EXECUTE BANISHMENT</button>
-            
-            <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 30px;">
-                <span class="label-text">Banned Database (Unban Feature)</span>
-                <div id="listBanned" class="ban-list-container">
-                    </div>
-            </div>
-        </div>
-
-        <button class="btn" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--red); margin-bottom: 100px;" onclick="location.reload()">
-            TERMINATE SESSION
-        </button>
-
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, set, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Konfigurasi RTDB Rayy
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // A. MATIKAN LOADER SETELAH 3 DETIK
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('loader').style.opacity = '0';
-                setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 500);
-            }, 3000);
-        });
+        let myDeviceId = "";
+        let isAutoActive = true;
 
-        // B. PROTEKSI LOGIN DEV
-        window.checkDevAuth = function() {
+        // --- A. GENERATE DEVICE FINGERPRINT ---
+        function generateFingerprint() {
+            const nav = window.navigator;
+            const screen = window.screen;
+            let str = nav.userAgent + nav.language + screen.colorDepth + screen.width + screen.height;
+            // Simple Hash
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return "RAYY-DEVICE-" + Math.abs(hash);
+        }
+
+        window.onload = () => {
+            myDeviceId = generateFingerprint();
+            fetch('https://api.ipify.org?format=json')
+                .then(res => res.json())
+                .then(data => document.getElementById('ipDisplay').innerText = data.ip);
+
+            setTimeout(() => {
+                document.getElementById('securityScanner').style.opacity = '0';
+                setTimeout(() => document.getElementById('securityScanner').style.display = 'none', 800);
+            }, 3000);
+        };
+
+        // --- B. SECURE LOGIN WITH DEVICE CHECK ---
+        window.verifySecureLogin = function() {
             const u = document.getElementById('devUser').value.trim();
             const p = document.getElementById('devPass').value.trim();
 
-            if(u === "rayy_dev" && p === "085794") {
-                document.getElementById('devAuth').style.display = 'none';
-                document.getElementById('mainPanel').style.display = 'block';
-                startMasterSystem();
+            if (u === "rayy_dev" && p === "085794") {
+                // Cek ke Database apakah Device ID ini diizinkan
+                onValue(ref(db, 'settings/master_device'), (snap) => {
+                    const registeredId = snap.val();
+
+                    if (!registeredId) {
+                        // Jika belum ada device terdaftar, daftarkan device ini (Hanya sekali seumur hidup)
+                        if(confirm("Device ini belum terdaftar. Daftarkan perangkat ini sebagai Master Device Rayy?")) {
+                            set(ref(db, 'settings/master_device'), myDeviceId).then(() => {
+                                accessGranted();
+                            });
+                        }
+                    } else if (registeredId === myDeviceId) {
+                        // Device ID Cocok
+                        accessGranted();
+                    } else {
+                        // DEVICE ID SALAH! BLOKIR AKSES
+                        document.getElementById('devAuth').style.display = 'none';
+                        document.getElementById('deniedOverlay').style.display = 'flex';
+                        document.getElementById('badDeviceId').innerText = myDeviceId;
+                    }
+                }, { onlyOnce: true });
             } else {
-                alert("ACCESS DENIED: Credentials Invalid!");
+                alert("ACCESS KEY INVALID.");
             }
+        };
+
+        function accessGranted() {
+            document.getElementById('devAuth').style.display = 'none';
+            document.getElementById('mainPanel').style.display = 'block';
+            initDevSystem();
         }
 
-        // C. LOGIKA MASTER PANEL
-        function startMasterSystem() {
-            // 1. Monitor Realtime Status Toko & Jadwal
+        // --- C. MASTER SYSTEM LOGIC ---
+        function initDevSystem() {
+            // Monitor Status
             onValue(ref(db, 'settings'), (snap) => {
-                const data = snap.val();
-                if(!data) return;
+                const s = snap.val();
+                if(!s) return;
 
                 const indicator = document.getElementById('statusIndicator');
-                
-                // Update UI Status
-                if(data.toko_locked) {
-                    indicator.innerText = "OFFLINE (SERVER LOCKED)";
-                    indicator.className = "status-box offline";
+                if(s.toko_locked) {
+                    indicator.innerText = "OFFLINE / CLOSED";
+                    indicator.className = "status-display status-locked";
                 } else {
-                    indicator.innerText = "ONLINE (SERVER ACTIVE)";
-                    indicator.className = "status-box online";
+                    indicator.innerText = "ONLINE / OPEN";
+                    indicator.className = "status-display status-active";
                 }
 
-                // Update Input Jadwal
-                if(data.jadwal) {
-                    document.getElementById('openTime').value = data.jadwal.buka;
-                    document.getElementById('closeTime').value = data.jadwal.tutup;
-                    
-                    // JALANKAN AUTO SINKRON (FITUR YG KAMU MINTA)
-                    autoSyncDatabase(data.jadwal.buka, data.jadwal.tutup, data.toko_locked);
+                if(s.jadwal) {
+                    document.getElementById('openTime').value = s.jadwal.buka;
+                    document.getElementById('closeTime').value = s.jadwal.tutup;
+                    runAutoLogic(s.jadwal.buka, s.jadwal.tutup, s.toko_locked);
                 }
             });
 
-            // 2. Monitor List Banned (Untuk Unban)
+            // Monitor Banned List
             onValue(ref(db, 'banned_users'), (snap) => {
-                const container = document.getElementById('listBanned');
-                container.innerHTML = "";
-                const bannedData = snap.val();
-
-                if(bannedData) {
-                    Object.keys(bannedData).forEach(username => {
-                        container.innerHTML += `
-                            <div class="ban-item">
-                                <span><b>${username}</b></span>
-                                <button class="unban-btn" onclick="executeUnban('${username}')">UNBAN USER</button>
+                const list = document.getElementById('listBanned');
+                list.innerHTML = "";
+                const data = snap.val();
+                if(data) {
+                    Object.keys(data).forEach(u => {
+                        list.innerHTML += `
+                            <div class="data-item">
+                                <span><b>${u}</b></span>
+                                <button onclick="unban('${u}')" style="color:var(--red); background:none; border:none; cursor:pointer; font-weight:900;">UNBAN</button>
                             </div>
                         `;
                     });
-                } else {
-                    container.innerHTML = "<p style='text-align:center; opacity:0.2;'>No banned users found.</p>";
                 }
             });
         }
 
-        // D. LOGIKA AUTO-SYNC (MENGUBAH DATABASE TANPA REFRESH/KLIK)
-        function autoSyncDatabase(buka, tutup, isLockedSekarang) {
-            // Cek setiap 1 detik
+        // --- D. LOGIKA AUTO SYNC (MANDOR) ---
+        function runAutoLogic(buka, tutup, currentLock) {
             setInterval(() => {
+                if (!isAutoActive) return;
+
                 const now = new Date();
-                const totalMenitSkrg = (now.getHours() * 60) + now.getMinutes();
+                const totalMenit = (now.getHours() * 60) + now.getMinutes();
+                const [hB, mB] = buka.split(':').map(Number);
+                const [hT, mT] = tutup.split(':').map(Number);
+                const tBuka = (hB * 60) + mB;
+                const tTutup = (hT * 60) + mT;
 
-                const [jamB, minB] = buka.split(':').map(Number);
-                const [jamT, minT] = tutup.split(':').map(Number);
-                
-                const menitBuka = (jamB * 60) + minB;
-                const menitTutup = (jamT * 60) + minT;
+                let statusTarget = (totalMenit < tBuka || totalMenit > tTutup);
 
-                let statusSeharusnya;
-                // Jika diluar jam operasional, harusnya Locked (True)
-                if (totalMenitSkrg < menitBuka || totalMenitSkrg > menitTutup) {
-                    statusSeharusnya = true;
-                } else {
-                    statusSeharusnya = false;
-                }
-
-                // JIKA STATUS DI DATABASE TIDAK SAMA DENGAN JADWAL, PAKSA UBAH DATABASE
-                if (statusSeharusnya !== isLockedSekarang) {
-                    update(ref(db, 'settings'), { toko_locked: statusSeharusnya });
+                if (statusTarget !== currentLock) {
+                    update(ref(db, 'settings'), { toko_locked: statusTarget });
                 }
             }, 1000);
         }
 
-        // E. ACTION FUNCTIONS
-        window.togglePower = function() {
-            onValue(ref(db, 'settings/toko_locked'), (snap) => {
-                const current = snap.val();
-                update(ref(db, 'settings'), { toko_locked: !current });
+        // --- E. ACTIONS ---
+        window.togglePower = () => {
+            isAutoActive = false; // Pause auto agar tidak bentrok
+            onValue(ref(db, 'settings/toko_locked'), (s) => {
+                update(ref(db, 'settings'), { toko_locked: !s.val() }).then(() => {
+                    setTimeout(() => isAutoActive = true, 5000); // Resume auto setelah 5 detik
+                });
             }, { onlyOnce: true });
-        }
+        };
 
-        window.saveJadwalDev = function() {
+        window.saveJadwalDev = () => {
             const b = document.getElementById('openTime').value;
             const t = document.getElementById('closeTime').value;
-            if(!b || !t) return alert("Jam tidak valid!");
-            
-            update(ref(db, 'settings/jadwal'), {
-                buka: b,
-                tutup: t,
-                auto: true
-            }).then(() => alert("Jadwal Berhasil Diperbarui & Auto-Sync Aktif!"));
-        }
+            if(!b || !t) return alert("Jam Kosong!");
+            update(ref(db, 'settings/jadwal'), { buka: b, tutup: t, auto: true }).then(() => alert("Jadwal Diperbarui!"));
+        };
 
-        window.registerAdmin = function() {
+        window.registerAdmin = () => {
             const u = document.getElementById('newAdminUser').value.trim();
             const p = document.getElementById('newAdminPass').value.trim();
-            if(!u || !p) return alert("Lengkapi data admin!");
+            if(u && p) set(ref(db, 'sys_extra_admins/'+u), { pass: p }).then(() => alert("Admin Registered!"));
+        };
 
-            set(ref(db, 'sys_extra_admins/' + u), { user: u, pass: p })
-            .then(() => {
-                alert("Admin " + u + " Berhasil Didaftarkan!");
-                document.getElementById('newAdminUser').value = "";
-                document.getElementById('newAdminPass').value = "";
-            });
-        }
+        window.executeBan = () => {
+            const u = document.getElementById('banTarget').value.trim();
+            if(u) set(ref(db, 'banned_users/'+u), { status: 'banned' }).then(() => alert("User Banned!"));
+        };
 
-        window.executeBan = function() {
-            const u = document.getElementById('banTargetUser').value.trim();
-            if(!u) return alert("Masukkan Nama Target!");
+        window.unban = (u) => {
+            if(confirm("Buka ban " + u + "?")) remove(ref(db, 'banned_users/'+u));
+        };
 
-            set(ref(db, 'banned_users/' + u), { status: "banned", date: new Date().toLocaleString() })
-            .then(() => {
-                alert("User " + u + " Telah Diblokir!");
-                document.getElementById('banTargetUser').value = "";
-            });
-        }
-
-        window.executeUnban = function(target) {
-            if(confirm("Buka Blokir Untuk " + target + "?")) {
-                remove(ref(db, 'banned_users/' + target))
-                .then(() => alert("User " + target + " Berhasil Di-Unban!"));
+        window.resetDeviceLock = () => {
+            if(confirm("HATI-HATI! Ini akan menghapus Device ID yang terdaftar. Anda harus login ulang untuk mendaftarkan device baru. Lanjutkan?")) {
+                remove(ref(db, 'settings/master_device')).then(() => location.reload());
             }
-        }
+        };
+
     </script>
 </body>
 </html>
