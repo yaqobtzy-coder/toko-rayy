@@ -1,87 +1,218 @@
-// --- DEWA SECURITY & SATELLITE SYNC SYSTEM ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, push, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAYY DEV | SUPREME ARCHITECT v10.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --p: #38bdf8; --bg: #020617; --c: #0f172a; --r: #ef4444; --g: #10b981; --a: #1e293b; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'JetBrains Mono', monospace; scrollbar-width: thin; scrollbar-color: var(--p) var(--bg); }
+        body { background: var(--bg); color: #fff; padding: 40px; overflow-x: hidden; background-image: radial-gradient(circle at 2px 2px, rgba(56, 189, 248, 0.05) 1px, transparent 0); background-size: 40px 40px; }
 
-const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+        /* MASTER GRID SYSTEM */
+        .master-container { display: grid; grid-template-columns: 1.8fr 1fr; gap: 40px; max-width: 1800px; margin: 0 auto; animation: slideUp 1s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
 
-// 1. GENERATE DEWA FINGERPRINT (HWID)
-const getHWID = () => {
-    const s = navigator.userAgent + navigator.language + screen.colorDepth + screen.width + screen.height;
-    return btoa(s).substring(10, 25); // ID Unik Perangkat
-};
-const myID = getHWID();
+        .module-card { background: var(--c); border-radius: 40px; padding: 45px; border: 1px solid rgba(56,189,248,0.1); box-shadow: 0 40px 100px rgba(0,0,0,0.7); position: relative; overflow: hidden; }
+        .module-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent, var(--p), transparent); }
 
-// 2. ANTI-BAN & BLACKLIST CHECKER
-function checkUserStatus(username) {
-    onValue(ref(db, 'banned_users/' + username), (snap) => {
-        if(snap.exists()) {
-            alert("⚠️ AKUN ANDA TELAH DITERMINASI OLEH ARCHITECT! Akses ditutup.");
-            document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:50px;'>403 - ACCESS TERMINATED</h1>";
-            window.location.href = "about:blank";
+        /* LIVE NEURAL FEED */
+        .terminal-box { background: #000; border-radius: 30px; padding: 35px; height: 600px; overflow-y: auto; border: 1px solid #1e293b; position: relative; box-shadow: inset 0 0 30px rgba(0,0,0,1); }
+        .terminal-box::after { content: "LIVE_ENCRYPTED_FEED"; position: absolute; top: 15px; right: 25px; font-size: 0.6rem; color: var(--p); opacity: 0.5; letter-spacing: 2px; }
+        .log-entry { font-size: 0.8rem; margin-bottom: 20px; border-left: 3px solid var(--p); padding-left: 20px; animation: glitch 0.3s ease-out; }
+        @keyframes glitch { 0% { opacity: 0; transform: translateX(-10px); } 100% { opacity: 1; transform: translateX(0); } }
+        .log-entry b { color: var(--p); text-shadow: 0 0 10px var(--p); }
+        .hwid-tag { color: #f59e0b; font-size: 0.7rem; background: rgba(245,158,11,0.1); padding: 5px 12px; border-radius: 10px; margin-top: 10px; display: inline-block; border: 1px solid rgba(245,158,11,0.2); }
+
+        /* INPUT & BUTTON DEWA */
+        h2 { font-size: 1.1rem; letter-spacing: 6px; color: var(--p); margin-bottom: 35px; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; }
+        .cyber-input { width: 100%; padding: 24px; background: #020617; border: 2px solid #1e293b; color: #fff; border-radius: 25px; margin-bottom: 20px; font-size: 1rem; transition: 0.4s; }
+        .cyber-input:focus { border-color: var(--p); box-shadow: 0 0 40px rgba(56,189,248,0.15); transform: scale(1.02); }
+
+        .btn-master { width: 100%; padding: 25px; border: none; border-radius: 25px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 4px; transition: 0.5s; font-size: 0.9rem; }
+        .btn-cyan { background: var(--p); color: #000; box-shadow: 0 20px 50px rgba(56, 189, 248, 0.3); }
+        .btn-red { background: var(--r); color: #fff; box-shadow: 0 20px 50px rgba(239, 68, 68, 0.2); }
+        .btn-green { background: var(--g); color: #fff; box-shadow: 0 20px 50px rgba(16, 185, 129, 0.2); }
+        .btn-master:hover { transform: translateY(-8px); filter: brightness(1.2); }
+        .btn-master:active { transform: scale(0.95); }
+
+        /* AUTOMATED SCHEDULE UI */
+        .schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+        .time-box { background: var(--a); padding: 20px; border-radius: 20px; text-align: center; }
+        .time-box label { font-size: 0.6rem; color: var(--p); display: block; margin-bottom: 10px; font-weight: 800; }
+        .time-box input { background: transparent; border: none; color: #fff; font-size: 1.5rem; font-weight: 800; width: 100%; text-align: center; }
+
+        /* AUTH OVERLAY */
+        #masterLock { position: fixed; inset: 0; background: var(--bg); z-index: 100000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(50px); }
+        .lock-card { background: var(--c); padding: 60px; border-radius: 50px; text-align: center; width: 100%; max-width: 500px; border: 1px solid var(--p); }
+    </style>
+</head>
+<body>
+
+    <div id="masterLock">
+        <div class="lock-card">
+            <h1 style="font-size: 2.5rem; font-weight: 900; letter-spacing: -2px; margin-bottom: 15px;">ARCHITECT <span style="color:var(--p)">LOGIN</span></h1>
+            <p style="font-size: 0.7rem; opacity: 0.4; letter-spacing: 5px; margin-bottom: 40px;">SECURE ACCESS ONLY [cite: 2025-12-21]</p>
+            <input type="password" id="mKey" class="cyber-input" placeholder="ACCESS KEY: 085794" style="text-align: center;">
+            <button class="btn-master btn-cyan" onclick="initArchitect()">Unlock Console</button>
+        </div>
+    </div>
+
+    <div id="rootPanel" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 60px;">
+            <div>
+                <h1 style="font-size: 4rem; font-weight: 900; letter-spacing: -4px;">RAYY<span style="color:var(--p)">TITAN</span></h1>
+                <p style="font-size: 0.8rem; letter-spacing: 12px; opacity: 0.5;">CORE ARCHITECTURE v10.0</p>
+            </div>
+            <div class="module-card" style="padding: 20px 40px; border-radius: 20px;">
+                <h4 style="font-size: 0.7rem; color: var(--p);">SYSTEM_TIME</h4>
+                <div id="digitalClock" style="font-size: 2rem; font-weight: 900;">00:00:00</div>
+            </div>
+        </div>
+
+        <div class="master-container">
+            <div class="module-card">
+                <h2>Intelligence Stream & Device Logs [cite: 2025-12-21]</h2>
+                <div id="terminalStream" class="terminal-box">
+                    <p style="color:var(--p)">[SYSTEM] WAITING FOR PACKET INJECTION...</p>
+                </div>
+                
+                <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;">
+                    <div class="time-box" style="border: 1px solid var(--g);">
+                        <label>DB SYNC</label>
+                        <div style="color:var(--g); font-weight: 900;">STABLE</div>
+                    </div>
+                    <div class="time-box" style="border: 1px solid var(--p);">
+                        <label>NETWORK</label>
+                        <div style="color:var(--p); font-weight: 900;">ENCRYPTED</div>
+                    </div>
+                    <div class="time-box" style="border: 1px solid var(--r);">
+                        <label>THREATS</label>
+                        <div style="color:var(--r); font-weight: 900;">0 DETECTED</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="side-controls">
+                <div class="module-card" style="margin-bottom: 30px;">
+                    <h2>Automated Schedule</h2>
+                    <div class="schedule-grid">
+                        <div class="time-box">
+                            <label>OPEN TIME (WIB)</label>
+                            <input type="time" id="openTime" value="13:26">
+                        </div>
+                        <div class="time-box">
+                            <label>CLOSE TIME (WIB)</label>
+                            <input type="time" id="closeTime" value="13:27">
+                        </div>
+                    </div>
+                    <button class="btn-master btn-green" onclick="saveSchedule()">Apply New Schedule</button>
+                </div>
+
+                <div class="module-card" style="margin-bottom: 30px;">
+                    <h2>Node Deployment</h2>
+                    <input type="text" id="nodeUser" class="cyber-input" placeholder="Admin Name">
+                    <input type="text" id="nodePass" class="cyber-input" placeholder="Secret Password">
+                    <button class="btn-master btn-cyan" onclick="deployAdmin()">Authorize New Admin</button>
+                </div>
+
+                <div class="module-card" style="margin-bottom: 30px;">
+                    <h2>Ban User [cite: 2025-12-21]</h2>
+                    <input type="text" id="targetId" class="cyber-input" placeholder="User ID / HWID">
+                    <button class="btn-master btn-red" onclick="banishUser()">Terminate Access</button>
+                </div>
+
+                <div class="module-card" style="text-align: center;">
+                    <h2>Server Power Control</h2>
+                    <button class="btn-master" id="pwrBtn" style="background: #f59e0b; color: #000;" onclick="toggleSystem()">FORCE POWER SWITCH</button>
+                    <p style="margin-top: 15px; font-size: 0.6rem; opacity: 0.4;">Klik untuk mengabaikan jadwal secara paksa.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set, push, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // ACCESS KEY VERIFICATION [cite: 2025-12-21]
+        window.initArchitect = () => {
+            if(document.getElementById('mKey').value === "085794") {
+                document.getElementById('masterLock').style.display = 'none';
+                document.getElementById('rootPanel').style.display = 'block';
+                startNeuralCore();
+            } else { alert("VOID: WRONG ACCESS KEY"); }
+        };
+
+        function startNeuralCore() {
+            // Live Device Logs [cite: 2025-12-21]
+            onValue(ref(db, 'system_logs'), (snap) => {
+                const stream = document.getElementById('terminalStream');
+                stream.innerHTML = "";
+                const data = snap.val();
+                if(data) {
+                    Object.values(data).reverse().forEach(log => {
+                        stream.innerHTML += `
+                            <div class="log-entry">
+                                <span style="color:var(--p)">[${log.time}]</span> <b>${log.user}</b>: ${log.action}
+                                <br><span class="hwid-tag">FINGERPRINT_ID: ${log.deviceId}</span>
+                            </div>
+                        `;
+                    });
+                }
+            });
+
+            // Schedule Sync
+            onValue(ref(db, 'settings/schedule'), (snap) => {
+                const s = snap.val();
+                if(s) {
+                    document.getElementById('openTime').value = s.open;
+                    document.getElementById('closeTime').value = s.close;
+                }
+            });
+
+            // Power Sync
+            onValue(ref(db, 'settings/toko_locked'), (snap) => {
+                const btn = document.getElementById('pwrBtn');
+                btn.innerText = snap.val() ? "SYSTEM: OFFLINE / OPEN" : "SYSTEM: ONLINE / CLOSED";
+                btn.style.background = snap.val() ? "var(--g)" : "#f59e0b";
+            });
+
+            // Clock Engine
+            setInterval(() => {
+                const d = new Date();
+                document.getElementById('digitalClock').innerText = d.getHours().toString().padStart(2,'0') + ":" + d.getMinutes().toString().padStart(2,'0') + ":" + d.getSeconds().toString().padStart(2,'0');
+            }, 1000);
         }
-    });
-}
 
-// 3. AUTO-SCHEDULE SYSTEM (SINKRON DENGAN DEV PANEL)
-function syncServerPower() {
-    onValue(ref(db, 'settings/toko_locked'), (snap) => {
-        const isLocked = snap.val();
-        const payBtn = document.querySelector('.btn-bayar'); // Sesuaikan class tombol lu
-        if(isLocked) {
-            if(payBtn) {
-                payBtn.disabled = true;
-                payBtn.innerText = "SERVER OFFLINE / CLOSED";
-                payBtn.style.background = "#444";
-            }
-        } else {
-            if(payBtn) {
-                payBtn.disabled = false;
-                payBtn.innerText = "BAYAR SEKARANG";
-                payBtn.style.background = "var(--primary)";
-            }
-        }
-    });
-}
+        // --- COMMANDS ---
+        window.saveSchedule = () => {
+            const o = document.getElementById('openTime').value;
+            const c = document.getElementById('closeTime').value;
+            set(ref(db, 'settings/schedule'), { open: o, close: c }).then(() => alert("SCHEDULE DEPLOYED."));
+        };
 
-// 4. TRANSACTION & LOGGING LOGIC
-window.kirimPembayaran = async function() {
-    const nama = document.getElementById('inputNama').value;
-    const nominal = document.getElementById('inputNominal').value;
+        window.deployAdmin = () => {
+            const u = document.getElementById('nodeUser').value;
+            const p = document.getElementById('nodePass').value;
+            if(u && p) set(ref(db, 'sys_extra_admins/' + u), { pass: p }).then(() => alert("ADMIN DEPLOYED."));
+        };
 
-    if(!nama || !nominal) return alert("Isi data yang bener!");
+        window.banishUser = () => {
+            const t = document.getElementById('targetId').value;
+            if(t) set(ref(db, 'banned_users/' + t), { status: "TERMINATED", time: new Date().toLocaleString() }).then(() => alert("USER TERMINATED."));
+        };
 
-    // Cek Ban dulu sebelum proses
-    const banRef = ref(db, 'banned_users/' + nama);
-    const checkBan = await get(banRef);
-    if(checkBan.exists()) return alert("Gak usah maksa, akun lu udah di BAN!");
-
-    const trxId = "TRX-" + Math.floor(Math.random() * 999999);
-    
-    // Kirim Data Transaksi ke Admin
-    set(ref(db, 'transactions/' + trxId), {
-        nama: nama,
-        jumlah: nominal,
-        status: "Pending",
-        waktu: new Date().toLocaleString(),
-        hwid: myID
-    }).then(() => {
-        // Log ke Dev Panel bahwa ada user bayar
-        push(ref(db, 'system_logs'), {
-            user: nama,
-            action: "Melakukan Checkout Rp " + nominal,
-            deviceId: myID,
-            time: new Date().toLocaleTimeString()
-        });
-        
-        alert("Pesanan dikirim! Tunggu admin konfirmasi.");
-        showPaymentModal(trxId); // Panggil fungsi modal lu
-    });
-};
-
-// INITIALIZE SYSTEM
-document.addEventListener('DOMContentLoaded', () => {
-    syncServerPower();
-    console.log("RAYY ENGINE v10.0 ACTIVE | HWID: " + myID);
-});
+        window.toggleSystem = () => {
+            onValue(ref(db, 'settings/toko_locked'), (snap) => {
+                update(ref(db, 'settings'), { toko_locked: !snap.val() });
+            }, { onlyOnce: true });
+        };
+    </script>
+</body>
+</html>
