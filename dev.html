@@ -1,93 +1,210 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DEV | ARCHITECT V4</title>
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
-        .box { border: 1px solid #0f0; padding: 20px; border-radius: 10px; margin-bottom: 20px; background: rgba(0,255,0,0.02); }
-        input { background: #000; border: 1px solid #0f0; color: #0f0; padding: 12px; width: 100%; margin: 5px 0; }
-        button { background: #0f0; color: #000; border: none; padding: 12px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        .btn-red { background: #f00; color: #fff; }
-        #log-list { height: 250px; overflow-y: auto; font-size: 0.7rem; border: 1px solid #222; padding: 10px; }
+        :root { --neon: #00ff00; --bg: #000; --card: #0a0a0a; --red: #ff0000; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
+        body { background: var(--bg); color: var(--neon); font-family: 'Courier New', monospace; }
+
+        /* LOGIN SCREEN FULL FIX */
+        #login-zone { 
+            position: fixed; inset: 0; background: #000; 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; z-index: 9999; padding: 20px; 
+        }
+        .login-card { width: 100%; max-width: 320px; text-align: center; }
+        .login-input { 
+            width: 100%; background: rgba(0,255,0,0.05); border: 1px solid var(--neon); 
+            color: var(--neon); padding: 15px; text-align: center; 
+            border-radius: 5px; margin-bottom: 15px; font-family: monospace;
+        }
+        .login-btn { 
+            width: 100%; background: var(--neon); color: #000; border: none; 
+            padding: 15px; font-weight: bold; cursor: pointer; border-radius: 5px; 
+            box-shadow: 0 0 15px var(--neon); text-transform: uppercase;
+        }
+
+        /* MAIN UI */
+        #dev-ui { padding: 20px; display: none; }
+        .box { 
+            border: 1px solid var(--neon); padding: 20px; border-radius: 10px; 
+            margin-bottom: 20px; background: rgba(0,255,0,0.02); 
+        }
+        h1, h3 { margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
+        input { 
+            background: #000; border: 1px solid var(--neon); color: var(--neon); 
+            padding: 12px; width: 100%; margin: 8px 0; border-radius: 5px;
+        }
+        .action-btn { 
+            background: var(--neon); color: #000; border: none; 
+            padding: 12px; width: 100%; font-weight: bold; cursor: pointer; 
+            margin-top: 5px; border-radius: 5px;
+        }
+        .btn-red { background: var(--red); color: #fff; }
+        
+        /* LOG MONITOR */
+        #log-list { 
+            height: 300px; overflow-y: auto; font-size: 0.75rem; 
+            border: 1px solid #222; padding: 10px; background: #050505;
+        }
+        .log-item { margin-bottom: 10px; border-bottom: 1px solid #111; padding-bottom: 5px; }
+
+        /* LOADER */
+        #dev-loader { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; color: var(--neon); }
     </style>
 </head>
 <body>
-    <div id="login-zone" style="text-align:center; padding-top:100px;">
-        <h1>[ SYSTEM AUTHENTICATION ]</h1>
-        <input type="password" id="key" placeholder="ENTER ACCESS KEY" style="width:280px;">
-        <button onclick="unlock()" style="width:280px;">VERIFY IDENTITY</button>
+
+    <div id="dev-loader">INITIALIZING_ARCHITECT_CORE...</div>
+
+    <div id="login-zone">
+        <div class="login-card">
+            <h1 style="font-size: 1.2rem; margin-bottom: 30px;">[ SYSTEM AUTHENTICATION ]</h1>
+            <input type="password" id="key" class="login-input" placeholder="ENTER ACCESS KEY">
+            <button onclick="unlock()" class="login-btn">VERIFY IDENTITY</button>
+            <p style="color: #444; font-size: 0.6rem; margin-top: 30px; letter-spacing: 2px;">SECURED BY BIOMETRIC SENSOR</p>
+        </div>
     </div>
 
-    <div id="dev-ui" style="display:none;">
-        <h1 style="color:#fff;">MASTER <span style="color:#0f0;">CONTROL</span></h1>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-            <div class="box">
-                <h3>USER SECURITY</h3>
-                <input type="text" id="t-user" placeholder="Username to Ban/Unban">
-                <button onclick="ban()" class="btn-red">BAN USER</button>
-                <button onclick="unban()">UNBAN USER</button>
-            </div>
-            <div class="box">
-                <h3>KILL SWITCH</h3>
-                <div id="stat" style="padding:10px; text-align:center; margin-bottom:10px;">LOADING...</div>
-                <button onclick="toggleSrv()" style="background:#fff; color:#000;">TOGGLE ONLINE/OFFLINE</button>
-                <input type="text" id="t-hwid" placeholder="Admin HWID" style="margin-top:15px;">
-                <button onclick="addAdm()">GRANT ADMIN ACCESS</button>
-            </div>
-        </div>
+    <div id="dev-ui">
+        <h1>MASTER <span style="color:#fff;">CONTROL</span></h1>
+        
         <div class="box">
-            <h3>SYSTEM DEEP LOGS</h3>
+            <h3>SERVER KILL SWITCH</h3>
+            <div id="stat" style="padding:15px; text-align:center; font-weight:bold; border-radius:5px; margin-bottom:10px;">LOADING...</div>
+            <button onclick="toggleSrv()" class="action-btn" style="background:#fff;">TOGGLE SERVER STATUS</button>
+        </div>
+
+        <div class="box">
+            <h3>USER MANAGEMENT</h3>
+            <input type="text" id="t-user" placeholder="Username / ID">
+            <button onclick="ban()" class="action-btn btn-red">BAN USER</button>
+            <button onclick="unban()" class="action-btn" style="background:#444; color:#fff;">UNBAN USER</button>
+        </div>
+
+        <div class="box">
+            <h3>ADMIN ACCESS (HWID)</h3>
+            <input type="text" id="t-hwid" placeholder="Paste HWID Admin">
+            <button onclick="addAdm()" class="action-btn">GRANT ACCESS</button>
+            <button onclick="remAdm()" class="action-btn" style="background:#555; color:#fff;">REVOKE ACCESS</button>
+        </div>
+
+        <div class="box">
+            <h3>DEEP SYSTEM LOGS</h3>
             <div id="log-list"></div>
-            <button onclick="clearLogs()" style="background:#333; color:#fff; width:auto; padding:5px 15px; font-size:0.7rem;">CLEAR</button>
+            <button onclick="clearLogs()" style="margin-top:10px; background:transparent; color:#555; border:none; cursor:pointer;">[ CLEAR_LOGS ]</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
 
-        // BIOMETRIC
+        // CONFIG FIREBASE
+        const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // FUNGSI SIDIK JARI
         async function verifyBio() {
             try {
-                const c = await navigator.credentials.create({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), rp: { name: "RayyDev" }, user: { id: new Uint8Array(16), name: "admin", displayName: "Rayy" }, pubKeyCredParams: [{alg: -7, type: "public-key"}], authenticatorSelection: {authenticatorAttachment: "platform"} } });
-                return !!c;
-            } catch (e) { return false; }
+                const challenge = crypto.getRandomValues(new Uint8Array(32));
+                const options = {
+                    publicKey: {
+                        challenge: challenge,
+                        rp: { name: "RayyDev" },
+                        user: { id: new Uint8Array(16), name: "admin", displayName: "Rayy Architect" },
+                        pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                        authenticatorSelection: { authenticatorAttachment: "platform" },
+                        timeout: 60000
+                    }
+                };
+                const cred = await navigator.credentials.create(options);
+                return !!cred;
+            } catch (e) { 
+                console.error(e);
+                return false; 
+            }
         }
 
+        // UNLOCK PANEL
         window.unlock = async () => {
-            if(document.getElementById('key').value === "085794") {
-                if(await verifyBio()) {
+            const inputKey = document.getElementById('key').value;
+            const secretKey = "085794"; // Access Key dari User Information
+
+            if(inputKey === secretKey) {
+                const isOwner = await verifyBio();
+                if(isOwner) {
                     document.getElementById('login-zone').style.display = 'none';
                     document.getElementById('dev-ui').style.display = 'block';
-                } else { alert("Verifikasi Gagal!"); }
-            } else { alert("Key Salah!"); }
+                } else { alert("BIOMETRIC FAILED!"); }
+            } else { alert("INVALID ACCESS KEY!"); }
         };
 
-        // FUNCTIONS
-        window.ban = () => set(ref(db, 'banned_users/'+document.getElementById('t-user').value), {status:'BANNED'});
-        window.unban = () => remove(ref(db, 'banned_users/'+document.getElementById('t-user').value));
-        window.addAdm = () => set(ref(db, 'authorized_admins/'+document.getElementById('t-hwid').value), {role:'ADMIN'});
+        // KONTROL FITUR
+        window.ban = () => {
+            const u = document.getElementById('t-user').value;
+            if(u) set(ref(db, 'banned_users/'+u), { status: 'BANNED', date: new Date().toLocaleString() });
+        };
+
+        window.unban = () => {
+            const u = document.getElementById('t-user').value;
+            if(u) remove(ref(db, 'banned_users/'+u));
+        };
+
+        window.addAdm = () => {
+            const h = document.getElementById('t-hwid').value;
+            if(h) set(ref(db, 'authorized_admins/'+h), { role: 'ADMIN' });
+        };
+
+        window.remAdm = () => {
+            const h = document.getElementById('t-hwid').value;
+            if(h) remove(ref(db, 'authorized_admins/'+h));
+        };
+
         window.toggleSrv = async () => {
             const sRef = ref(db, 'settings/toko_locked');
-            const s = await get(sRef);
-            set(sRef, !s.val());
+            const snap = await get(sRef);
+            set(sRef, !snap.val());
         };
-        window.clearLogs = () => remove(ref(db, 'system_logs'));
 
-        // SYNC STATUS & LOGS
+        window.clearLogs = () => {
+            if(confirm("Hapus semua log?")) remove(ref(db, 'system_logs'));
+        };
+
+        // REAL-TIME SYNC
         onValue(ref(db, 'settings/toko_locked'), snap => {
             const s = document.getElementById('stat');
-            s.innerText = snap.val() ? "OFFLINE" : "ONLINE";
-            s.style.background = snap.val() ? "red" : "#0f0";
-            s.style.color = snap.val() ? "#fff" : "#000";
+            const locked = snap.val();
+            s.innerText = locked ? "STATUS: OFFLINE (LOCKED)" : "STATUS: ONLINE (LIVE)";
+            s.style.background = locked ? "var(--red)" : "var(--neon)";
+            s.style.color = locked ? "#fff" : "#000";
         });
+
         onValue(ref(db, 'system_logs'), snap => {
-            const box = document.getElementById('log-list'); box.innerHTML = "";
-            const d = snap.val(); if(d) Object.keys(d).reverse().forEach(k => {
-                box.innerHTML += `<div>[${d[k].time}] <b>${d[k].action}</b>: ${d[k].detail} <br><small style="color:#555">${d[k].device}</small></div><hr style="border:#111">`;
-            });
+            const box = document.getElementById('log-list');
+            box.innerHTML = "";
+            const data = snap.val();
+            if(data) {
+                Object.keys(data).reverse().forEach(k => {
+                    const l = data[k];
+                    box.innerHTML += `
+                        <div class="log-item">
+                            [${l.time}] <b>${l.action}</b><br>
+                            Detail: ${l.detail}<br>
+                            <small style="color:#444">${l.device}</small>
+                        </div>`;
+                });
+            }
         });
+
+        // HIDE LOADER
+        window.onload = () => {
+            setTimeout(() => { document.getElementById('dev-loader').style.display = 'none'; }, 1000);
+        };
     </script>
 </body>
 </html>
