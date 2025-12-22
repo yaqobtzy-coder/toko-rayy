@@ -1,97 +1,56 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Payment - Official Premium System</title>
-    <style>
-        :root { --primary: #38bdf8; --primary-glow: rgba(56, 189, 248, 0.4); --bg: #0b1120; --card: #141b2d; --dark: #0f172a; --text: #f8fafc; --red: #ef4444; --transition-smooth: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; background-image: radial-gradient(circle at top right, #1e293b 0%, #0b1120 100%); }
-        #customToast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: var(--primary); color: #000; padding: 18px; border-radius: 22px; text-align: center; font-weight: 900; box-shadow: 0 15px 35px rgba(0,0,0,0.6); z-index: 10005; transition: 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); text-transform: uppercase; }
-        #customToast.show { top: 30px; }
-        #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 1s ease-in-out; }
-        .logo-box { width: 110px; height: 110px; background: var(--primary); border-radius: 30px; display: flex; align-items: center; justify-content: center; font-size: 4rem; font-weight: 900; color: #000; animation: pulseSplash 2s infinite; }
-        @keyframes pulseSplash { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        .loader-bar { width: 150px; height: 4px; background: rgba(255,255,255,0.1); margin-top: 30px; border-radius: 10px; overflow: hidden; }
-        .loader-fill { width: 0%; height: 100%; background: var(--primary); animation: fillProgress 2s forwards; }
-        @keyframes fillProgress { to { width: 100%; } }
-        .container { width: 100%; max-width: 480px; padding: 30px; opacity: 0; transform: translateY(40px); transition: 1.2s cubic-bezier(0.22, 1, 0.36, 1); z-index: 10; }
-        .container.visible { opacity: 1; transform: translateY(0); }
-        .card { background: var(--card); border-radius: 45px; padding: 45px 35px; border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
-        .input-group { margin-bottom: 30px; }
-        .input-group label { display: block; font-size: 0.75rem; font-weight: 900; color: var(--primary); margin-bottom: 12px; letter-spacing: 2.5px; text-transform: uppercase; }
-        input { width: 100%; padding: 20px 25px; background: var(--dark); border: 2px solid transparent; color: white; border-radius: 22px; font-size: 1rem; transition: var(--transition-smooth); }
-        input:focus { border-color: var(--primary); background: #0b1120; }
-        .btn-pay { width: 100%; padding: 22px; border: none; border-radius: 22px; background: var(--primary); color: #000; font-weight: 900; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: var(--transition-smooth); }
-        .btn-pay:hover { transform: translateY(-5px); box-shadow: 0 15px 35px var(--primary-glow); }
-        .overlay-offline { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 30px; text-align: center; }
-        .box-msg { border: 2px solid var(--red); padding: 60px 40px; border-radius: 50px; background: rgba(239,68,68,0.04); width: 100%; max-width: 450px; }
-    </style>
-</head>
-<body>
-    <div id="customToast">Pesan Notifikasi</div>
-    <div id="splash"><div class="logo-box">R</div><div class="loader-bar"><div class="loader-fill"></div></div></div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    <div class="container" id="main-content">
-        <div style="text-align: center; margin-bottom: 40px;">
-            <h1 style="font-weight: 900; font-size: 2.4rem; letter-spacing: -1px;">RAYY <span style="color:var(--primary);">STORE</span></h1>
-            <p style="font-size: 0.8rem; opacity: 0.4; letter-spacing: 4px; text-transform: uppercase;">Official Payment Gate</p>
-        </div>
-        <div class="card">
-            <div class="input-group"><label>IDENTITAS PEMBELI</label><input type="text" id="username" placeholder="Masukkan Nama / ID Akun"></div>
-            <div class="input-group"><label>NOMINAL TRANSAKSI (RP)</label><input type="number" id="amount" placeholder="Contoh: 10000"></div>
-            <button class="btn-pay" id="btnPay" onclick="prosesPembayaran()">BAYAR SEKARANG</button>
-        </div>
-    </div>
+    const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // ELEMENT CACHE
+    const mainContent = document.getElementById('main-content');
+    const bodyElement = document.body;
 
-        const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
+    // LOGIC AUTO-LISTEN (REAL-TIME)
+    onValue(ref(db, 'settings'), (snap) => {
+        const s = snap.val();
+        if(!s) return;
 
-        const sendLog = (act, det = "") => {
-            push(ref(db, 'system_logs'), { action: act, device: navigator.userAgent.substring(0, 60), time: new Date().toLocaleString('id-ID'), detail: det });
-        };
+        const now = new Date();
+        const mNow = now.getHours() * 60 + now.getMinutes();
+        let isLock = false;
+        let msg = "";
 
-        function myNotif(msg) {
-            const t = document.getElementById('customToast'); t.innerText = msg; t.classList.add('show');
-            setTimeout(() => { t.classList.remove('show'); }, 3000);
+        // Cek Jadwal Otomatis
+        if(s.jadwal?.auto) {
+            const [hB, mB] = s.jadwal.buka.split(':').map(Number);
+            const [hT, mT] = s.jadwal.tutup.split(':').map(Number);
+            if (mNow < (hB*60+mB) || mNow > (hT*60+mT)) {
+                isLock = true;
+                msg = `Server tutup otomatis. Buka pukul ${s.jadwal.buka} WIB.`;
+            }
         }
 
-        onValue(ref(db, 'settings'), (snap) => {
-            const s = snap.val(); if(!s) return;
-            const now = new Date(); const mNow = now.getHours() * 60 + now.getMinutes();
-            let lock = false; let msg = "";
-            if(s.jadwal?.auto) {
-                const [hB, mB] = s.jadwal.buka.split(':').map(Number); const [hT, mT] = s.jadwal.tutup.split(':').map(Number);
-                if (mNow < (hB*60+mB) || mNow > (hT*60+mT)) { lock = true; msg = `Server tutup otomatis. Buka: ${s.jadwal.buka} WIB`; }
+        // Cek Manual Lock (Prioritas Dev)
+        if (s.toko_locked) {
+            isLock = true;
+            msg = "Sistem dinonaktifkan sementara oleh Developer Rayy.";
+        }
+
+        // EKSEKUSI TANPA REFRESH
+        if (isLock) {
+            bodyElement.innerHTML = `
+                <div class="overlay-offline" id="off-screen">
+                    <div class="box-msg">
+                        <h1>SERVER OFFLINE</h1>
+                        <p>${msg}</p>
+                        <div style="margin-top:20px; font-size:0.7rem; opacity:0.5;">RAYY STORE SYSTEM V4.0</div>
+                    </div>
+                </div>`;
+        } else {
+            // Kalau tiba-tiba dibuka (Unlocked), halaman bakal balik normal
+            if(document.getElementById('off-screen')) {
+                location.reload(); // Hanya reload jika sebelumnya layar offline aktif
             }
-            if (s.toko_locked) { lock = true; msg = "Sistem dinonaktifkan oleh Developer."; }
-            if (lock) document.body.innerHTML = `<div class="overlay-offline"><div class="box-msg"><h1>OFFLINE</h1><p>${msg}</p></div></div>`;
-        });
+        }
+    });
 
-        window.prosesPembayaran = async function() {
-            const user = document.getElementById('username').value.trim();
-            const nominal = document.getElementById('amount').value;
-            const btn = document.getElementById('btnPay');
-            if(!user || !nominal) return myNotif("⚠️ ISI SEMUA DATA!");
-            
-            btn.disabled = true; btn.innerText = "PROCESSING...";
-            const ban = await get(ref(db, 'banned_users/' + user));
-            if (ban.exists()) { myNotif("❌ BLOKIR!"); btn.disabled = false; return; }
-
-            const trxId = `RY-${Date.now()}`;
-            sendLog("CLICK_BAYAR", `User: ${user} | Rp${nominal}`);
-            push(ref(db, 'transactions'), { nama: user, jumlah: nominal, waktu: new Date().toLocaleString('id-ID'), status: "Pending", trxId: trxId })
-            .then(() => { window.location.href = `https://app.pakasir.com/pay/rayy-store/${nominal}?order_id=${trxId}`; });
-        };
-
-        window.onload = () => { 
-            sendLog("WEB_OPEN", "User masuk index");
-            setTimeout(() => { document.getElementById('splash').style.display = 'none'; document.getElementById('main-content').classList.add('visible'); }, 2500); 
-        };
-    </script>
-</body>
-</html>
+    // ... sisa fungsi prosesPembayaran lu tetap sama ...
+</script>
