@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Store - Premium Admin Monitoring System v2.6</title>
+    <title>Rayy Store - Premium Admin Monitoring System v3.0</title>
     
     <style>
         :root {
@@ -216,8 +216,8 @@
             box-shadow: none;
         }
 
-        /* --- VISUAL BLOKIR MEWAH (SESUAI FOTO) --- */
-        .ban-overlay {
+        /* --- VISUAL OVERLAY TUTUP / BLOKIR --- */
+        .full-overlay {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
@@ -228,9 +228,10 @@
             justify-content: center;
             padding: 30px;
             text-align: center;
+            animation: fadeIn 0.4s ease;
         }
 
-        .ban-box {
+        .msg-box {
             border: 2px solid var(--red);
             padding: 60px 35px;
             border-radius: 45px;
@@ -240,7 +241,7 @@
             box-shadow: 0 0 50px rgba(239, 68, 68, 0.1);
         }
 
-        .ban-box h1 {
+        .msg-box h1 {
             color: var(--red);
             font-size: 2.8rem;
             font-weight: 900;
@@ -249,15 +250,14 @@
             letter-spacing: -1px;
         }
 
-        .ban-box p {
+        .msg-box p {
             font-size: 1.1rem;
             line-height: 1.7;
             margin-bottom: 35px;
-            opacity: 0.8;
             color: #f8fafc;
         }
 
-        .btn-contact-owner {
+        .btn-wa-link {
             display: inline-block;
             padding: 20px 40px;
             background: var(--primary);
@@ -267,13 +267,7 @@
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: var(--transition-smooth);
             box-shadow: 0 10px 25px rgba(56, 189, 248, 0.3);
-        }
-
-        .btn-contact-owner:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 35px var(--primary-glow);
         }
     </style>
 </head>
@@ -314,104 +308,125 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Konfigurasi Database Utama
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Data Penting Owner
-        const RAYY_PHONE = "628131172093"; //
+        const RAYY_PHONE = "628131172093";
         const ACCESS_KEY = "085794";
+        
+        let sessionAdmin = null;
 
-        // 1. FUNGSI TAMPILKAN LAYAR BLOKIR (SESUAI REQUEST)
+        // 1. LOGIKA CEK SERVER TUTUP (SINKRON DENGAN INDEX)
+        function checkServerStatus() {
+            onValue(ref(db, 'settings'), (snapshot) => {
+                const settings = snapshot.val();
+                if(!settings) return;
+
+                // Owner Bypass: Jika password master digunakan, abaikan tutup server
+                if(sessionAdmin === "Owner Rayy") return;
+
+                const skrg = new Date();
+                const totalMenitSkrg = (skrg.getHours() * 60) + skrg.getMinutes();
+                let serverMati = false;
+                let alesan = "";
+
+                // A. Cek Jadwal Otomatis
+                if(settings.jadwal && settings.jadwal.auto) {
+                    const [jamBuka, minBuka] = settings.jadwal.buka.split(':').map(Number);
+                    const [jamTutup, minTutup] = settings.jadwal.tutup.split(':').map(Number);
+                    const totalMenitBuka = (jamBuka * 60) + minBuka;
+                    const totalMenitTutup = (jamTutup * 60) + minTutup;
+
+                    if (totalMenitSkrg < totalMenitBuka || totalMenitSkrg > totalMenitTutup) {
+                        serverMati = true;
+                        alesan = `Server tutup pukul ${settings.jadwal.tutup} WIB akan di buka lagi pukul ${settings.jadwal.buka} WIB, yang terlanjur bayar akan di proses besok hari.`;
+                    }
+                }
+
+                // B. Cek Tombol Manual
+                if (settings.toko_locked === true) {
+                    serverMati = true;
+                    alesan = "Server tutup pukul 21:00 WIB akan di buka lagi pukul 09:00 WIB, yang terlanjur bayar akan di proses besok hari.";
+                }
+
+                if(serverMati) {
+                    document.body.innerHTML = `
+                        <div class="full-overlay">
+                            <div class="msg-box">
+                                <h1>SERVER TUTUP</h1>
+                                <p>${alesan}</p>
+                            </div>
+                        </div>`;
+                }
+            });
+        }
+
+        // 2. FUNGSI LAYAR BLOKIR
         function triggerBlockScreen(username) {
-            // Teks Pesan Sesuai Permintaan
             const message = `halo owner terhormat akun saya (${username}) terkana ban tanpa alasan harap di tinjau🙏`;
             const waLink = `https://wa.me/${RAYY_PHONE}?text=${encodeURIComponent(message)}`;
-            
             document.body.innerHTML = `
-                <div class="ban-overlay">
-                    <div class="ban-box">
+                <div class="full-overlay">
+                    <div class="msg-box">
                         <h1>AKUN DIBLOKIR</h1>
                         <p>Akun Admin anda Telah di blokir oleh developer/owner silahkan hubungi owner Rayy</p>
-                        <a href="${waLink}" class="btn-contact-owner">CONTACT OWNER</a>
+                        <a href="${waLink}" class="btn-wa-link">CONTACT OWNER</a>
                     </div>
                 </div>`;
         }
 
-        // 2. PROTEKSI REAL-TIME (ANTI LOLOS BAN)
+        // 3. KEAMANAN REAL-TIME
         function startLiveSecurity(username) {
             if(username === "Owner Rayy") return;
-
-            // Monitor folder banned_users secara real-time
             onValue(ref(db, 'banned_users/' + username), (snap) => {
-                if(snap.exists()) {
-                    triggerBlockScreen(username);
-                }
-            });
-
-            // Monitor juga apakah masih terdaftar di extra_admins
-            onValue(ref(db, 'sys_extra_admins'), (adminSnap) => {
-                const admins = adminSnap.val();
-                let exists = false;
-                if(admins) {
-                    for(let id in admins) {
-                        if(admins[id].user === username) { exists = true; break; }
-                    }
-                }
-                if(!exists) triggerBlockScreen(username);
+                if(snap.exists()) triggerBlockScreen(username);
             });
         }
 
-        // 3. FUNGSI LOGIN DENGAN DOUBLE CHECK
+        // 4. LOGIN HANDLER
         window.handleAdminLogin = function() {
             const u = document.getElementById('inputUser').value.trim();
             const p = document.getElementById('inputPass').value.trim();
+            if(!u || !p) return alert("Harap isi semua kolom!");
 
-            if(!u || !p) { alert("Harap isi semua kolom!"); return; }
-
-            // Cek Jika Dia Owner Langsung
             if(p === ACCESS_KEY) {
+                sessionAdmin = "Owner Rayy";
                 initDashboard("Owner Rayy");
                 return;
             }
 
-            // Langkah 1: Cek Status Ban Terlebih Dahulu
             onValue(ref(db, 'banned_users/' + u), (banCheck) => {
                 if(banCheck.exists()) {
                     triggerBlockScreen(u);
                 } else {
-                    // Langkah 2: Cek Kredensial Admin
                     onValue(ref(db, 'sys_extra_admins'), (snap) => {
                         const data = snap.val();
                         let isVerified = false;
-
                         if(data) {
                             for(let key in data) {
-                                if(data[key].user === u && data[key].pass === p) {
-                                    isVerified = true;
-                                    break;
-                                }
+                                if(data[key].user === u && data[key].pass === p) { isVerified = true; break; }
                             }
                         }
 
                         if(isVerified) {
+                            sessionAdmin = u;
                             initDashboard(u);
                             startLiveSecurity(u);
+                            checkServerStatus(); // Jalankan proteksi tutup server untuk admin biasa
                         } else {
-                            alert("Akses Ditolak: Akun tidak ditemukan atau password salah!");
+                            alert("Akses Ditolak!");
                         }
                     }, { onlyOnce: true });
                 }
             }, { onlyOnce: true });
         }
 
-        // 4. MEMBUKA DASHBOARD TRANSAKSI
+        // 5. DASHBOARD HANDLER
         function initDashboard(adminName) {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('monitorArea').style.display = 'block';
 
-            // Mendengarkan Database Transaksi
             onValue(ref(db, 'transactions'), (snapshot) => {
                 const display = document.getElementById('historyListDisplay');
                 display.innerHTML = "";
@@ -421,38 +436,31 @@
                     Object.keys(data).reverse().forEach(key => {
                         const tr = data[key];
                         const isDone = tr.status === "Success";
-                        const badgeClass = isDone ? "status-success" : "status-pending";
-                        const btnLabel = isDone ? "✓ TRANSAKSI SELESAI" : "KONFIRMASI PEMBAYARAN";
-
                         display.innerHTML += `
                             <div class="item-card" style="border-left-color: ${isDone ? '#22c55e' : '#38bdf8'}">
-                                <div class="status-badge ${badgeClass}">${tr.status || 'Pending'}</div>
+                                <div class="status-badge ${isDone ? 'status-success' : 'status-pending'}">${tr.status || 'Pending'}</div>
                                 <div style="padding-right: 80px;">
                                     <h3 style="font-size:1.2rem; margin-bottom:5px;">${tr.nama}</h3>
                                     <p style="color:var(--primary); font-weight:800; font-size:1.1rem;">Rp ${Number(tr.jumlah).toLocaleString()}</p>
                                     <p style="font-size:0.75rem; opacity:0.4; margin-top:8px;">Waktu: ${tr.waktu}</p>
                                 </div>
                                 <button class="btn-confirm-action" ${isDone ? 'disabled' : ''} onclick="confirmPaymentNow('${key}')">
-                                    ${btnLabel}
+                                    ${isDone ? '✓ TRANSAKSI SELESAI' : 'KONFIRMASI PEMBAYARAN'}
                                 </button>
-                            </div>
-                        `;
+                            </div>`;
                     });
                 } else {
-                    display.innerHTML = `<p style="text-align:center; opacity:0.2; margin-top:50px;">Belum ada data transaksi masuk.</p>`;
+                    display.innerHTML = `<p style="text-align:center; opacity:0.2; margin-top:50px;">Belum ada data transaksi.</p>`;
                 }
             });
         }
 
-        // 5. PROSES KONFIRMASI (UPDATE TANPA HAPUS)
         window.confirmPaymentNow = function(id) {
-            const targetRef = ref(db, 'transactions/' + id);
-            update(targetRef, {
-                status: "Success"
-            }).then(() => {
-                console.log("Status updated successfully.");
-            });
+            update(ref(db, 'transactions/' + id), { status: "Success" });
         }
+
+        // Jalankan cek status diawal (tapi jangan blokir jika belum login sebagai admin biasa)
+        checkServerStatus();
 
     </script>
 </body>
