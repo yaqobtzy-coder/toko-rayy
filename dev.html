@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rayy Dev Panel - Ultimate Secure v7.0</title>
+    <title>Rayy Dev Panel - Master Access v8.0</title>
     
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --primary: #38bdf8;
-            --primary-glow: rgba(56, 189, 248, 0.4);
             --bg: #020617;
             --card: #0f172a;
             --dark: #010409;
@@ -18,10 +17,8 @@
             --red: #ef4444;
             --green: #22c55e;
             --gold: #f59e0b;
-            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* --- GLOBAL RESET --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; }
         
         body {
@@ -32,14 +29,10 @@
             flex-direction: column;
             align-items: center;
             overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
-                linear-gradient(rgba(56, 189, 248, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(56, 189, 248, 0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
+            background-image: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.1) 0%, transparent 50%);
         }
 
-        /* --- PRELOADER --- */
+        /* --- LOADING SCREEN --- */
         #loader {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -51,12 +44,11 @@
             justify-content: center;
         }
         .spinner {
-            width: 60px; height: 60px;
-            border: 4px solid rgba(56, 189, 248, 0.1);
-            border-top: 4px solid var(--primary);
+            width: 50px; height: 50px;
+            border: 3px solid rgba(56, 189, 248, 0.1);
+            border-top: 3px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
@@ -73,118 +65,69 @@
         }
         .auth-card {
             background: var(--card);
-            padding: 50px 30px;
-            border-radius: 40px;
+            padding: 40px;
+            border-radius: 30px;
             width: 100%;
-            max-width: 420px;
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            max-width: 400px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
             text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        /* --- MAIN CONTAINER --- */
+        /* --- DASHBOARD --- */
         .container {
             width: 100%;
             max-width: 600px;
             padding: 40px 20px;
             display: none;
-            animation: fadeInUp 0.8s ease;
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- COMPONENT STYLES --- */
-        .section-title {
-            font-size: 0.65rem;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 20px;
-            display: block;
-            font-weight: 800;
-            opacity: 0.7;
         }
 
         .glass-card {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 35px;
-            border-radius: 35px;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 30px;
+            border-radius: 25px;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
         }
 
         .status-box {
             width: 100%;
-            padding: 40px 20px;
-            border-radius: 25px;
+            padding: 30px;
+            border-radius: 20px;
             background: var(--dark);
             text-align: center;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 800;
             margin-bottom: 20px;
             border: 2px solid #1e293b;
-            transition: var(--transition);
         }
-        .status-box.online { color: var(--green); border-color: var(--green); box-shadow: 0 0 20px rgba(34, 197, 94, 0.1); }
-        .status-box.offline { color: var(--red); border-color: var(--red); box-shadow: 0 0 20px rgba(239, 68, 68, 0.1); }
+        .status-box.online { color: var(--green); border-color: var(--green); }
+        .status-box.offline { color: var(--red); border-color: var(--red); }
 
-        input, select {
+        input {
             width: 100%;
-            padding: 20px;
+            padding: 18px;
             background: var(--dark);
             border: 1px solid #1e293b;
             color: #fff;
-            border-radius: 18px;
-            font-size: 1rem;
+            border-radius: 15px;
             margin-bottom: 15px;
-            transition: 0.3s;
         }
-        input:focus { border-color: var(--primary); outline: none; }
 
         .btn {
             width: 100%;
-            padding: 22px;
+            padding: 20px;
             border: none;
-            border-radius: 20px;
+            border-radius: 15px;
             font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
             cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            text-transform: uppercase;
         }
         .btn-primary { background: var(--primary); color: #000; }
         .btn-success { background: var(--green); color: #fff; }
         .btn-danger { background: var(--red); color: #fff; }
-        .btn:active { transform: scale(0.96); }
 
-        /* --- FOOTER NAVBAR (Agar kayak aplikasi) --- */
-        .bottom-nav {
-            position: fixed;
-            bottom: 20px;
-            width: 90%;
-            max-width: 400px;
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 15px;
-            border-radius: 25px;
-            display: flex;
-            justify-content: space-around;
-            border: 1px solid rgba(255,255,255,0.05);
-            z-index: 100;
-        }
-        .nav-item { color: var(--text); opacity: 0.5; font-size: 0.6rem; text-decoration: none; text-align: center; }
-        .nav-item.active { opacity: 1; color: var(--primary); }
-
-        /* --- DEVICE DENIED OVERLAY --- */
+        /* --- DENIED OVERLAY --- */
         #deniedOverlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -192,79 +135,61 @@
             display: none; flex-direction: column;
             align-items: center; justify-content: center; padding: 40px; text-align: center;
         }
-
     </style>
 </head>
 <body>
 
     <div id="loader">
         <div class="spinner"></div>
-        <p style="letter-spacing: 5px; font-size: 0.7rem; opacity: 0.5;">RAYY CLOUD SECURITY</p>
+        <p style="margin-top: 15px; font-size: 0.7rem; opacity: 0.5;">AUTHENTICATING DEVICE...</p>
     </div>
 
     <div id="deniedOverlay">
-        <h1 style="color: var(--red); font-size: 5rem;">403</h1>
-        <h2 style="margin-bottom: 20px;">ACCESS DENIED</h2>
-        <p style="opacity: 0.6; line-height: 1.6;">ID Perangkat tidak terdaftar. Username dan password benar, namun hanya HP Owner yang diizinkan mengelola database ini.</p>
-        <div id="showMyId" style="margin-top: 30px; font-size: 0.7rem; color: var(--gold);"></div>
+        <h1 style="color: var(--red); font-size: 4rem;">403</h1>
+        <h2 style="margin-bottom: 20px;">AKSES DITOLAK</h2>
+        <p style="opacity: 0.6;">Sistem mendeteksi perangkat ilegal. Hanya HP Owner Rayy yang bisa masuk.</p>
+        <div id="badId" style="margin-top: 20px; color: var(--gold); font-size: 0.7rem;"></div>
+        <button onclick="location.reload()" style="margin-top: 30px; background: none; border: 1px solid var(--primary); color: var(--primary); padding: 10px 20px; border-radius: 10px;">Coba Lagi</button>
     </div>
 
     <div id="devAuth">
         <div class="auth-card">
-            <h2 style="color: var(--primary); margin-bottom: 30px;">AUTHORIZE</h2>
+            <h2 style="color: var(--primary); margin-bottom: 30px;">LOGIN MASTER</h2>
             <input type="text" id="devUser" placeholder="Username">
             <input type="password" id="devPass" placeholder="Password">
-            <button class="btn btn-primary" onclick="handleSecureLogin()">LOGIN DEV</button>
+            <button class="btn btn-primary" onclick="handleLogin()">VERIFIKASI</button>
         </div>
     </div>
 
     <div class="container" id="mainPanel">
-        
-        <header style="text-align: center; margin-bottom: 40px;">
-            <h1 style="font-weight: 800; font-size: 2rem;">MASTER PANEL</h1>
-            <p id="ipTag" style="font-size: 0.6rem; opacity: 0.3; margin-top: 5px;">IP: FETCHING...</p>
+        <header style="text-align: center; margin-bottom: 30px;">
+            <h1 style="font-weight: 800;">DEV PANEL v8.0</h1>
+            <p id="ipTag" style="font-size: 0.6rem; opacity: 0.4;">IP: FETCHING...</p>
         </header>
 
         <div class="glass-card">
-            <span class="section-title">Server Power</span>
-            <div id="statusIndicator" class="status-box">SYNC...</div>
-            <button class="btn btn-primary" onclick="togglePower()">FORCE POWER SWITCH</button>
-            <p style="margin-top: 15px; font-size: 0.6rem; opacity: 0.4; text-align: center;">Mengabaikan jadwal otomatis sementara waktu.</p>
+            <div id="statusIndicator" class="status-box">SYNCING...</div>
+            <button class="btn btn-primary" onclick="togglePower()">FORCE SWITCH</button>
         </div>
 
         <div class="glass-card">
-            <span class="section-title">Time Schedule (WIB)</span>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div>
-                    <label style="font-size: 0.6rem; opacity: 0.5; margin-bottom: 5px; display: block;">OPEN</label>
-                    <input type="time" id="openTime">
-                </div>
-                <div>
-                    <label style="font-size: 0.6rem; opacity: 0.5; margin-bottom: 5px; display: block;">CLOSE</label>
-                    <input type="time" id="closeTime">
-                </div>
+            <p style="font-size: 0.7rem; color: var(--primary); margin-bottom: 10px;">SCHEDULE SETUP</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="time" id="openT">
+                <input type="time" id="closeT">
             </div>
-            <button class="btn btn-success" onclick="updateJadwal()">APPLY SCHEDULE</button>
+            <button class="btn btn-success" onclick="saveJadwal()">UPDATE JADWAL</button>
         </div>
 
         <div class="glass-card">
-            <span class="section-title">Security & Admins</span>
-            <input type="text" id="adminU" placeholder="New Admin Username">
-            <input type="text" id="adminP" placeholder="New Admin Password">
-            <button class="btn btn-primary" onclick="addAdmin()" style="margin-bottom: 30px;">ADD ADMIN</button>
-            
-            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.05); margin-bottom: 30px;">
-            
-            <input type="text" id="banU" placeholder="Username to Ban">
-            <button class="btn btn-danger" onclick="banUser()">BAN USER</button>
+            <p style="font-size: 0.7rem; color: var(--red); margin-bottom: 10px;">ADMIN & BAN</p>
+            <input type="text" id="targetBan" placeholder="Username">
+            <button class="btn btn-danger" onclick="doBan()">BAN USER</button>
         </div>
-
-        <div style="height: 120px;"></div> </div>
-
-    <div class="bottom-nav">
-        <a href="#" class="nav-item active">DASHBOARD</a>
-        <a href="javascript:resetMasterDevice()" class="nav-item" style="color: var(--red);">RESET DEVICE</a>
-        <a href="javascript:location.reload()" class="nav-item">REFRESH</a>
+        
+        <div style="text-align: center; margin-bottom: 50px;">
+            <button onclick="resetAkses()" style="color: var(--red); background: none; border: none; font-size: 0.6rem; text-decoration: underline;">RESET MASTER DEVICE</button>
+        </div>
     </div>
 
     <script type="module">
@@ -275,29 +200,24 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        let deviceId = "";
-        let isLockedInternal = false; 
-        let isManualOverride = false;
+        let myId = "";
+        let currentLock = false;
+        let isManual = false;
 
-        // 1. GENERATE UNIQUE DEVICE ID
-        function generateId() {
-            const platform = window.navigator.platform;
+        // FUNGSI BUAT ID YANG LEBIH STABIL
+        function getStableId() {
             const screen = window.screen.width + "x" + window.screen.height;
-            const agent = window.navigator.userAgent.length;
-            return "RAYY-" + btoa(platform + screen + agent).substring(0, 12);
+            const platform = navigator.platform;
+            return "MASTER-" + btoa(screen + platform).substring(0, 10);
         }
 
         window.onload = () => {
-            deviceId = generateId();
+            myId = getStableId();
             fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => document.getElementById('ipTag').innerText = "IP: " + d.ip);
-            
-            setTimeout(() => {
-                document.getElementById('loader').style.display = 'none';
-            }, 2000);
+            setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 1500);
         };
 
-        // 2. LOGIN WITH DEVICE PROTECT
-        window.handleSecureLogin = function() {
+        window.handleLogin = function() {
             const u = document.getElementById('devUser').value;
             const p = document.getElementById('devPass').value;
 
@@ -305,104 +225,74 @@
                 onValue(ref(db, 'settings/master_device'), (snap) => {
                     const saved = snap.val();
                     if(!saved) {
-                        if(confirm("Daftarkan perangkat ini sebagai Owner?")) {
-                            set(ref(db, 'settings/master_device'), deviceId).then(() => location.reload());
+                        if(confirm("Daftarkan HP ini sebagai milik Rayy?")) {
+                            set(ref(db, 'settings/master_device'), myId).then(() => location.reload());
                         }
-                    } else if (saved === deviceId) {
+                    } else if (saved === myId) {
                         document.getElementById('devAuth').style.display = 'none';
                         document.getElementById('mainPanel').style.display = 'block';
-                        startPanel();
+                        startSys();
                     } else {
                         document.getElementById('devAuth').style.display = 'none';
                         document.getElementById('deniedOverlay').style.display = 'flex';
-                        document.getElementById('showMyId').innerText = "YOUR ID: " + deviceId;
+                        document.getElementById('badId').innerText = "DEVICE ID: " + myId;
                     }
                 }, { onlyOnce: true });
-            } else {
-                alert("LOGIN SALAH!");
-            }
+            } else { alert("WRONG ACCESS KEY!"); }
         };
 
-        // 3. CORE PANEL LOGIC
-        function startPanel() {
+        function startSys() {
             onValue(ref(db, 'settings'), (snap) => {
                 const data = snap.val();
                 if(!data) return;
-
-                const indicator = document.getElementById('statusIndicator');
-                isLockedInternal = data.toko_locked;
-
-                if(isLockedInternal) {
-                    indicator.innerText = "OFFLINE / CLOSED";
-                    indicator.className = "status-box offline";
-                } else {
-                    indicator.innerText = "ONLINE / OPEN";
-                    indicator.className = "status-box online";
-                }
-
+                currentLock = data.toko_locked;
+                const ind = document.getElementById('statusIndicator');
+                ind.innerText = currentLock ? "OFFLINE / CLOSED" : "ONLINE / OPEN";
+                ind.className = "status-box " + (currentLock ? "offline" : "online");
                 if(data.jadwal) {
-                    document.getElementById('openTime').value = data.jadwal.buka;
-                    document.getElementById('closeTime').value = data.jadwal.tutup;
-                    syncJadwal(data.jadwal.buka, data.jadwal.tutup);
+                    document.getElementById('openT').value = data.jadwal.buka;
+                    document.getElementById('closeT').value = data.jadwal.tutup;
+                    sync(data.jadwal.buka, data.jadwal.tutup);
                 }
             });
         }
 
-        // 4. SYNC JADWAL (MANDOR)
-        function syncJadwal(buka, tutup) {
-            // Hapus interval lama jika ada
-            if(window.mandor) clearInterval(window.mandor);
-
-            window.mandor = setInterval(() => {
-                if(isManualOverride) return; // Berhenti jika owner baru saja klik tombol manual
-
+        function sync(b, t) {
+            if(window.timer) clearInterval(window.timer);
+            window.timer = setInterval(() => {
+                if(isManual) return;
                 const now = new Date();
                 const cur = (now.getHours() * 60) + now.getMinutes();
-                const [hB, mB] = buka.split(':').map(Number);
-                const [hT, mT] = tutup.split(':').map(Number);
-                const tBuka = (hB * 60) + mB;
-                const tTutup = (hT * 60) + mT;
-
-                let shouldLock = (cur < tBuka || cur > tTutup);
-
-                if(shouldLock !== isLockedInternal) {
-                    update(ref(db, 'settings'), { toko_locked: shouldLock });
-                }
+                const [hB, mB] = b.split(':').map(Number);
+                const [hT, mT] = t.split(':').map(Number);
+                let lock = (cur < (hB * 60 + mB) || cur > (hT * 60 + mT));
+                if(lock !== currentLock) update(ref(db, 'settings'), { toko_locked: lock });
             }, 1000);
         }
 
-        // 5. FUNCTIONS
         window.togglePower = () => {
-            isManualOverride = true; 
-            update(ref(db, 'settings'), { toko_locked: !isLockedInternal }).then(() => {
-                setTimeout(() => { isManualOverride = false; }, 10000); // Lock manual selama 10 detik
+            isManual = true;
+            update(ref(db, 'settings'), { toko_locked: !currentLock }).then(() => {
+                setTimeout(() => { isManual = false; }, 15000); // Tunggu 15 detik baru auto lagi
             });
         };
 
-        window.updateJadwal = () => {
-            const b = document.getElementById('openTime').value;
-            const t = document.getElementById('closeTime').value;
-            if(!b || !t) return alert("Pilih Jam!");
-            update(ref(db, 'settings/jadwal'), { buka: b, tutup: t }).then(() => alert("Jadwal Disimpan!"));
+        window.saveJadwal = () => {
+            const b = document.getElementById('openT').value;
+            const t = document.getElementById('closeT').value;
+            if(b && t) update(ref(db, 'settings/jadwal'), { buka: b, tutup: t }).then(() => alert("Sip!"));
         };
 
-        window.addAdmin = () => {
-            const u = document.getElementById('adminU').value;
-            const p = document.getElementById('adminP').value;
-            if(u && p) set(ref(db, 'sys_extra_admins/' + u), { pass: p }).then(() => alert("Admin Ditambahkan!"));
+        window.doBan = () => {
+            const u = document.getElementById('targetBan').value;
+            if(u) set(ref(db, 'banned_users/' + u), { status: 'banned' }).then(() => alert("Beres!"));
         };
 
-        window.banUser = () => {
-            const u = document.getElementById('banU').value;
-            if(u) set(ref(db, 'banned_users/' + u), { status: 'banned' }).then(() => alert("User Diblokir!"));
-        };
-
-        window.resetMasterDevice = () => {
-            if(confirm("Hapus proteksi perangkat? Kamu harus login ulang.")) {
+        window.resetAkses = () => {
+            if(confirm("Hapus ID HP ini? Kamu harus daftar ulang.")) {
                 remove(ref(db, 'settings/master_device')).then(() => location.reload());
             }
         };
-
     </script>
 </body>
 </html>
