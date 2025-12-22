@@ -2,75 +2,184 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rayy Store - Official Payment Gate</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rayy Dev - Intelligence & Security</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #38bdf8; --bg: #020617; --c: #0f172a; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .card { background: var(--c); padding: 40px; border-radius: 30px; width: 100%; max-width: 450px; border: 1px solid rgba(56,189,248,0.2); text-align: center; }
-        h1 { font-size: 2.5rem; margin-bottom: 5px; letter-spacing: -1px; }
-        p { opacity: 0.5; font-size: 0.8rem; margin-bottom: 30px; letter-spacing: 2px; }
-        .input-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; font-size: 0.7rem; color: var(--p); font-weight: 800; margin-bottom: 8px; margin-left: 15px; }
-        input { width: 100%; padding: 20px; background: #010409; border: 1px solid #1e293b; color: #fff; border-radius: 20px; font-size: 1rem; }
-        .btn { width: 100%; padding: 22px; background: var(--p); border: none; border-radius: 20px; color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
-        #lockScreen { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: 40px; }
+        :root {
+            --p: #38bdf8;
+            --bg: #0b1120;
+            --c: #141b2d;
+            --d: #0f172a;
+            --r: #ef4444;
+            --g: #22c55e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; }
+        body { background: var(--bg); color: #fff; padding: 20px; overflow-x: hidden; }
+
+        .glass {
+            background: var(--c); border-radius: 30px; padding: 30px;
+            border: 1px solid rgba(56,189,248,0.1); margin-bottom: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        /* MONITORING BOX */
+        .monitor-box {
+            background: #000; border-radius: 20px; padding: 20px;
+            height: 300px; overflow-y: auto; border: 1px solid #1e293b;
+        }
+        .log-line {
+            font-size: 0.7rem; border-left: 2px solid var(--p);
+            padding-left: 12px; margin-bottom: 12px; color: #94a3b8;
+        }
+        .log-line b { color: var(--p); }
+        .device-info { color: #f59e0b; font-size: 0.6rem; display: block; margin-top: 4px; }
+
+        /* FORM STYLING */
+        h2 { font-size: 0.8rem; letter-spacing: 3px; color: var(--p); margin-bottom: 20px; text-transform: uppercase; }
+        input {
+            width: 100%; padding: 15px; background: var(--d); border: 1px solid #1e293b;
+            color: #fff; border-radius: 12px; margin-bottom: 12px; font-size: 0.85rem;
+        }
+        .btn-m {
+            width: 100%; padding: 18px; border: none; border-radius: 12px;
+            font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s;
+        }
+        .btn-p { background: var(--p); color: #000; }
+        .btn-r { background: var(--r); color: #fff; }
+        .btn-g { background: var(--g); color: #fff; }
+
+        #devAuth {
+            position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg);
+            z-index: 9999; display: flex; align-items: center; justify-content: center;
+        }
     </style>
 </head>
 <body>
-    <div id="lockScreen">
-        <h1 style="color: #ef4444;">TOKO TUTUP</h1>
-        <p>Maaf, kami sedang beristirahat. Silakan kembali pada jam operasional.</p>
+
+    <div id="devAuth">
+        <div class="glass" style="width: 100%; max-width: 360px; text-align: center;">
+            <h1 style="font-size:1.5rem; margin-bottom:20px;">MASTER <span style="color:var(--p);">KEY</span></h1>
+            <input type="password" id="masterPin" placeholder="PIN CODE">
+            <button class="btn-m btn-p" onclick="unlockDev()">Akses Panel</button>
+        </div>
     </div>
 
-    <div class="card">
-        <h1>RAYY STORE</h1>
-        <p>OFFICIAL PAYMENT GATE</p>
-        <div class="input-group">
-            <label>IDENTITAS PEMBELI</label>
-            <input type="text" id="buyerName" placeholder="Nama / ID Akun">
+    <div id="devDashboard" style="display: none; max-width: 900px; margin: 0 auto;">
+        <h1 style="text-align: center; font-weight: 800; margin-bottom: 40px; font-size: 2rem;">
+            RAYY <span style="color:var(--p);">INTELLIGENCE</span>
+        </h1>
+
+        <div class="glass">
+            <h2>Live System Monitoring (Scanning Device)</h2>
+            <div id="logMonitor" class="monitor-box">
+                <p style="opacity:0.2;">Menghubungkan ke server...</p>
+            </div>
         </div>
-        <div class="input-group">
-            <label>NOMINAL (RP)</label>
-            <input type="number" id="amount" placeholder="Contoh: 10000">
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div class="glass">
+                <h2>Kelola Admin Extra</h2>
+                <input type="text" id="newAdminU" placeholder="Username Baru">
+                <input type="text" id="newAdminP" placeholder="Password Baru">
+                <button class="btn-m btn-g" onclick="tambahAdmin()">Daftarkan Admin</button>
+                <div id="daftarAdmin" style="margin-top: 20px; font-size: 0.8rem;"></div>
+            </div>
+
+            <div class="glass">
+                <h2>Banishment System (Ban User)</h2>
+                <input type="text" id="banTarget" placeholder="Username Target">
+                <button class="btn-m btn-r" onclick="eksekusiBan()">Blokir Akses</button>
+                <p style="font-size:0.6rem; opacity:0.3; margin-top:15px;">User yang diblokir tidak akan bisa menekan tombol bayar di index.</p>
+            </div>
         </div>
-        <button class="btn" onclick="prosesBayar()">BAYAR SEKARANG</button>
+
+        <div class="glass" style="text-align: center;">
+            <h2>Force Power Switch (Emergency)</h2>
+            <button class="btn-m" style="background: #f59e0b; color: #000;" onclick="toggleServer()">Buka / Tutup Server Manual</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, push, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        function getDvc() {
-            return btoa(navigator.userAgent + window.screen.width).substring(0, 12);
+        // Login Dev
+        window.unlockDev = function() {
+            if(document.getElementById('masterPin').value === "085794") {
+                document.getElementById('devAuth').style.display = 'none';
+                document.getElementById('devDashboard').style.display = 'block';
+                jalankanDashboard();
+            } else {
+                alert("PIN SALAH!");
+            }
+        };
+
+        function jalankanDashboard() {
+            // Monitor Log Login & Device ID
+            onValue(ref(db, 'system_logs'), (snap) => {
+                const box = document.getElementById('logMonitor');
+                box.innerHTML = "";
+                const data = snap.val();
+                if(data) {
+                    Object.values(data).reverse().forEach(log => {
+                        box.innerHTML += `
+                            <div class="log-line">
+                                [${log.time}] <b>${log.user}</b>: ${log.action}
+                                <span class="device-info">FINGERPRINT ID: ${log.deviceId}</span>
+                            </div>
+                        `;
+                    });
+                }
+            });
+
+            // List Admin Aktif
+            onValue(ref(db, 'sys_extra_admins'), (snap) => {
+                const list = document.getElementById('daftarAdmin');
+                list.innerHTML = "";
+                const data = snap.val();
+                if(data) {
+                    Object.keys(data).forEach(u => {
+                        list.innerHTML += `
+                            <div style="background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin-bottom:5px; display:flex; justify-content:space-between;">
+                                <span>👤 ${u}</span>
+                                <span onclick="hapusAdmin('${u}')" style="color:var(--r); cursor:pointer; font-weight:800;">HAPUS</span>
+                            </div>
+                        `;
+                    });
+                }
+            });
         }
 
-        onValue(ref(db, 'settings'), (snap) => {
-            const s = snap.val();
-            if(s.toko_locked) document.getElementById('lockScreen').style.display = 'flex';
-            else document.getElementById('lockScreen').style.display = 'none';
-        });
+        window.tambahAdmin = function() {
+            const u = document.getElementById('newAdminU').value;
+            const p = document.getElementById('newAdminP').value;
+            if(u && p) {
+                set(ref(db, 'sys_extra_admins/' + u), { pass: p }).then(() => alert("Admin Ditambah!"));
+            }
+        };
 
-        window.prosesBayar = () => {
-            const n = document.getElementById('buyerName').value;
-            const a = document.getElementById('amount').value;
-            if(!n || !a) return alert("Isi data!");
+        window.hapusAdmin = function(u) {
+            if(confirm("Hapus akses admin " + u + "?")) remove(ref(db, 'sys_extra_admins/' + u));
+        };
 
-            const id = "TRX-" + Date.now();
-            set(ref(db, 'transactions/' + id), {
-                nama: n, jumlah: a, status: "Pending", waktu: new Date().toLocaleString()
-            });
+        window.eksekusiBan = function() {
+            const t = document.getElementById('banTarget').value;
+            if(t) {
+                set(ref(db, 'banned_users/' + t), { status: "banned", date: new Date().toLocaleString() })
+                .then(() => alert(t + " Berhasil Diban!"));
+            }
+        };
 
-            push(ref(db, 'system_logs'), {
-                user: n, deviceId: getDvc(), time: new Date().toLocaleTimeString(), action: "Checkout"
-            });
-
-            alert("Pesanan dikirim! Menunggu konfirmasi admin.");
+        window.toggleServer = function() {
+            onValue(ref(db, 'settings/toko_locked'), (snap) => {
+                const cur = snap.val();
+                update(ref(db, 'settings'), { toko_locked: !cur });
+            }, { onlyOnce: true });
         };
     </script>
 </body>
