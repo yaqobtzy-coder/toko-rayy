@@ -3,142 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rayy Dev - Intelligence System v9.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
+    <title>Rayy Store - Official Payment Gate</title>
     <style>
-        :root { --primary: #38bdf8; --bg: #020617; --card: #0f172a; --red: #ef4444; --green: #22c55e; --gold: #f59e0b; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'JetBrains Mono', monospace; }
-        body { background: var(--bg); color: #f8fafc; min-height: 100vh; padding: 20px; }
-        .glass { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.2); padding: 25px; border-radius: 25px; margin-bottom: 20px; }
-        h2 { font-size: 1rem; color: var(--primary); margin-bottom: 15px; letter-spacing: 2px; text-transform: uppercase; }
-        input { width: 100%; padding: 15px; background: #010409; border: 1px solid #1e293b; color: #fff; border-radius: 12px; margin-bottom: 10px; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .btn-blue { background: var(--primary); color: #000; }
-        .btn-red { background: var(--red); color: #fff; }
-        .btn-green { background: var(--green); color: #fff; }
-        
-        /* Log Styling */
-        .log-container { max-height: 200px; overflow-y: auto; background: #000; padding: 10px; border-radius: 10px; font-size: 0.7rem; }
-        .log-entry { border-left: 2px solid var(--primary); padding-left: 10px; margin-bottom: 8px; color: #94a3b8; }
-        .device-chip { font-size: 0.6rem; background: #1e293b; padding: 2px 6px; border-radius: 4px; color: var(--gold); }
-        
-        #devAuth { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; }
+        :root { --p: #38bdf8; --bg: #020617; --c: #0f172a; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .card { background: var(--c); padding: 40px; border-radius: 30px; width: 100%; max-width: 450px; border: 1px solid rgba(56,189,248,0.2); text-align: center; }
+        h1 { font-size: 2.5rem; margin-bottom: 5px; letter-spacing: -1px; }
+        p { opacity: 0.5; font-size: 0.8rem; margin-bottom: 30px; letter-spacing: 2px; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; font-size: 0.7rem; color: var(--p); font-weight: 800; margin-bottom: 8px; margin-left: 15px; }
+        input { width: 100%; padding: 20px; background: #010409; border: 1px solid #1e293b; color: #fff; border-radius: 20px; font-size: 1rem; }
+        .btn { width: 100%; padding: 22px; background: var(--p); border: none; border-radius: 20px; color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        #lockScreen { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: 40px; }
     </style>
 </head>
 <body>
-
-    <div id="devAuth">
-        <div class="glass" style="width: 100%; max-width: 350px; text-align: center;">
-            <h2>DEV ACCESS</h2>
-            <input type="password" id="passDev" placeholder="ACCESS KEY">
-            <button class="btn btn-blue" onclick="authDev()">UNLOCK</button>
-        </div>
+    <div id="lockScreen">
+        <h1 style="color: #ef4444;">TOKO TUTUP</h1>
+        <p>Maaf, kami sedang beristirahat. Silakan kembali pada jam operasional.</p>
     </div>
 
-    <div id="mainDev" style="display: none; max-width: 600px; margin: 0 auto;">
-        <h1 style="text-align: center; margin-bottom: 30px; font-weight: 800;">RAYY <span style="color:var(--primary)">INTELLIGENCE</span></h1>
-
-        <div class="glass">
-            <h2>LIVE DEVICE MONITOR</h2>
-            <div id="loginLogs" class="log-container">
-                <p style="opacity:0.3">Waiting for logs...</p>
-            </div>
+    <div class="card">
+        <h1>RAYY STORE</h1>
+        <p>OFFICIAL PAYMENT GATE</p>
+        <div class="input-group">
+            <label>IDENTITAS PEMBELI</label>
+            <input type="text" id="buyerName" placeholder="Nama / ID Akun">
         </div>
-
-        <div class="glass">
-            <h2>ADD NEW ADMIN</h2>
-            <input type="text" id="newAdminUser" placeholder="Username">
-            <input type="text" id="newAdminPass" placeholder="Password">
-            <button class="btn btn-green" onclick="addNewAdmin()">CREATE ADMIN ACCESS</button>
+        <div class="input-group">
+            <label>NOMINAL (RP)</label>
+            <input type="number" id="amount" placeholder="Contoh: 10000">
         </div>
-
-        <div class="glass">
-            <h2>ACTIVE ADMINS</h2>
-            <div id="adminList"></div>
-        </div>
-
-        <div class="glass">
-            <h2>BANISHMENT</h2>
-            <input type="text" id="banUser" placeholder="Username to Ban">
-            <button class="btn btn-red" onclick="banTarget()">EXECUTE BAN</button>
-        </div>
-
-        <button onclick="location.reload()" style="background:none; border:none; color:var(--red); font-size:0.7rem; width:100%; text-decoration:underline;">LOGOUT MASTER</button>
+        <button class="btn" onclick="prosesBayar()">BAYAR SEKARANG</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, push, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // -- AUTH LOGIC --
-        window.authDev = () => {
-            const p = document.getElementById('passDev').value;
-            if(p === "085794") {
-                document.getElementById('devAuth').style.display = 'none';
-                document.getElementById('mainDev').style.display = 'block';
-                loadData();
-            } else { alert("WRONG KEY!"); }
-        };
-
-        function loadData() {
-            // Monitor Riwayat Login
-            onValue(ref(db, 'system_logs'), (snap) => {
-                const logs = snap.val();
-                const container = document.getElementById('loginLogs');
-                container.innerHTML = "";
-                if(logs) {
-                    Object.values(logs).reverse().forEach(log => {
-                        container.innerHTML += `
-                            <div class="log-entry">
-                                [${log.time}] <b>${log.user}</b> logged in.<br>
-                                <span class="device-chip">${log.deviceId}</span>
-                            </div>
-                        `;
-                    });
-                }
-            });
-
-            // List Admin Aktif
-            onValue(ref(db, 'sys_extra_admins'), (snap) => {
-                const admins = snap.val();
-                const container = document.getElementById('adminList');
-                container.innerHTML = "";
-                if(admins) {
-                    Object.keys(admins).forEach(name => {
-                        container.innerHTML += `
-                            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.8rem;">
-                                <span>👤 ${name}</span>
-                                <button onclick="delAdmin('${name}')" style="color:var(--red); background:none; border:none; cursor:pointer;">DEL</button>
-                            </div>
-                        `;
-                    });
-                }
-            });
+        function getDvc() {
+            return btoa(navigator.userAgent + window.screen.width).substring(0, 12);
         }
 
-        // -- ACTIONS --
-        window.addNewAdmin = () => {
-            const u = document.getElementById('newAdminUser').value.trim();
-            const p = document.getElementById('newAdminPass').value.trim();
-            if(u && p) {
-                set(ref(db, 'sys_extra_admins/' + u), { pass: p, registered: new Date().toLocaleString() })
-                .then(() => alert("Admin Berhasil Ditambah!"));
-            }
-        };
+        onValue(ref(db, 'settings'), (snap) => {
+            const s = snap.val();
+            if(s.toko_locked) document.getElementById('lockScreen').style.display = 'flex';
+            else document.getElementById('lockScreen').style.display = 'none';
+        });
 
-        window.delAdmin = (name) => {
-            if(confirm("Hapus " + name + "?")) remove(ref(db, 'sys_extra_admins/' + name));
-        };
+        window.prosesBayar = () => {
+            const n = document.getElementById('buyerName').value;
+            const a = document.getElementById('amount').value;
+            if(!n || !a) return alert("Isi data!");
 
-        window.banTarget = () => {
-            const u = document.getElementById('banUser').value.trim();
-            if(u) set(ref(db, 'banned_users/' + u), { time: new Date().toLocaleString() }).then(() => alert("User Banned!"));
-        };
+            const id = "TRX-" + Date.now();
+            set(ref(db, 'transactions/' + id), {
+                nama: n, jumlah: a, status: "Pending", waktu: new Date().toLocaleString()
+            });
 
+            push(ref(db, 'system_logs'), {
+                user: n, deviceId: getDvc(), time: new Date().toLocaleTimeString(), action: "Checkout"
+            });
+
+            alert("Pesanan dikirim! Menunggu konfirmasi admin.");
+        };
     </script>
 </body>
 </html>
