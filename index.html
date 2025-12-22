@@ -1,80 +1,48 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rayy Payment - Official Premium System</title>
-    <style>
-        :root { --p: #38bdf8; --bg: #0b1120; --card: #141b2d; --text: #f8fafc; --red: #ef4444; }
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-        
-        /* SPLASH SCREEN */
-        #splash { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 1s; }
-        .logo-r { width: 100px; height: 100px; background: var(--p); border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 900; color: #000; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(56,189,248,0.3); } 50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(56,189,248,0.5); } }
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        /* MAIN UI */
-        .container { width: 90%; max-width: 450px; opacity: 0; transform: translateY(30px); transition: 1s; }
-        .visible { opacity: 1; transform: translateY(0); }
-        .card { background: var(--card); padding: 40px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
-        input { width: 100%; padding: 20px; background: #0f172a; border: 2px solid transparent; color: #fff; border-radius: 20px; margin: 10px 0 20px 0; transition: 0.3s; }
-        input:focus { border-color: var(--p); }
-        .btn { width: 100%; padding: 20px; background: var(--p); border: none; border-radius: 20px; font-weight: 900; cursor: pointer; transition: 0.3s; color: #000; }
-        
-        /* OFFLINE OVERLAY */
-        .overlay-offline { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px; }
-        .box-msg { border: 2px solid var(--red); padding: 40px; border-radius: 30px; background: rgba(239,68,68,0.05); }
-    </style>
-</head>
-<body>
-    <div id="splash"><div class="logo-r">R</div><p style="margin-top:20px; letter-spacing:5px; font-size:0.7rem; opacity:0.5;">INITIALIZING...</p></div>
+    const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
 
-    <div class="container" id="main-ui">
-        <h1 style="text-align: center; margin-bottom: 30px; font-weight: 900;">RAYY <span style="color:var(--p)">STORE</span></h1>
-        <div class="card">
-            <label style="font-size:0.7rem; font-weight:900; color:var(--p); letter-spacing:2px;">IDENTITAS PEMBELI</label>
-            <input type="text" id="user" placeholder="Nama / ID Akun">
-            <label style="font-size:0.7rem; font-weight:900; color:var(--p); letter-spacing:2px;">NOMINAL (RP)</label>
-            <input type="number" id="amt" placeholder="Min. 1000">
-            <button class="btn" onclick="pay()">BAYAR SEKARANG</button>
-        </div>
-    </div>
+    // LOGIKA ANTI-BENTROK: Prioritas Tombol Manual daripada Jadwal
+    onValue(ref(db, 'settings'), (snap) => {
+        const s = snap.val();
+        if(!s) return;
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
+        const now = new Date();
+        const mNow = now.getHours() * 60 + now.getMinutes();
+        let isOff = false;
+        let msg = "";
 
-        // REAL-TIME AUTO SWITCH
-        onValue(ref(db, 'settings'), (snap) => {
-            const s = snap.val(); if(!s) return;
-            const now = new Date(); const mNow = now.getHours() * 60 + now.getMinutes();
-            let isOff = false; let msg = "";
-            if(s.jadwal?.auto) {
-                const [hB, mB] = s.jadwal.buka.split(':').map(Number); const [hT, mT] = s.jadwal.tutup.split(':').map(Number);
-                if (mNow < (hB*60+mB) || mNow > (hT*60+mT)) { isOff = true; msg = `Toko Tutup. Buka Jam ${s.jadwal.buka}`; }
+        // PRIORITAS 1: Tombol Manual di Dev Panel
+        if(s.toko_locked === true) {
+            isOff = true;
+            msg = "SERVER SEDANG MAINTENANCE";
+        } 
+        // PRIORITAS 2: Jadwal (Hanya jalan kalau Toko TIDAK di-lock manual)
+        else if(s.jadwal && s.jadwal.auto === true) {
+            const [hB, mB] = s.jadwal.buka.split(':').map(Number);
+            const [hT, mT] = s.jadwal.tutup.split(':').map(Number);
+            const menitBuka = hB * 60 + mB;
+            const menitTutup = hT * 60 + mT;
+
+            if (mNow < menitBuka || mNow > menitTutup) {
+                isOff = true;
+                msg = `TOKO TUTUP. BUKA JAM ${s.jadwal.buka}`;
             }
-            if(s.toko_locked) { isOff = true; msg = "Server sedang dimatikan oleh Developer."; }
-            
-            if(isOff) {
-                document.body.innerHTML = `<div class="overlay-offline"><div class="box-msg"><h1 style="color:var(--red)">OFFLINE</h1><p>${msg}</p></div></div>`;
-            } else if(window.isOfflineMode) { location.reload(); }
-            window.isOfflineMode = isOff;
-        });
+        }
 
-        window.pay = async () => {
-            const u = document.getElementById('user').value; const a = document.getElementById('amt').value;
-            if(!u || a < 1000) return alert("Data tidak valid!");
-            const b = await get(ref(db, 'banned_users/'+u)); if(b.exists()) return alert("AKUN DIBLOKIR!");
-            
-            const tid = "RY-" + Date.now();
-            push(ref(db, 'system_logs'), { action: "PAY_ATTEMPT", detail: `${u} - Rp${a}`, time: new Date().toLocaleString(), device: navigator.userAgent });
-            push(ref(db, 'transactions'), { nama: u, jumlah: a, status: "Pending", trxId: tid, waktu: new Date().toLocaleString() })
-            .then(() => window.location.href = `https://app.pakasir.com/pay/rayy-store/${a}?order_id=${tid}`);
-        };
-
-        window.onload = () => { setTimeout(() => { document.getElementById('splash').style.display = 'none'; document.getElementById('main-ui').classList.add('visible'); }, 2000); };
-    </script>
-</body>
-</html>
+        if(isOff) {
+            document.body.innerHTML = `
+                <div style="height:100vh; background:#0a0d16; display:flex; align-items:center; justify-content:center; flex-direction:column; font-family:sans-serif; color:white; text-align:center;">
+                    <div style="border:2px solid #ff4d4d; padding:40px; border-radius:20px; background:rgba(255,77,77,0.05); width:80%;">
+                        <h1 style="color:#ff4d4d; font-size:2.5rem; margin-bottom:10px;">OFFLINE</h1>
+                        <p style="opacity:0.7;">${msg}</p>
+                    </div>
+                </div>`;
+            window.isLocked = true;
+        } else {
+            if(window.isLocked) location.reload();
+        }
+    });
+</script>
