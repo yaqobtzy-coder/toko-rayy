@@ -3,150 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN DASHBOARD | RAYY</title>
+    <title>ADMIN PANEL | RAYY STORE</title>
     <style>
-        :root { --neon: #00ff00; --bg: #0a0d16; --wa-dark: #075e54; --card: #161b22; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', monospace; }
-        body { background: var(--bg); color: #fff; padding: 15px; }
+        :root { --accent: #00d2ff; --bg: #05070a; --card: #0d121b; --green: #2ecc71; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: #fff; overflow-x: hidden; padding: 20px; }
 
-        /* LOGIN LAYER */
-        #login-screen { position:fixed; inset:0; background:#000; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; }
-        .login-box { width: 100%; max-width: 320px; text-align: center; }
-        
-        .box { background: var(--card); border: 1px solid #30363d; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-        input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 8px; margin-bottom: 10px; outline: none; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-green { background: var(--neon); color: #000; }
+        /* LOADING LOGO R PULSE */
+        #loader { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; transition: 1s; }
+        .logo-r { font-size: 60px; font-weight: 900; color: var(--accent); text-shadow: 0 0 30px var(--accent); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
 
-        /* CHAT MONITOR */
-        #user-list { height: 130px; overflow-y: auto; background: #000; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; }
-        .user-item { padding: 10px; border-bottom: 1px solid #222; cursor: pointer; color: var(--neon); font-size: 0.85rem; display: flex; justify-content: space-between; }
-        
-        .chat-win { height: 400px; background: #e5ddd5; border-radius: 12px; display: none; flex-direction: column; overflow: hidden; border: 1px solid #444; }
-        .chat-head { background: var(--wa-dark); padding: 12px; font-size: 0.9rem; font-weight: bold; display: flex; justify-content: space-between; }
-        .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        .bubble { padding: 8px 12px; border-radius: 8px; max-width: 80%; font-size: 0.85rem; color: #000; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
-        .bubble.admin { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 0; }
-        .bubble.user { background: #fff; align-self: flex-start; border-bottom-left-radius: 0; }
-        
-        .chat-foot { padding: 10px; background: #f0f0f0; display: flex; gap: 8px; }
-        .chat-foot input { margin: 0; color: #000; background: #fff; flex: 1; border-radius: 20px; }
+        /* NOTIF SLIDE DOWN-UP */
+        .notif { position: fixed; top: -120px; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--accent); padding: 15px 30px; border-radius: 15px; z-index: 10000; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,210,255,0.4); text-align: center; min-width: 280px; font-weight: bold; }
+        .notif.show { top: 30px; }
 
-        /* LOGS */
-        #log-view { font-size: 0.75rem; color: #8b949e; height: 120px; overflow-y: auto; line-height: 1.5; }
+        /* OFFLINE SCREEN (Auto-lock dari Dev) */
+        #offline-screen { display:none; position:fixed; inset:0; background:#05070a; z-index:9500; flex-direction:column; align-items:center; justify-content:center; }
+
+        .header { margin-bottom: 25px; border-bottom: 1px solid #1f2937; padding-bottom: 15px; }
+        .header h2 { font-size: 1.4rem; color: var(--accent); }
+        .header p { font-size: 0.8rem; color: #8b949e; margin-top: 5px; }
+
+        /* TRX CARD STYLE */
+        .trx-card { background: var(--card); border-radius: 18px; padding: 20px; margin-bottom: 15px; border-left: 6px solid var(--accent); position: relative; transition: 0.3s; }
+        .trx-card.success { border-left-color: var(--green); }
+        
+        .trx-id { color: var(--accent); font-weight: bold; font-size: 0.85rem; margin-bottom: 8px; }
+        .trx-val { font-size: 1.3rem; font-weight: 800; margin-bottom: 5px; }
+        .trx-user { font-size: 0.9rem; color: #fff; margin-bottom: 5px; }
+        .trx-time { font-size: 0.75rem; color: #8b949e; }
+        
+        .status-badge { position: absolute; top: 20px; right: 20px; font-size: 0.8rem; font-weight: bold; }
+        .badge-pending { color: #f1c40f; }
+        .badge-success { color: var(--green); }
+
+        .btn-acc { width: 100%; padding: 14px; background: var(--green); color: #000; border: none; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; transition: 0.2s; }
+        .btn-acc:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h2 style="color:var(--neon); margin-bottom:20px;">[ ADMIN ACCESS ]</h2>
-            <input type="text" id="u-name" placeholder="Username">
-            <input type="password" id="u-pass" placeholder="Password">
-            <button onclick="authAdmin()" class="btn btn-green">LOGIN SYSTEM</button>
-        </div>
+    <div id="loader"><div class="logo-r">R</div></div>
+    <div id="notif-box" class="notif">Pesan</div>
+    <div id="offline-screen"><h2 style="color:red">SERVER OFFLINE</h2></div>
+
+    <div class="header">
+        <h2>Riwayat Transaksi</h2>
+        <p id="total-text">Memuat data...</p>
     </div>
 
-    <div id="admin-ui" style="display:none;">
-        <h2 style="margin-bottom:15px; font-size:1.1rem;">PANEL <span style="color:var(--neon)">ADMIN</span></h2>
-
-        <div class="box">
-            <h3 style="font-size:0.8rem; margin-bottom:10px; color:var(--neon)">LIVE CHATS:</h3>
-            <div id="user-list"></div>
-
-            <div class="chat-win" id="chat-win">
-                <div class="chat-head">
-                    <span id="chat-target">User</span>
-                    <span onclick="closeChat()" style="cursor:pointer">CLOSE</span>
-                </div>
-                <div class="chat-body" id="chat-body"></div>
-                <div class="chat-foot">
-                    <input type="text" id="chat-in" placeholder="Ketik balasan...">
-                    <button onclick="sendReply()" style="background:var(--wa-dark); color:#fff; border:none; padding:8px 15px; border-radius:10px;">SEND</button>
-                </div>
-            </div>
+    <div id="trx-container">
         </div>
-
-        <div class="box">
-            <h3 style="font-size:0.8rem; margin-bottom:10px; color:var(--neon)">RIWAYAT TRANSAKSI:</h3>
-            <div id="log-view"></div>
-        </div>
-    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
 
-        // LOGIN SYSTEM
-        window.authAdmin = async () => {
-            const u = document.getElementById('u-name').value;
-            const p = document.getElementById('u-pass').value;
-
-            // Login Master
-            if(u === "admin" && p === "085794") {
-                startUI(); return;
-            }
-
-            // Cek Akun dari Panel Dev
-            const snap = await get(ref(db, 'admin_accounts/' + u));
-            if(snap.exists() && snap.val().password === p) {
-                startUI();
-            } else {
-                alert("Akses Ditolak!");
-            }
+        // 1. Notif Slide Down-Up
+        window.showNotif = (txt) => {
+            const n = document.getElementById('notif-box');
+            n.innerText = txt; n.classList.add('show');
+            setTimeout(() => n.classList.remove('show'), 3000);
         };
 
-        function startUI() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('admin-ui').style.display = 'block';
-        }
-
-        // CHAT LOGIC
-        let currentChat = "";
-        onValue(ref(db, 'live_chats'), snap => {
-            const list = document.getElementById('user-list'); list.innerHTML = "";
-            snap.forEach(c => {
-                const d = document.createElement('div');
-                d.className = "user-item";
-                d.innerHTML = `<span>> ${c.key}</span> <span>💬</span>`;
-                d.onclick = () => openChat(c.key);
-                list.appendChild(d);
-            });
+        // 2. Loader Animasi
+        window.addEventListener('load', () => {
+            setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 1500);
         });
 
-        function openChat(uid) {
-            currentChat = uid;
-            document.getElementById('chat-win').style.display = "flex";
-            document.getElementById('chat-target').innerText = "Chat: " + uid;
-            onValue(ref(db, `live_chats/${uid}`), snap => {
-                const body = document.getElementById('chat-body'); body.innerHTML = "";
-                snap.forEach(m => {
-                    const data = m.val();
-                    body.innerHTML += `<div class="bubble ${data.sender}">${data.text}</div>`;
-                });
-                body.scrollTop = body.scrollHeight;
+        // 3. Cek Status Server (Real-time)
+        onValue(ref(db, 'server_status'), (snap) => {
+            document.getElementById('offline-screen').style.display = snap.val() === "OFF" ? "flex" : "none";
+        });
+
+        // 4. Load Transaksi & Logic ACC
+        onValue(ref(db, 'transactions'), (snap) => {
+            const container = document.getElementById('trx-container');
+            container.innerHTML = "";
+            let count = 0;
+
+            if (!snap.exists()) {
+                container.innerHTML = "<p style='text-align:center; color:#555;'>Belum ada transaksi.</p>";
+                document.getElementById('total-text').innerText = "Total: 0";
+                return;
+            }
+
+            snap.forEach((child) => {
+                count++;
+                const data = child.val();
+                const isDone = data.status === "Sukses";
+                
+                const card = `
+                    <div class="trx-card ${isDone ? 'success' : ''}">
+                        <div class="trx-id">${data.orderId}</div>
+                        <div class="trx-user">Pembeli: <b>${data.buyer}</b></div>
+                        <div class="trx-val">${data.amount}</div>
+                        <div class="trx-time">${data.time}</div>
+                        <div class="status-badge ${isDone ? 'badge-success' : 'badge-pending'}">
+                            ${isDone ? '✅ Sukses' : '⏳ Pending'}
+                        </div>
+                        ${!isDone ? `<button class="btn-acc" onclick="accTrx('${data.orderId}')">KONFIRMASI PEMBAYARAN</button>` : ''}
+                    </div>
+                `;
+                container.innerHTML = card + container.innerHTML; // Terbaru di atas
             });
-        }
+            document.getElementById('total-text').innerText = "Total Transaksi: " + count;
+        });
 
-        window.closeChat = () => { document.getElementById('chat-win').style.display = "none"; };
-
-        window.sendReply = () => {
-            const msg = document.getElementById('chat-in');
-            if(!msg.value || !currentChat) return;
-            push(ref(db, `live_chats/${currentChat}`), { sender: 'admin', text: msg.value });
-            msg.value = "";
+        // 5. Fungsi Konfirmasi (Acc) + Notif Slide Down-Up
+        window.accTrx = (id) => {
+            update(ref(db, `transactions/${id}`), { status: "Sukses" }).then(() => {
+                showNotif("✅ Transaksi Berhasil Di-ACC!");
+            });
         };
-
-        // TRANSACTION MONITOR
-        onValue(ref(db, 'system_logs'), snap => {
-            const view = document.getElementById('log-view'); view.innerHTML = "";
-            snap.forEach(s => {
-                const l = s.val();
-                view.innerHTML = `<div>[${l.time}] ${l.detail}</div>` + view.innerHTML;
-            });
-        });
     </script>
 </body>
 </html>
