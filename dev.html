@@ -7,49 +7,73 @@
     <style>
         :root { --accent: #00d2ff; --bg: #0a0d16; --card: #161b22; --red: #e74c3c; --green: #2ecc71; }
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: #fff; padding: 15px; }
-        .box { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #30363d; }
-        h3 { font-size: 0.9rem; margin-bottom: 15px; color: var(--accent); }
-        input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 8px; margin-bottom: 10px; }
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-        th { text-align: left; color: #8b949e; padding-bottom: 10px; border-bottom: 1px solid #333; }
-        td { padding: 10px 0; border-bottom: 1px solid #222; }
+        body { background: var(--bg); color: #fff; padding: 20px; overflow-x: hidden; }
+
+        /* LOADING LOGO R */
+        #loader { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; transition: 1s; }
+        .logo-r { font-size: 60px; font-weight: 900; color: var(--accent); text-shadow: 0 0 20px var(--accent); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
+
+        /* NOTIF SLIDE DOWN-UP */
+        .notif { position: fixed; top: -120px; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--accent); padding: 15px 30px; border-radius: 15px; z-index: 10000; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,210,255,0.4); min-width: 280px; text-align: center; font-weight: bold; }
+        .notif.show { top: 30px; }
+
+        .box { background: var(--card); border-radius: 15px; padding: 20px; margin-bottom: 20px; border: 1px solid #30363d; }
+        h3 { font-size: 0.95rem; margin-bottom: 15px; color: var(--accent); }
+        input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 10px; margin-bottom: 10px; outline: none; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: #000; transition: 0.2s; }
+        .btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-    <h2 style="text-align:center; color:var(--accent); margin: 20px 0;">🛠️ RAYY SUPER DEV</h2>
+<div id="loader"><div class="logo-r">R</div></div>
+<div id="notif-box" class="notif">Ready</div>
 
-    <div class="box">
-        <h3>⚡ Server Controller</h3>
-        <div style="display: flex; gap: 10px;">
-            <button onclick="setServer('ON')" class="btn" style="background:var(--green)">ON</button>
-            <button onclick="setServer('OFF')" class="btn" style="background:var(--red)">OFF</button>
-        </div>
+<h2 style="text-align:center; color:var(--accent); margin-bottom: 25px;">🛠️ SUPER DEV PANEL</h2>
+
+<div class="box">
+    <h3>⚡ Kontrol Server</h3>
+    <div style="display: flex; gap: 10px;">
+        <button onclick="setServer('ON')" class="btn" style="background:var(--green)">HIDUPKAN</button>
+        <button onclick="setServer('OFF')" class="btn" style="background:var(--red)">MATIKAN</button>
     </div>
+</div>
 
-    <div class="box">
-        <h3>👥 List Akun Terdaftar</h3>
-        <table>
-            <tr><th>User</th><th>Nama</th><th>Aksi</th></tr>
-            <tr><td>admin_rayy <span style="background:orange; padding:2px 5px; border-radius:4px; font-size:0.6rem; color:#000;">OWNER</span></td><td>Rayy Utama</td><td>-</td></tr>
-        </table>
-    </div>
+<div class="box">
+    <h3>👥 Tambah Admin</h3>
+    <input type="text" id="adm-user" placeholder="Username">
+    <button onclick="act('Admin Berhasil Ditambahkan!')" class="btn" style="background:var(--accent)">SIMPAN</button>
+</div>
 
-    <div class="box">
-        <h3>➕ Tambah Admin Baru</h3>
-        <input type="text" placeholder="Username">
-        <input type="text" placeholder="Nama Lengkap">
-        <button class="btn" style="background:var(--accent); color:#000;">SIMPAN ADMIN</button>
-    </div>
+<div class="box">
+    <h3>🔒 Buka Blokir</h3>
+    <input type="text" id="blk-user" placeholder="Username Target">
+    <button onclick="act('Akses Telah Dibuka!')" class="btn" style="background:var(--green)">BUKA BLOKIR</button>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
 
-        window.setServer = (val) => set(ref(db, 'server_status'), val);
-    </script>
+    window.showNotif = (txt) => {
+        const n = document.getElementById('notif-box');
+        n.innerText = txt; n.classList.add('show');
+        setTimeout(() => n.classList.remove('show'), 3000);
+    };
+
+    window.setServer = (v) => {
+        set(ref(db, 'server_status'), v).then(() => {
+            showNotif(v === 'ON' ? "🚀 Server On!" : "🛑 Server Off!");
+        });
+    };
+
+    window.act = (msg) => showNotif("✅ " + msg);
+
+    window.addEventListener('load', () => {
+        setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 1500);
+    });
+</script>
 </body>
 </html>
