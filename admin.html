@@ -3,122 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN PANEL | RAYY STORE</title>
+    <title>RIWAYAT TRANSAKSI</title>
     <style>
         :root { --accent: #00d2ff; --bg: #05070a; --card: #0d121b; --green: #2ecc71; }
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: #fff; overflow-x: hidden; padding: 20px; }
+        body { background: var(--bg); color: #fff; padding: 20px; }
 
-        /* LOADING LOGO R PULSE */
-        #loader { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; transition: 1s; }
-        .logo-r { font-size: 60px; font-weight: 900; color: var(--accent); text-shadow: 0 0 30px var(--accent); animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } }
-
-        /* NOTIF SLIDE DOWN-UP */
+        /* NOTIF SLIDE */
         .notif { position: fixed; top: -120px; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--accent); padding: 15px 30px; border-radius: 15px; z-index: 10000; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,210,255,0.4); text-align: center; min-width: 280px; font-weight: bold; }
         .notif.show { top: 30px; }
 
-        /* OFFLINE SCREEN (Auto-lock dari Dev) */
-        #offline-screen { display:none; position:fixed; inset:0; background:#05070a; z-index:9500; flex-direction:column; align-items:center; justify-content:center; }
-
-        .header { margin-bottom: 25px; border-bottom: 1px solid #1f2937; padding-bottom: 15px; }
-        .header h2 { font-size: 1.4rem; color: var(--accent); }
-        .header p { font-size: 0.8rem; color: #8b949e; margin-top: 5px; }
-
-        /* TRX CARD STYLE */
-        .trx-card { background: var(--card); border-radius: 18px; padding: 20px; margin-bottom: 15px; border-left: 6px solid var(--accent); position: relative; transition: 0.3s; }
+        .trx-card { background: var(--card); border-radius: 18px; padding: 20px; margin-bottom: 15px; border-left: 6px solid var(--accent); position: relative; }
         .trx-card.success { border-left-color: var(--green); }
-        
-        .trx-id { color: var(--accent); font-weight: bold; font-size: 0.85rem; margin-bottom: 8px; }
-        .trx-val { font-size: 1.3rem; font-weight: 800; margin-bottom: 5px; }
-        .trx-user { font-size: 0.9rem; color: #fff; margin-bottom: 5px; }
-        .trx-time { font-size: 0.75rem; color: #8b949e; }
-        
+        .trx-val { font-size: 1.2rem; font-weight: 800; margin-bottom: 5px; }
         .status-badge { position: absolute; top: 20px; right: 20px; font-size: 0.8rem; font-weight: bold; }
-        .badge-pending { color: #f1c40f; }
-        .badge-success { color: var(--green); }
-
-        .btn-acc { width: 100%; padding: 14px; background: var(--green); color: #000; border: none; border-radius: 12px; font-weight: bold; margin-top: 15px; cursor: pointer; transition: 0.2s; }
-        .btn-acc:active { transform: scale(0.95); }
+        .btn-acc { width: 100%; padding: 12px; background: var(--green); border: none; border-radius: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="loader"><div class="logo-r">R</div></div>
-    <div id="notif-box" class="notif">Pesan</div>
-    <div id="offline-screen"><h2 style="color:red">SERVER OFFLINE</h2></div>
+<div id="notif-box" class="notif">Pesan</div>
 
-    <div class="header">
-        <h2>Riwayat Transaksi</h2>
-        <p id="total-text">Memuat data...</p>
-    </div>
+<div class="header" style="margin-bottom:20px;">
+    <h2>Riwayat Transaksi</h2>
+    <p id="total-text">Total: 0</p>
+</div>
 
-    <div id="trx-container">
-        </div>
+<div id="trx-list"></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
 
-        const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
+    window.showNotif = (txt) => {
+        const n = document.getElementById('notif-box');
+        n.innerText = txt; n.classList.add('show');
+        setTimeout(() => n.classList.remove('show'), 3000);
+    };
 
-        // 1. Notif Slide Down-Up
-        window.showNotif = (txt) => {
-            const n = document.getElementById('notif-box');
-            n.innerText = txt; n.classList.add('show');
-            setTimeout(() => n.classList.remove('show'), 3000);
-        };
-
-        // 2. Loader Animasi
-        window.addEventListener('load', () => {
-            setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 1500);
+    onValue(ref(db, 'transactions'), (snap) => {
+        const container = document.getElementById('trx-list');
+        container.innerHTML = "";
+        let count = 0;
+        snap.forEach((child) => {
+            count++;
+            const data = child.val();
+            const isDone = data.status === "Sukses";
+            container.innerHTML = `
+                <div class="trx-card ${isDone ? 'success' : ''}">
+                    <div style="color:var(--accent); font-size:0.8rem;">${data.orderId}</div>
+                    <div class="trx-val">${data.amount}</div>
+                    <div style="font-size:0.7rem; color:#8b949e;">${data.time}</div>
+                    <div class="status-badge" style="color:${isDone ? '#2ecc71' : '#f1c40f'}">${isDone ? '✓ Sukses' : '⏳ Pending'}</div>
+                    ${!isDone ? `<button class="btn-acc" onclick="accTrx('${data.orderId}')">KONFIRMASI PEMBAYARAN</button>` : ''}
+                </div>
+            ` + container.innerHTML;
         });
+        document.getElementById('total-text').innerText = "Total: " + count;
+    });
 
-        // 3. Cek Status Server (Real-time)
-        onValue(ref(db, 'server_status'), (snap) => {
-            document.getElementById('offline-screen').style.display = snap.val() === "OFF" ? "flex" : "none";
+    window.accTrx = (id) => {
+        update(ref(db, `transactions/${id}`), { status: "Sukses" }).then(() => {
+            showNotif("✅ Transaksi Dikonfirmasi!");
         });
-
-        // 4. Load Transaksi & Logic ACC
-        onValue(ref(db, 'transactions'), (snap) => {
-            const container = document.getElementById('trx-container');
-            container.innerHTML = "";
-            let count = 0;
-
-            if (!snap.exists()) {
-                container.innerHTML = "<p style='text-align:center; color:#555;'>Belum ada transaksi.</p>";
-                document.getElementById('total-text').innerText = "Total: 0";
-                return;
-            }
-
-            snap.forEach((child) => {
-                count++;
-                const data = child.val();
-                const isDone = data.status === "Sukses";
-                
-                const card = `
-                    <div class="trx-card ${isDone ? 'success' : ''}">
-                        <div class="trx-id">${data.orderId}</div>
-                        <div class="trx-user">Pembeli: <b>${data.buyer}</b></div>
-                        <div class="trx-val">${data.amount}</div>
-                        <div class="trx-time">${data.time}</div>
-                        <div class="status-badge ${isDone ? 'badge-success' : 'badge-pending'}">
-                            ${isDone ? '✅ Sukses' : '⏳ Pending'}
-                        </div>
-                        ${!isDone ? `<button class="btn-acc" onclick="accTrx('${data.orderId}')">KONFIRMASI PEMBAYARAN</button>` : ''}
-                    </div>
-                `;
-                container.innerHTML = card + container.innerHTML; // Terbaru di atas
-            });
-            document.getElementById('total-text').innerText = "Total Transaksi: " + count;
-        });
-
-        // 5. Fungsi Konfirmasi (Acc) + Notif Slide Down-Up
-        window.accTrx = (id) => {
-            update(ref(db, `transactions/${id}`), { status: "Sukses" }).then(() => {
-                showNotif("✅ Transaksi Berhasil Di-ACC!");
-            });
-        };
-    </script>
+    };
+</script>
 </body>
 </html>
