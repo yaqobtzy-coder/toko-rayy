@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAYY STORE | TOPUP</title>
+    <title>PAYMENT RAYYSTORE</title>
     <style>
         :root { --accent: #00d2ff; --bg: #05070a; --card: #0d121b; }
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
@@ -18,115 +18,87 @@
         .notif { position: fixed; top: -120px; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--accent); padding: 15px 30px; border-radius: 15px; z-index: 10000; transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,210,255,0.4); text-align: center; min-width: 280px; font-weight: bold; color: var(--accent); }
         .notif.show { top: 30px; }
 
-        /* OFFLINE SCREEN REAL-TIME */
+        /* OFFLINE SCREEN */
         #offline-screen { display:none; position:fixed; inset:0; background:#05070a; z-index:9500; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; }
 
         .container { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
         .card { background: var(--card); border: 1px solid #1f2937; padding: 35px; border-radius: 28px; width: 100%; max-width: 380px; text-align: center; border-top: 4px solid var(--accent); }
         
-        h1 { margin-bottom: 25px; letter-spacing: 2px; font-size: 1.8rem; }
-        input { width: 100%; padding: 16px; margin-bottom: 12px; background: #161d29; border: 1px solid #1f2937; color: #fff; border-radius: 14px; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--accent); }
+        input { width: 100%; padding: 16px; margin-bottom: 12px; background: #161d29; border: 1px solid #1f2937; color: #fff; border-radius: 14px; outline: none; }
+        .btn-pay { width: 100%; padding: 18px; background: var(--accent); color: #000; border: none; border-radius: 14px; font-weight: 800; cursor: pointer; margin-bottom: 15px; }
 
-        .btn-pay { width: 100%; padding: 18px; background: var(--accent); color: #000; border: none; border-radius: 14px; font-weight: 800; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
-        .btn-pay:active { transform: scale(0.95); }
-
-        /* CONTACT CS */
+        /* CONTACT CS STYLE */
+        .cs-text { font-size: 0.8rem; color: #8b949e; margin-bottom: 12px; font-weight: bold; }
         .cs-container { display: flex; gap: 10px; flex-direction: column; }
-        .btn-cs { padding: 12px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; }
-        .wa { background: #25d366; color: #fff; }
-        .tele { background: #0088cc; color: #fff; }
-        .btn-cs:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .btn-cs { padding: 12px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; color: #fff; }
+        .wa { background: #25d366; }
+        .tele { background: #0088cc; }
     </style>
 </head>
 <body>
 
-    <div id="loader"><div class="logo-r">R</div></div>
+<div id="loader"><div class="logo-r">R</div></div>
+<div id="notif-box" class="notif">Pesan</div>
 
-    <div id="notif-box" class="notif">Pesan</div>
+<div id="offline-screen">
+    <div class="logo-r" style="margin-bottom:20px; font-size: 60px;">R</div>
+    <h2 style="color:#e74c3c; margin-bottom:10px;">SERVER OFFLINE</h2>
+    <p style="color:#8b949e; margin-bottom: 30px;">Server akan kembali on pada pagi hari pukul 09:00</p>
+    <div class="cs-container" style="width: 250px;">
+        <a href="https://wa.me/628131172093" class="btn-cs wa">Hubungi WhatsApp</a>
+        <a href="https://t.me/Rayynotjavva" class="btn-cs tele">Hubungi Telegram</a>
+    </div>
+</div>
 
-    <div id="offline-screen">
-        <div class="logo-r" style="margin-bottom:20px; font-size: 60px;">R</div>
-        <h2 style="color:#e74c3c; margin-bottom:10px;">SERVER OFFLINE</h2>
-        <p style="color:#8b949e; margin-bottom: 30px;">Server akan kembali on pada pagi hari pukul 09:00</p>
-        <div class="cs-container" style="width: 250px;">
-            <a href="https://wa.me/628131172093" class="btn-cs wa">WhatsApp CS</a>
-            <a href="https://t.me/Rayynotjavva" class="btn-cs tele">Telegram CS</a>
+<div class="container">
+    <div class="card">
+        <h1 style="margin-bottom:20px;">RAYY <span style="color:var(--accent)">STORE</span></h1>
+        <input type="text" id="buyer-name" placeholder="Username / ID">
+        <input type="number" id="amount" placeholder="Nominal Topup">
+        <button class="btn-pay" onclick="handlePay()">BAYAR SEKARANG</button>
+        
+        <p class="cs-text">Customer service Payment rayy store</p>
+        <div class="cs-container">
+            <a href="https://wa.me/628131172093" class="btn-cs wa">Hubungi WhatsApp</a>
+            <a href="https://t.me/Rayynotjavva" class="btn-cs tele">Hubungi Telegram</a>
         </div>
     </div>
+</div>
 
-    <div class="container">
-        <div class="card">
-            <h1>RAYY <span style="color:var(--accent)">STORE</span></h1>
-            <input type="text" id="buyer-name" placeholder="Username / ID">
-            <input type="number" id="amount" placeholder="Nominal Topup">
-            <button class="btn-pay" onclick="handlePay()">BAYAR SEKARANG</button>
-            
-            <div class="cs-container">
-                <a href="https://wa.me/628131172093" class="btn-cs wa">Hubungi WhatsApp</a>
-                <a href="https://t.me/Rayynotjavva" class="btn-cs tele">Hubungi Telegram</a>
-            </div>
-        </div>
-    </div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    const db = getDatabase(initializeApp({ databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" }));
 
-        // Inisialisasi Firebase
-        const firebaseConfig = { databaseURL: "https://rayy-all-web-default-rtdb.asia-southeast1.firebasedatabase.app/" };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    window.showNotif = (txt) => {
+        const n = document.getElementById('notif-box');
+        n.innerText = txt; n.classList.add('show');
+        setTimeout(() => n.classList.remove('show'), 3000);
+    };
 
-        // Fungsi Notif Slide Down-Up
-        window.showNotif = (txt) => {
-            const n = document.getElementById('notif-box');
-            n.innerText = txt; 
-            n.classList.add('show');
-            setTimeout(() => n.classList.remove('show'), 3000);
-        };
+    window.addEventListener('load', () => {
+        setTimeout(() => { document.getElementById('loader').style.display = 'none'; document.body.style.overflow = 'auto'; }, 1500);
+    });
 
-        // Hilangkan Loader saat halaman siap
-        window.addEventListener('load', () => {
+    onValue(ref(db, 'server_status'), (snap) => {
+        document.getElementById('offline-screen').style.display = snap.val() === "OFF" ? "flex" : "none";
+    });
+
+    window.handlePay = () => {
+        const name = document.getElementById('buyer-name').value;
+        const amount = document.getElementById('amount').value;
+        if(!name || !amount) { showNotif("⚠️ Isi data dulu bos!"); return; }
+        showNotif("⏳ Mengalihkan ke Pakasir...");
+        const orderId = "RAYY" + Date.now();
+        set(ref(db, 'transactions/' + orderId), {
+            orderId, buyer: name, amount: "Rp " + parseInt(amount).toLocaleString('id-ID'), status: "Pending", time: new Date().toLocaleString('id-ID')
+        }).then(() => {
             setTimeout(() => {
-                const ld = document.getElementById('loader');
-                ld.style.opacity = '0';
-                setTimeout(() => { ld.style.display = 'none'; document.body.style.overflow = 'auto'; }, 1000);
+                window.location.href = `https://app.pakasir.com/pay/rayy-store/${amount}?order_id=${orderId}&qris_only=1`;
             }, 1500);
         });
-
-        // Cek Status Server (Mati/Hidup) Real-Time
-        onValue(ref(db, 'server_status'), (snap) => {
-            const status = snap.val();
-            if(status === "OFF") {
-                document.getElementById('offline-screen').style.display = "flex";
-            } else {
-                document.getElementById('offline-screen').style.display = "none";
-            }
-        });
-
-        // Logika Bayar & Notif Slide
-        window.handlePay = () => {
-            const name = document.getElementById('buyer-name').value;
-            const amount = document.getElementById('amount').value;
-
-            if(!name || !amount) {
-                showNotif("⚠️ Lengkapi data dulu bos!");
-                return;
-            }
-
-            showNotif("⏳ Mengalihkan ke Pembayaran...");
-
-            // Simpan data transaksi & Redirect ke Pakasir
-            const orderId = "RAYY" + Date.now();
-            set(ref(db, 'transactions/' + orderId), {
-                orderId, buyer: name, amount: "Rp " + parseInt(amount).toLocaleString('id-ID'), status: "Pending", time: new Date().toLocaleString('id-ID')
-            }).then(() => {
-                setTimeout(() => {
-                    window.location.href = `https://app.pakasir.com/pay/rayy-store/${amount}?order_id=${orderId}&qris_only=1`;
-                }, 1500);
-            });
-        };
-    </script>
+    };
+</script>
 </body>
 </html>
